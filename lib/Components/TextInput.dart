@@ -24,7 +24,7 @@ class _TextInputState extends State<TextInput> {
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
                     ))),
-            SizedBox(
+            const SizedBox(
               height: 10,
             ),
             const TextField(

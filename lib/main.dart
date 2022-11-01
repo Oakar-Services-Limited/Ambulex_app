@@ -20,11 +20,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     Timer(const Duration(seconds: 2), () {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
     });
-
 
     return MaterialApp(
         title: 'Ambulex',
@@ -42,10 +40,13 @@ class MyApp extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Image.asset('assets/images/logo.png'),
-                  const Text(
-                    'Emergency Response System',
-                    style: TextStyle(fontSize: 20.0),
-                  )
+                  const Padding(
+                      padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+                      child: Text(
+                        'Emergency Response \n System',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 28, color: Colors.blue),
+                      ))
                 ],
               ),
             ),

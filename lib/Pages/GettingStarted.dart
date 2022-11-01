@@ -1,3 +1,4 @@
+import 'package:ambulex_app/Components/Map.dart';
 import 'package:ambulex_app/Components/NavigationButton.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
@@ -35,6 +36,7 @@ class _GettingStartedState extends State<GettingStarted> {
                     child: SingleChildScrollView(
                         child: Form(
                             child: Center(
+                              heightFactor: 1,
                                 child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
@@ -45,6 +47,7 @@ class _GettingStartedState extends State<GettingStarted> {
                           ),            
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Getting Started"),
+                          const  Map(),
                           const TextInput(title: 'City'),
                           const TextInput(title: 'Street/Address'),
                           const TextInput(title: 'Nearest Landmark'),
