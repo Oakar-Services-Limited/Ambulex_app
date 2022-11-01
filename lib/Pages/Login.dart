@@ -44,8 +44,8 @@ class _LoginState extends State<Login> {
                           const TextLarge(label: "Login"),
                           const TextInput(title: 'Phone Number'),
                           const TextInput(title: 'Password'),
-                          const SubmitButton(label: "Login", object:Register()),
-                          const NavigationButton(label: "Register"),
+                          const SubmitButton(label: "Login"),
+                          const NavigationButton(label: "Register", object:Register()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
                         ]))))))

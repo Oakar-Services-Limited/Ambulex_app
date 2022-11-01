@@ -45,9 +45,8 @@ class _RegisterState extends State<Register> {
                           const TextInput(title: 'Full Name'),
                           const TextInput(title: 'Phone Number'),
                           const TextInput(title: 'Password'),
-                           const SubmitButton(
-                              label: "Login", object: Login()),
-                          const NavigationButton(label: "Login"),
+                          const SubmitButton(label: "Login"),
+                          const NavigationButton(label: "Login", object: Login()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
                         ]))))))
