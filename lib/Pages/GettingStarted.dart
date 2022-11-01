@@ -1,11 +1,9 @@
 import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/NavigationButton.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
-import 'package:ambulex_app/Components/TextOakar.dart';
+import 'package:ambulex_app/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/TextInput.dart';
-import 'Login.dart';
 
 class GettingStarted extends StatefulWidget {
   const GettingStarted({super.key});
@@ -36,26 +34,35 @@ class _GettingStartedState extends State<GettingStarted> {
                     child: SingleChildScrollView(
                         child: Form(
                             child: Center(
-                              heightFactor: 1,
+                                heightFactor: 1,
                                 child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: <Widget>[
-                          const SizedBox(
-                            height: 100,
-                          ),            
-                          Image.asset('assets/images/logo.png'),
-                          const TextLarge(label: "Getting Started"),
-                          const  Map(),
-                          const TextInput(title: 'City'),
-                          const TextInput(title: 'Street/Address'),
-                          const TextInput(title: 'Nearest Landmark'),
-                          const TextInput(title: 'Building Name'),
-                          const TextInput(title: 'House Number'),
-                          const SubmitButton(label: "Submit", onButtonPressed: null,),
-                         
-                        ]))))))
+                                      const SizedBox(
+                                        height: 100,
+                                      ),
+                                      Image.asset('assets/images/logo.png'),
+                                      const TextLarge(label: "Getting Started"),
+                                      const Map(),
+                                      const TextInput(title: 'City'),
+                                      const TextInput(title: 'Street/Address'),
+                                      const TextInput(
+                                          title: 'Nearest Landmark'),
+                                      const TextInput(title: 'Building Name'),
+                                      const TextInput(title: 'House Number'),
+                                      SubmitButton(
+                                        label: "Submit",
+                                        onButtonPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (_) =>
+                                                      const Home()));
+                                        },
+                                      ),
+                                    ]))))))
           ])),
     );
   }

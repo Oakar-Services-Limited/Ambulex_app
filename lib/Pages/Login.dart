@@ -1,6 +1,7 @@
 import 'package:ambulex_app/Components/NavigationButton.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
+import 'package:ambulex_app/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/TextInput.dart';
@@ -44,7 +45,9 @@ class _LoginState extends State<Login> {
                           const TextLarge(label: "Login"),
                           const TextInput(title: 'Phone Number'),
                           const TextInput(title: 'Password'),
-                          const SubmitButton(label: "Login",onButtonPressed: null,),
+                          SubmitButton(label: "Login",onButtonPressed: (){
+                            Navigator.push(context,MaterialPageRoute(builder:(_) => const Home()));
+                          },),
                           const NavigationButton(label: "Register", object:Register()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
