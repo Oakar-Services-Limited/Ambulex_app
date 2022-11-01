@@ -9,46 +9,74 @@ class NavigationDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle style = const TextStyle(
+        color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
+
     return Container(
+        decoration: const BoxDecoration(
+            gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.blue,
+            Colors.lightBlue,
+          ],
+        )),
         child: ListView(
-      // Important: Remove any padding from the ListView.
-      padding: EdgeInsets.zero,
-      children: [
-        const DrawerHeader(
-          decoration: BoxDecoration(
-            color: Colors.blue,
-          ),
-          child: Text('Drawer Header'),
-        ),
-        ListTile(
-          title: const Text('Home'),
-          onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const Home()));
-          },
-        ),
-        ListTile(
-          title: const Text('Settings'),
-          onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const Settings()));
-          },
-        ),
-        ListTile(
-          title: const Text('About'),
-          onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const About()));
-          },
-        ),
-        ListTile(
-          title: const Text('Exit'),
-          onTap: () {
-           Navigator.push(
-                context, MaterialPageRoute(builder: (_) => const MyApp()));
-          },
-        ),
-      ],
-    ));
+          // Important: Remove any padding from the ListView.
+          padding: const EdgeInsets.all(0),
+          children: [
+            DrawerHeader(
+                decoration: const BoxDecoration(
+                  image: DecorationImage(
+                  image: AssetImage("assets/images/bg.png"),
+                  fit: BoxFit.cover,
+                )),
+                child: Center(child: Image.asset('assets/images/logo.png'))),
+            ListTile(
+              title: const Text(
+                'Home',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const Home()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Settings',
+                style: style,
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const Settings()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'About',
+                style: style,
+              ),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const About()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Exit',
+                style: style,
+              ),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const MyApp()));
+              },
+            ),
+          ],
+        ));
   }
 }
