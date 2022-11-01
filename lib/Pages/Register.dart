@@ -1,6 +1,7 @@
 import 'package:ambulex_app/Components/NavigationButton.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
+import 'package:ambulex_app/Pages/GettingStarted.dart';
 import 'package:flutter/material.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/TextInput.dart';
@@ -41,11 +42,13 @@ class _RegisterState extends State<Register> {
                                         CrossAxisAlignment.center,
                                     children: <Widget>[
                           Image.asset('assets/images/logo.png'),
-                          const TextLarge(label: "Getting Started"),
+                          const TextLarge(label: "Register"),
                           const TextInput(title: 'Full Name'),
                           const TextInput(title: 'Phone Number'),
                           const TextInput(title: 'Password'),
-                          const SubmitButton(label: "Login"),
+                          SubmitButton(label: "Submit", onButtonPressed: (){
+                            Navigator.push(context,MaterialPageRoute(builder:(_) => const GettingStarted()));
+                          },),
                           const NavigationButton(label: "Login", object: Login()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
