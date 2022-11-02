@@ -46,12 +46,22 @@ class _GettingStartedState extends State<GettingStarted> {
                                       Image.asset('assets/images/logo.png'),
                                       const TextLarge(label: "Getting Started"),
                                       const Map(),
-                                      const TextInput(title: 'City'),
-                                      const TextInput(title: 'Street/Address'),
-                                      const TextInput(
-                                          title: 'Nearest Landmark'),
-                                      const TextInput(title: 'Building Name'),
-                                      const TextInput(title: 'House Number'),
+                                       TextInput(title: 'City' ,onSubmit: (value){
+              },),
+                                       TextInput(title: 'Street/Address',
+                                        onSubmit: (value) {
+                                        },
+                                      ),
+                                       TextInput(
+                                          title: 'Nearest Landmark',
+                                        onSubmit: (value) {},
+                                      ),
+                                       TextInput(title: 'Building Name',
+                                        onSubmit: (value) {},
+                                      ),
+                                       TextInput(title: 'House Number',
+                                        onSubmit: (value) {},
+                                      ),
                                       SubmitButton(
                                         label: "Submit",
                                         onButtonPressed: () {

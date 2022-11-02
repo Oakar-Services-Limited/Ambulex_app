@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/TextInput.dart';
 import 'Login.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -15,6 +18,11 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  String error = '';
+  String phone = '';
+  String name = '';
+  String password = '';
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -43,17 +51,96 @@ class _RegisterState extends State<Register> {
                                     children: <Widget>[
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Register"),
-                          const TextInput(title: 'Full Name'),
-                          const TextInput(title: 'Phone Number'),
-                          const TextInput(title: 'Password'),
-                          SubmitButton(label: "Submit", onButtonPressed: (){
-                            Navigator.push(context,MaterialPageRoute(builder:(_) => const GettingStarted()));
-                          },),
-                          const NavigationButton(label: "Login", object: Login()),
+                          TextOakar(label: error),
+                          TextInput(
+                            title: 'Full Name',
+                            onSubmit: (value) {
+                              setState(() {
+                                name = value;
+                              });
+                            },
+                          ),
+                          TextInput(
+                            title: 'Phone Number',
+                            onSubmit: (value) {
+                              setState(() {
+                                phone = value;
+                              });
+                            },
+                          ),
+                          TextInput(
+                            title: 'Password',
+                            onSubmit: (value) {
+                              setState(() {
+                                password = value;
+                              });
+                            },
+                          ),
+                          SubmitButton(
+                            label: "Submit",
+                            onButtonPressed: () async {
+                              var res = await register(name, phone, password);
+                              setState(() {
+                                if (res.error == null) {
+                                  error = res.success;
+                                } else {
+                                  error = res.error;
+                                }
+                              });
+                              // Navigator.push(context,MaterialPageRoute(builder:(_) => const GettingStarted()));
+                            },
+                          ),
+                          const NavigationButton(
+                              label: "Login", object: Login()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
                         ]))))))
           ])),
+    );
+  }
+}
+
+Future<Message> register(String name, String phone, String password) async {
+  final response = await http.post(
+    Uri.parse('http://192.168.1.114:3002/api/users/register'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(
+        <String, String>{'Phone': phone, 'Password': password, 'Name': name}),
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 203) {
+    // If the server did return a 200 OK response,
+    // then parse the JSON.
+    return Message.fromJson(jsonDecode(response.body));
+  } else {
+    // If the server did not return a 200 OK response,
+    // then throw an exception.
+    return Message(
+      token: null,
+      success: null,
+      error: "Connection to server failed!",
+    );
+  }
+}
+
+class Message {
+  var token;
+  var success;
+  var error;
+
+  Message({
+    required this.token,
+    required this.success,
+    required this.error,
+  });
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      token: json['token'],
+      success: json['success'],
+      error: json['error'],
     );
   }
 }

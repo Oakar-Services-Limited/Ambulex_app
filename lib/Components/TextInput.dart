@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class TextInput extends StatefulWidget {
-  final String title;
-
-  const TextInput({super.key, required this.title});
+  String title;
+  Function(String) onSubmit;
+  TextInput({super.key, required this.title, required this.onSubmit});
 
   @override
   State<StatefulWidget> createState() => _TextInputState();
@@ -27,8 +27,9 @@ class _TextInputState extends State<TextInput> {
             const SizedBox(
               height: 10,
             ),
-            const TextField(
-              decoration: InputDecoration(
+            TextField(
+              onChanged: widget.onSubmit,
+              decoration: const InputDecoration(
                 contentPadding: EdgeInsets.fromLTRB(24, 8, 24, 0),
                 border: OutlineInputBorder(),
                 filled: false,
