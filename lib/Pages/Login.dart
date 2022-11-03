@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:ambulex_app/Components/NavigationButton.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
@@ -9,6 +11,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -18,6 +21,11 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String phone = '';
+  String password = '';
+  String error = '';
+  var isLoading = null;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -46,16 +54,42 @@ class _LoginState extends State<Login> {
                                     children: <Widget>[
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Login"),
-                           TextInput(title: 'Phone Number',
-                            onSubmit: (value) {},
+                          TextOakar(label: error),
+                          TextInput(
+                            title: 'Phone Number',
+                            onSubmit: (value) {
+                              setState(() {
+                                phone = value;
+                              });
+                            },
                           ),
-                           TextInput(title: 'Password',
-                            onSubmit: (value) {},
+                          TextInput(
+                            title: 'Password',
+                            onSubmit: (value) {
+                              setState(() {
+                                password = value;
+                              });
+                            },
                           ),
                           SubmitButton(
                             label: "Login",
-                            onButtonPressed: () {
-                              login();
+                            onButtonPressed: () async {
+                              setState(() {
+                                isLoading =
+                                    LoadingAnimationWidget.staggeredDotsWave(
+                                  color: Colors.blue,
+                                  size: 100,
+                                );
+                              });
+                              var res = await login(phone, password);
+                              setState(() {
+                                isLoading = null;
+                                if (res.error == null) {
+                                  error = res.success;
+                                } else {
+                                  error = res.error;
+                                }
+                              });
                               // Navigator.push(
                               //     context,
                               //     MaterialPageRoute(
@@ -66,32 +100,44 @@ class _LoginState extends State<Login> {
                               label: "Register", object: Register()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
-                        ]))))))
+                        ])))))),
+            Center(child: isLoading),
           ])),
     );
   }
 }
 
-Future<Message> login() async {
+Future<Message> login(String phone, String password) async {
+  if (phone.length != 10) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Invalid phone number!",
+    );
+  }
+  if (password.length < 5) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Password is too short",
+    );
+  }
   final response = await http.post(
-    Uri.parse('http://192.168.1.140:8001/api/users/login'),
+    Uri.parse('http://192.168.1.114:3002/api/users/login'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(
-        <String, String>{'Phone': "0714816920", 'Password': '123456'}),
+    body: jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
   );
 
-  print(response);
-
-  if (response.statusCode == 200) {
+  if (response.statusCode == 200 || response.statusCode == 203) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
     return Message.fromJson(jsonDecode(response.body));
   } else {
     // If the server did not return a 200 OK response,
     // then throw an exception.
-    return  Message(
+    return Message(
       token: null,
       success: null,
       error: "Connection to server failed!",

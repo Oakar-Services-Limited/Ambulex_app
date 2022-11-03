@@ -80,13 +80,11 @@ class _RegisterState extends State<Register> {
                             label: "Submit",
                             onButtonPressed: () async {
                               var res = await register(name, phone, password);
-                              setState(() {
                                 if (res.error == null) {
                                   error = res.success;
                                 } else {
                                   error = res.error;
                                 }
-                              });
                               // Navigator.push(context,MaterialPageRoute(builder:(_) => const GettingStarted()));
                             },
                           ),
@@ -111,12 +109,8 @@ Future<Message> register(String name, String phone, String password) async {
   );
 
   if (response.statusCode == 200 || response.statusCode == 203) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
     return Message.fromJson(jsonDecode(response.body));
   } else {
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
     return Message(
       token: null,
       success: null,
