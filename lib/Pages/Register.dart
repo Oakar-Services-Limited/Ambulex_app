@@ -9,6 +9,8 @@ import 'Login.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -22,6 +24,7 @@ class _RegisterState extends State<Register> {
   String phone = '';
   String name = '';
   String password = '';
+  var isLoading = null;
 
   @override
   Widget build(BuildContext context) {
@@ -79,26 +82,71 @@ class _RegisterState extends State<Register> {
                           SubmitButton(
                             label: "Submit",
                             onButtonPressed: () async {
+                              setState(() {
+                                isLoading =
+                                    LoadingAnimationWidget.staggeredDotsWave(
+                                  color: Colors.blue,
+                                  size: 100,
+                                );
+                              });
                               var res = await register(name, phone, password);
+                              setState(() {
+                                isLoading = null;
                                 if (res.error == null) {
                                   error = res.success;
                                 } else {
                                   error = res.error;
                                 }
-                              // Navigator.push(context,MaterialPageRoute(builder:(_) => const GettingStarted()));
+                              });
+
+                              if(res.error == null){
+                                Timer(const Duration(seconds: 2), () {
+                                 Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) =>
+                                              const GettingStarted()));
+                                });
+                              }
+
+                             
                             },
                           ),
                           const NavigationButton(
                               label: "Login", object: Login()),
                           const TextOakar(
                               label: "Powered by \n Oakar Services Ltd.")
-                        ]))))))
+                        ])))))),
+            Center(child: isLoading),
           ])),
     );
   }
 }
 
 Future<Message> register(String name, String phone, String password) async {
+    if (name == '') {
+    return Message(
+      token: null,
+      success: null,
+      error: "Please enter your name!",
+    );
+  }
+   if (phone.length != 10) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Invalid phone number!",
+    );
+  }
+  if (password.length < 5) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Password is too short!",
+    );
+  }
+  
+  
   final response = await http.post(
     Uri.parse('http://192.168.1.114:3002/api/users/register'),
     headers: <String, String>{

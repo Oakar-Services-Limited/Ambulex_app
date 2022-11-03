@@ -90,10 +90,14 @@ class _LoginState extends State<Login> {
                                   error = res.error;
                                 }
                               });
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(
-                              //         builder: (_) => const Home()));
+                              if (res.error == null) {
+                                Timer(const Duration(seconds: 2), () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const Home()));
+                                });
+                              }
                             },
                           ),
                           const NavigationButton(
@@ -119,7 +123,7 @@ Future<Message> login(String phone, String password) async {
     return Message(
       token: null,
       success: null,
-      error: "Password is too short",
+      error: "Password is too short!",
     );
   }
   final response = await http.post(
