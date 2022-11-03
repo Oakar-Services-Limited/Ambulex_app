@@ -38,8 +38,10 @@ dependencies:
   cupertino_icons: ^1.0.2
   webview_flutter: ^3.0.4
   http: ^0.13.5
+  flutter_secure_storage:
   loading_animation_widget:
   slider_button: ^2.0.0
+  geolocator: ^9.0.2
 
 dev_dependencies:
   flutter_test:

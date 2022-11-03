@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:ambulex_app/Components/NavigationButton.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
@@ -12,6 +10,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -25,6 +24,7 @@ class _LoginState extends State<Login> {
   String password = '';
   String error = '';
   var isLoading = null;
+  final storage = new FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {
@@ -91,6 +91,8 @@ class _LoginState extends State<Login> {
                                 }
                               });
                               if (res.error == null) {
+                                await storage.write(
+                                    key: 'jwt', value: res.token);
                                 Timer(const Duration(seconds: 2), () {
                                   Navigator.push(
                                       context,
