@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -24,6 +25,7 @@ class _HomeState extends State<Home> {
   late Position position;
   double long = 0.0, lat = 0.0;
   late StreamSubscription<Position> positionStream;
+  var isLoading = null;
 
   @override
   void initState() {
@@ -103,88 +105,115 @@ class _HomeState extends State<Home> {
     return MaterialApp(
         title: "Home",
         home: Scaffold(
-          appBar: AppBar(title: const Text("Home")),
-          drawer: const Drawer(child: NavigationDrawer()),
-          body: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/bg.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: SingleChildScrollView(
-                  child: Column(children: <Widget>[
-                const Map(),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(location),
-                const SizedBox(
-                  height: 10,
-                ),
-                Center(
-                    child: SliderButton(
-                  action: () {
-                    setState(() {
-                      location =
-                          'Using saved location Lon: 36.1578 Lat: -1.4552';
-                    });
-                    location = 'Using saved location Lon: 36.1578 Lat: -1.4552';
-                  },
-                  label: const Text(
-                    "Use saved location",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w400,
-                        fontSize: 16),
+            appBar: AppBar(title: const Text("Home")),
+            drawer: const Drawer(child: NavigationDrawer()),
+            body: Stack(children: [
+              Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage("assets/images/bg.png"),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  icon: const Center(
-                      child: Icon(
-                    Icons.location_pin,
-                    color: Colors.white,
-                    size: 24,
-                    semanticLabel: 'Current Location',
-                  )),
-                  buttonSize: 40,
-                  height: 42,
-                  radius: 40,
-                  buttonColor: Colors.blue,
-                  backgroundColor: Colors.orange,
-                  highlightedColor: Colors.blue,
-                  baseColor: Colors.white,
-                )),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                  child: Column(
-                    children: <Widget>[
-                      ReportButton(
-                        label: "Gender Based Violence",
-                        icon: Icons.handshake_sharp,
-                        color1: const Color.fromARGB(255, 251, 189, 107),
-                        color2: Colors.deepOrange,
-                        onButtonPressed: () {
-                          report("GBV", long, lat);
-                        },
+                  child: SingleChildScrollView(
+                      child: Column(children: <Widget>[
+                    const Map(),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Text(location),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                      child: Column(
+                        children: <Widget>[
+                          ReportButton(
+                            label: "Gender Based Violence",
+                            icon: Icons.handshake_sharp,
+                            color1: const Color.fromARGB(255, 251, 189, 107),
+                            color2: Colors.deepOrange,
+                            onButtonPressed: () async {
+                              setState(() {
+                                isLoading =
+                                    LoadingAnimationWidget.staggeredDotsWave(
+                                  color: Colors.blue,
+                                  size: 100,
+                                );
+                              });
+                              var res = await report("GBV", long, lat);
+                              setState(() {
+                                isLoading = null;
+                              });
+
+                              if (res.error == null) {
+                                showDialog<String>(
+                                    context: context,
+                                    builder: (BuildContext context) =>
+                                        AlertDialog(
+                                          title: const Text(
+                                              'Gender Based Violence'),
+                                          content: const Text(
+                                              'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
+                                          actions: <Widget>[
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, 'OK'),
+                                              child: const Text('OK'),
+                                            ),
+                                          ],
+                                        ));
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          ReportButton(
+                              label: "Medical Emergency",
+                              icon: Icons.medical_services,
+                              color1: const Color.fromARGB(255, 251, 107, 225),
+                              color2: Colors.red,
+                              onButtonPressed: () async {
+                                setState(() {
+                                  isLoading =
+                                      LoadingAnimationWidget.staggeredDotsWave(
+                                    color: Colors.blue,
+                                    size: 100,
+                                  );
+                                });
+
+                                var res = await report("ME", long, lat);
+                                setState(() {
+                                  isLoading = null;
+                                });
+
+                                if (res.error == null) {
+                                  showDialog<String>(
+                                      context: context,
+                                      builder: (BuildContext context) =>
+                                          AlertDialog(
+                                            title:
+                                                const Text('Medical Emergency'),
+                                            content: const Text(
+                                                'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                onPressed: () => Navigator.pop(
+                                                    context, 'OK'),
+                                                child: const Text('OK'),
+                                              ),
+                                            ],
+                                          ));
+                                }
+                              }),
+                        ],
                       ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ReportButton(
-                          label: "Medical Emergency",
-                          icon: Icons.medical_services,
-                          color1: const Color.fromARGB(255, 251, 107, 225),
-                          color2: Colors.red,
-                          onButtonPressed: () {
-                            report("ME", long, lat);
-                          }),
-                     MyAlertDialog(type: "Gender Based Violence")     
-                    ],
-                  ),
-                )
-              ]))
-              
-              ),
-        ));
+                    )
+                  ]))),
+              Center(child: isLoading),
+            ])));
   }
 }
 
@@ -201,8 +230,6 @@ Future<Message> report(String type, double lon, double lat) async {
       'Longitude': lon
     }),
   );
-
-  print(response.body);
 
   if (response.statusCode == 200 || response.statusCode == 203) {
     // If the server did return a 200 OK response,

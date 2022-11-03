@@ -105,7 +105,7 @@ class _RegisterState extends State<Register> {
                                       context,
                                       MaterialPageRoute(
                                           builder: (_) =>
-                                              const GettingStarted()));
+                                              const Login()));
                                 });
                               }
 

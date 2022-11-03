@@ -22,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Timer(const Duration(seconds: 2), () {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Home()));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
     });
 
     return MaterialApp(
