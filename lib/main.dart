@@ -1,3 +1,4 @@
+import 'package:ambulex_app/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'Pages/Login.dart';
 import 'Pages/Register.dart';
@@ -21,7 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Timer(const Duration(seconds: 2), () {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Home()));
     });
 
     return MaterialApp(

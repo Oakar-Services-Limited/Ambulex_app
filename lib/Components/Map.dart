@@ -26,7 +26,7 @@ class _MapState extends State<Map> {
             height: 10,
           ),
           SizedBox(
-            height: 250,
+            height: 200,
             child:WebView(
             initialUrl: 'http://demo.osl.co.ke:444/api/homepage',
           ))

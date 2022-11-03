@@ -39,6 +39,7 @@ dependencies:
   webview_flutter: ^3.0.4
   http: ^0.13.5
   loading_animation_widget:
+  slider_button: ^2.0.0
 
 dev_dependencies:
   flutter_test:
