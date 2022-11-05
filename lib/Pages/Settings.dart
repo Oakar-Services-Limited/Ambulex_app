@@ -2,7 +2,7 @@ import 'package:ambulex_app/Components/Map.dart';
 import 'package:ambulex_app/Components/NavigationDrawer.dart';
 import 'package:ambulex_app/Pages/Home.dart';
 import 'package:flutter/material.dart';
-import '../Components/TextInput.dart';
+import '../Components/MyTextInput.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/Utils.dart';
 import 'dart:async';
@@ -16,7 +16,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-    String location = '';
+  String location = '';
   bool servicestatus = false;
   bool haspermission = false;
   late LocationPermission permission;
@@ -108,37 +108,40 @@ class _SettingsState extends State<Settings> {
           body: Container(
               child: SingleChildScrollView(
                   child: Column(children: <Widget>[
-            Map(lat: lat, lon: long,),
+            MyMap(
+              lat: lat,
+              lon: long,
+            ),
             const Padding(
               padding: EdgeInsets.all(12.0),
               child: Text("Lon: 36.56695 Lat: -1.25854"),
             ),
-            TextInput(
+            MyTextInput(
               title: 'Phone Number',
               type: TextInputType.phone,
               onSubmit: (value) {},
             ),
-            TextInput(
+            MyTextInput(
               title: 'City',
               type: TextInputType.text,
               onSubmit: (value) {},
             ),
-            TextInput(
+            MyTextInput(
               title: 'Street/Address',
               type: TextInputType.text,
               onSubmit: (value) {},
             ),
-            TextInput(
+            MyTextInput(
               title: 'Nearest Landmark',
               type: TextInputType.text,
               onSubmit: (value) {},
             ),
-            TextInput(
+            MyTextInput(
               title: 'Building Name',
               type: TextInputType.text,
               onSubmit: (value) {},
             ),
-            TextInput(
+            MyTextInput(
               title: 'House Number',
               type: TextInputType.text,
               onSubmit: (value) {},

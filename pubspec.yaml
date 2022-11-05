@@ -43,6 +43,7 @@ dependencies:
   flutter_inappwebview:
   slider_button: ^2.0.0
   geolocator: ^9.0.2
+  url_launcher: ^6.1.6
 
 dev_dependencies:
   flutter_test:

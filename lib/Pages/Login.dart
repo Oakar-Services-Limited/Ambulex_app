@@ -3,7 +3,7 @@ import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
 import 'package:ambulex_app/Pages/Home.dart';
 import '../Components/SubmitButton.dart';
-import '../Components/TextInput.dart';
+import '../Components/MyTextInput.dart';
 import 'Register.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -48,7 +48,7 @@ class _LoginState extends State<Login> {
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Login"),
                           TextOakar(label: error),
-                          TextInput(
+                          MyTextInput(
                             title: 'Phone Number',
                             type: TextInputType.phone,
                             onSubmit: (value) {
@@ -57,7 +57,7 @@ class _LoginState extends State<Login> {
                               });
                             },
                           ),
-                          TextInput(
+                          MyTextInput(
                             title: 'Password',
                             type: TextInputType.visiblePassword,
                             onSubmit: (value) {

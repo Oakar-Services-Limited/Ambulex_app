@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-class TextInput extends StatefulWidget {
+class MyTextInput extends StatefulWidget {
   String title;
   var type;
   Function(String) onSubmit;
-  TextInput(
+  MyTextInput(
       {super.key,
       required this.title,
       required this.type,
       required this.onSubmit});
 
   @override
-  State<StatefulWidget> createState() => _TextInputState();
+  State<StatefulWidget> createState() => _MyTextInputState();
 }
 
-class _TextInputState extends State<TextInput> {
+class _MyTextInputState extends State<MyTextInput> {
   @override
   Widget build(BuildContext context) {
     return Padding(

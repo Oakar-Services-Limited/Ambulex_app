@@ -4,7 +4,7 @@ import 'package:ambulex_app/Components/TextOakar.dart';
 import 'package:ambulex_app/Pages/GettingStarted.dart';
 import 'package:flutter/material.dart';
 import '../Components/SubmitButton.dart';
-import '../Components/TextInput.dart';
+import '../Components/MyTextInput.dart';
 import 'Login.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -47,7 +47,7 @@ class _RegisterState extends State<Register> {
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Register"),
                           TextOakar(label: error),
-                          TextInput(
+                          MyTextInput(
                             title: 'Full Name',
                             type: TextInputType.text,
                             onSubmit: (value) {
@@ -56,7 +56,7 @@ class _RegisterState extends State<Register> {
                               });
                             },
                           ),
-                          TextInput(
+                          MyTextInput(
                             title: 'Phone Number',
                             type: TextInputType.phone,
                             onSubmit: (value) {
@@ -65,7 +65,7 @@ class _RegisterState extends State<Register> {
                               });
                             },
                           ),
-                          TextInput(
+                          MyTextInput(
                             title: 'Password',
                             type: TextInputType.visiblePassword,
                             onSubmit: (value) {
@@ -99,7 +99,7 @@ class _RegisterState extends State<Register> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) => const Login()));
+                                          builder: (_) => const GettingStarted()));
                                 });
                               }
                             },

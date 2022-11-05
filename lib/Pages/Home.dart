@@ -2,6 +2,7 @@ import 'package:ambulex_app/Components/AlertDialog.dart';
 import 'package:ambulex_app/Components/Map.dart';
 import 'package:ambulex_app/Components/NavigationDrawer.dart';
 import 'package:ambulex_app/Components/ReportButton.dart';
+import 'package:ambulex_app/Pages/GettingStarted.dart';
 import 'package:ambulex_app/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
@@ -13,6 +14,9 @@ import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Components/Utils.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+final Uri _url = Uri.parse('tel://+254714816920');
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -46,12 +50,18 @@ class _HomeState extends State<Home> {
     if (decoded["error"] == "Invalid token") {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
     } else {
-      setState(() {
-        phone = decoded["Phone"];
-        lat = decoded["Latitude"] ?? 0.0;
-        long = decoded["Longitude"] ?? 0.0;
-        location = 'Saved location Lat: $lat Lon: $long';
-      });
+      if (decoded["Latitude"] == null || decoded["Latitude"] == null) {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const GettingStarted()));
+      } else {
+        setState(() {
+          phone = decoded["Phone"];
+          lat = double.parse(decoded["Latitude"]) ?? 0.0;
+          long = double.parse(decoded["Longitude"]) ?? 0.0;
+          location =
+              "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+        });
+      }
     }
   }
 
@@ -88,36 +98,25 @@ class _HomeState extends State<Home> {
   getLocation() async {
     position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    print(position.longitude); //Output: 80.24599079
-    print(position.latitude); //Output: 29.6593457
-
     long = position.longitude;
     lat = position.latitude;
 
     setState(() {
-      location = 'Current location Lat: ' +
-          lat.toString() +
-          ' Lon: ' +
-          long.toString();
+      location = 'Current location Lat: $lat Lon: $long';
     });
 
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 100, //minimum distance (measured in meters) a
+      distanceFilter: 10, //minimum distance (measured in meters) a
       //device must move horizontally before an update event is generated;
     );
 
     StreamSubscription<Position> positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position position) {
-      print(position.longitude); //Output: 80.24599079
-      print(position.latitude); //Output: 29.6593457
-
-      long = position.longitude;
-      lat = position.latitude;
-
       setState(() {
-        //refresh UI on update
+        long = position.longitude;
+        lat = position.latitude;
       });
     });
   }
@@ -133,7 +132,9 @@ class _HomeState extends State<Home> {
                 elevation: 10.0,
                 child: Icon(Icons.call),
                 backgroundColor: Colors.blue,
-                onPressed: () {}),
+                onPressed: () {
+                  _launchUrl();
+                }),
             body: Stack(children: [
               Container(
                   child: Padding(
@@ -143,7 +144,7 @@ class _HomeState extends State<Home> {
                     Flexible(
                         flex: 2,
                         fit: FlexFit.tight,
-                        child: Map(
+                        child: MyMap(
                           lat: lat,
                           lon: long,
                         )),
@@ -166,7 +167,8 @@ class _HomeState extends State<Home> {
                               size: 100,
                             );
                           });
-                          var res = await report("GBV", long, lat);
+                          var res =
+                              await report(context, phone, "GBV", long, lat);
                           setState(() {
                             isLoading = null;
                           });
@@ -196,7 +198,8 @@ class _HomeState extends State<Home> {
                               );
                             });
 
-                            var res = await report("ME", long, lat);
+                            var res =
+                                await report(context, phone, "ME", long, lat);
                             setState(() {
                               isLoading = null;
                             });
@@ -214,14 +217,33 @@ class _HomeState extends State<Home> {
   }
 }
 
-Future<Message> report(String type, double lon, double lat) async {
+Future<void> _launchUrl() async {
+  if (!await launchUrl(_url)) {
+    throw 'Could not launch $_url';
+  }
+}
+
+Future<Message> report(
+    var context, String phone, String type, double lon, double lat) async {
+  if (phone == '') {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+  }
+
+  if (lat == 0.0 || lon == 0.0) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Location not acquired! Please turn on your location.",
+    );
+  }
+
   final response = await http.post(
     Uri.parse('${getUrl()}reports/create'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
     body: jsonEncode(<String, dynamic>{
-      'Phone': '0714816920',
+      'Phone': phone,
       'Type': type,
       'Latitude': lat,
       'Longitude': lon
