@@ -49,6 +49,7 @@ class _RegisterState extends State<Register> {
                           TextOakar(label: error),
                           MyTextInput(
                             title: 'Full Name',
+                            value: '',
                             type: TextInputType.text,
                             onSubmit: (value) {
                               setState(() {
@@ -58,6 +59,7 @@ class _RegisterState extends State<Register> {
                           ),
                           MyTextInput(
                             title: 'Phone Number',
+                            value: '',
                             type: TextInputType.phone,
                             onSubmit: (value) {
                               setState(() {
@@ -67,6 +69,7 @@ class _RegisterState extends State<Register> {
                           ),
                           MyTextInput(
                             title: 'Password',
+                            value: '',
                             type: TextInputType.visiblePassword,
                             onSubmit: (value) {
                               setState(() {

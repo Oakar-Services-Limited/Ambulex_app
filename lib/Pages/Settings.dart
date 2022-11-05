@@ -1,12 +1,19 @@
-import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/NavigationDrawer.dart';
-import 'package:ambulex_app/Pages/Home.dart';
-import 'package:flutter/material.dart';
-import '../Components/MyTextInput.dart';
-import '../Components/SubmitButton.dart';
-import '../Components/Utils.dart';
 import 'dart:async';
+import 'package:ambulex_app/Components/Map.dart';
+import 'package:ambulex_app/Components/TextLarge.dart';
+import 'package:ambulex_app/Components/TextOakar.dart';
+import 'package:ambulex_app/Pages/Home.dart';
+import '../Components/NavigationDrawer.dart';
+import 'package:ambulex_app/Pages/Login.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../Components/SubmitButton.dart';
+import '../Components/MyTextInput.dart';
+import '../Components/Utils.dart';
 import 'package:geolocator/geolocator.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -16,6 +23,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
+  final storage = new FlutterSecureStorage();
   String location = '';
   bool servicestatus = false;
   bool haspermission = false;
@@ -23,12 +31,21 @@ class _SettingsState extends State<Settings> {
   late Position position;
   double long = 0.0, lat = 0.0;
   late StreamSubscription<Position> positionStream;
+  String email = '';
+  String city = '';
+  String address = '';
+  String landmark = '';
+  String buildingname = '';
+  String houseno = '';
+  String error = '';
+  String id = '';
   var isLoading = null;
 
   @override
   void initState() {
     checkGps();
     super.initState();
+    getToken();
   }
 
   checkGps() async {
@@ -64,13 +81,10 @@ class _SettingsState extends State<Settings> {
   getLocation() async {
     position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
-    print(position.longitude); //Output: 80.24599079
-    print(position.latitude); //Output: 29.6593457
-
-    long = position.longitude;
-    lat = position.latitude;
 
     setState(() {
+      long = position.longitude;
+      lat = position.latitude;
       location = 'Current location Lat: ' +
           lat.toString() +
           ' Lon: ' +
@@ -79,81 +93,245 @@ class _SettingsState extends State<Settings> {
 
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 100, //minimum distance (measured in meters) a
+      distanceFilter: 10, //minimum distance (measured in meters) a
       //device must move horizontally before an update event is generated;
     );
 
     StreamSubscription<Position> positionStream =
         Geolocator.getPositionStream(locationSettings: locationSettings)
             .listen((Position position) {
-      print(position.longitude); //Output: 80.24599079
-      print(position.latitude); //Output: 29.6593457
-
-      long = position.longitude;
-      lat = position.latitude;
-
       setState(() {
-        //refresh UI on update
+        long = position.longitude;
+        lat = position.latitude;
       });
     });
   }
 
+  Future<bool> getToken() async {
+    var token = await storage.read(key: "jwt");
+    var decoded = parseJwt(token.toString());
+    if (decoded["error"] == "Invalid token") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+      return false;
+    } else {
+      setState(() {
+        id = decoded["UserID"];
+        email = decoded["Email"];
+        city = decoded["City"];
+        address = decoded["Address"];
+        landmark = decoded["Landmark"];
+        buildingname = decoded["BuildingName"];
+        houseno = decoded["HouseNumber"];
+        lat = double.parse(decoded["Latitude"]) ?? 0.0;
+        long = double.parse(decoded["Longitude"]) ?? 0.0;
+        location =
+            "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+      });
+      return true;
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-        title: "Settings",
-        home: Scaffold(
-          appBar: AppBar(title: const Text("Settings")),
-          drawer: const Drawer(child: NavigationDrawer()),
-          body: Container(
-              child: SingleChildScrollView(
-                  child: Column(children: <Widget>[
-            MyMap(
-              lat: lat,
-              lon: long,
-            ),
-            const Padding(
-              padding: EdgeInsets.all(12.0),
-              child: Text("Lon: 36.56695 Lat: -1.25854"),
-            ),
-            MyTextInput(
-              title: 'Phone Number',
-              type: TextInputType.phone,
-              onSubmit: (value) {},
-            ),
-            MyTextInput(
-              title: 'City',
-              type: TextInputType.text,
-              onSubmit: (value) {},
-            ),
-            MyTextInput(
-              title: 'Street/Address',
-              type: TextInputType.text,
-              onSubmit: (value) {},
-            ),
-            MyTextInput(
-              title: 'Nearest Landmark',
-              type: TextInputType.text,
-              onSubmit: (value) {},
-            ),
-            MyTextInput(
-              title: 'Building Name',
-              type: TextInputType.text,
-              onSubmit: (value) {},
-            ),
-            MyTextInput(
-              title: 'House Number',
-              type: TextInputType.text,
-              onSubmit: (value) {},
-            ),
-            SubmitButton(
-              label: "Submit",
-              onButtonPressed: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const Home()));
-              },
-            ),
-          ]))),
-        ));
+  Widget build(BuildContext context) => FutureBuilder(
+      future: getToken(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return MaterialApp(
+              title: "Settings",
+              home: Scaffold(
+                  appBar: AppBar(title: const Text("Settings")),
+                  drawer: const Drawer(child: NavigationDrawer()),
+                  body: Stack(children: [
+                    Container(
+                        child: SingleChildScrollView(
+                            child: Column(children: <Widget>[
+                      Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                          child: SizedBox(
+                            height: 250,
+                            child: MyMap(
+                              lat: lat,
+                              lon: long,
+                            ),
+                          )),
+                      Text(location),
+                      TextOakar(label: error),
+                      MyTextInput(
+                        title: 'Email',
+                        value: email,
+                        type: TextInputType.emailAddress,
+                        onSubmit: (value) {
+                          setState(() {
+                            email = value;
+                          });
+                        },
+                      ),
+                      MyTextInput(
+                        title: 'City',
+                        value: city,
+                        type: TextInputType.text,
+                        onSubmit: (value) {
+                          setState(() {
+                            city = value;
+                          });
+                        },
+                      ),
+                      MyTextInput(
+                        title: 'Address',
+                        value: address,
+                        type: TextInputType.text,
+                        onSubmit: (value) {
+                          setState(() {
+                            address = value;
+                          });
+                        },
+                      ),
+                      MyTextInput(
+                        title: 'Nearest Landmark',
+                        value: landmark,
+                        type: TextInputType.text,
+                        onSubmit: (value) {
+                          setState(() {
+                            landmark = value;
+                          });
+                        },
+                      ),
+                      MyTextInput(
+                        title: 'Building Name',
+                        value: buildingname,
+                        type: TextInputType.text,
+                        onSubmit: (value) {
+                          setState(() {
+                            buildingname = value;
+                          });
+                        },
+                      ),
+                      MyTextInput(
+                        title: 'House Number',
+                        value: houseno,
+                        type: TextInputType.text,
+                        onSubmit: (value) {
+                          setState(() {
+                            houseno = value;
+                          });
+                        },
+                      ),
+                      SubmitButton(
+                        label: "Submit",
+                        onButtonPressed: () async {
+                          setState(() {
+                            isLoading =
+                                LoadingAnimationWidget.staggeredDotsWave(
+                              color: Colors.blue,
+                              size: 100,
+                            );
+                          });
+                          var res = await update(id, email, city, address,
+                              landmark, buildingname, houseno, lat, long);
+                          setState(() {
+                            isLoading = null;
+                            if (res.error == null) {
+                              error = res.success;
+                            } else {
+                              error = res.error;
+                            }
+                          });
+
+                          if (res.error == null) {
+                            Timer(const Duration(seconds: 2), () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const Login()));
+                            });
+                          }
+                        },
+                      ),
+                    ]))),
+                    Center(child: isLoading),
+                  ])));
+        } else {
+          return CircularProgressIndicator();
+        }
+      });
+}
+
+Future<Message> update(
+    String id,
+    String email,
+    String city,
+    String address,
+    String landmark,
+    String buildingname,
+    String houseno,
+    double lat,
+    double lon) async {
+  if (lat == 0.0 || lon == 0.0) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Location not acquired! Please turn on your location.",
+    );
+  }
+  if (id == '' ||
+      email == '' ||
+      city == '' ||
+      address == '' ||
+      landmark == '' ||
+      buildingname == '' ||
+      houseno == '') {
+    return Message(
+      token: null,
+      success: null,
+      error: "All fields are required!",
+    );
+  }
+
+  final response = await http.put(
+    Uri.parse('${getUrl()}users/${id}'),
+    headers: <String, String>{
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode(<String, dynamic>{
+      'Email': email,
+      'City': city,
+      'Address': address,
+      'Landmark': landmark,
+      'BuildingName': buildingname,
+      'HouseNumber': houseno,
+      'Latitude': lat,
+      'Longitude': lon
+    }),
+  );
+
+  if (response.statusCode == 200 || response.statusCode == 203) {
+    print(response.body);
+    return Message.fromJson(jsonDecode(response.body));
+  } else {
+    return Message(
+      token: null,
+      success: null,
+      error: "Connection to server failed!",
+    );
+  }
+}
+
+class Message {
+  var token;
+  var success;
+  var error;
+
+  Message({
+    required this.token,
+    required this.success,
+    required this.error,
+  });
+
+  factory Message.fromJson(Map<String, dynamic> json) {
+    return Message(
+      token: json['token'],
+      success: json['success'],
+      error: json['error'],
+    );
   }
 }

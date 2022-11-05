@@ -159,6 +159,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                       TextOakar(label: error),
                                       MyTextInput(
                                         title: 'Email',
+                                        value: '',
                                         type: TextInputType.emailAddress,
                                         onSubmit: (value) {
                                           setState(() {
@@ -168,6 +169,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                       ),
                                       MyTextInput(
                                         title: 'City',
+                                        value: '',
                                         type: TextInputType.text,
                                         onSubmit: (value) {
                                           setState(() {
@@ -177,6 +179,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                       ),
                                       MyTextInput(
                                         title: 'Address',
+                                        value: '',
                                         type: TextInputType.text,
                                         onSubmit: (value) {
                                           setState(() {
@@ -186,6 +189,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                       ),
                                       MyTextInput(
                                         title: 'Nearest Landmark',
+                                        value: '',
                                         type: TextInputType.text,
                                         onSubmit: (value) {
                                           setState(() {
@@ -195,6 +199,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                       ),
                                       MyTextInput(
                                         title: 'Building Name',
+                                        value: '',
                                         type: TextInputType.text,
                                         onSubmit: (value) {
                                           setState(() {
@@ -204,6 +209,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                       ),
                                       MyTextInput(
                                         title: 'House Number',
+                                        value: '',
                                         type: TextInputType.text,
                                         onSubmit: (value) {
                                           setState(() {

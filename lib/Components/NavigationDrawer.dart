@@ -3,6 +3,8 @@ import 'package:ambulex_app/Pages/Home.dart';
 import 'package:ambulex_app/Pages/Settings.dart';
 import 'package:ambulex_app/main.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class NavigationDrawer extends StatelessWidget {
   const NavigationDrawer({super.key});
@@ -28,7 +30,7 @@ class NavigationDrawer extends StatelessWidget {
           children: [
             DrawerHeader(
                 decoration: const BoxDecoration(
-                  image: DecorationImage(
+                    image: DecorationImage(
                   image: AssetImage("assets/images/bg.png"),
                   fit: BoxFit.cover,
                 )),
@@ -72,6 +74,8 @@ class NavigationDrawer extends StatelessWidget {
                 style: style,
               ),
               onTap: () {
+                final store = new FlutterSecureStorage();
+                store.deleteAll();
                 Navigator.push(
                     context, MaterialPageRoute(builder: (_) => const MyApp()));
               },

@@ -50,6 +50,7 @@ class _LoginState extends State<Login> {
                           TextOakar(label: error),
                           MyTextInput(
                             title: 'Phone Number',
+                            value: '',
                             type: TextInputType.phone,
                             onSubmit: (value) {
                               setState(() {
@@ -59,6 +60,7 @@ class _LoginState extends State<Login> {
                           ),
                           MyTextInput(
                             title: 'Password',
+                            value: '',
                             type: TextInputType.visiblePassword,
                             onSubmit: (value) {
                               setState(() {
