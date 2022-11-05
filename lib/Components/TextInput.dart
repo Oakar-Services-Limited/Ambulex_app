@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 
 class TextInput extends StatefulWidget {
   String title;
+  var type;
   Function(String) onSubmit;
-  TextInput({super.key, required this.title, required this.onSubmit});
+  TextInput(
+      {super.key,
+      required this.title,
+      required this.type,
+      required this.onSubmit});
 
   @override
   State<StatefulWidget> createState() => _TextInputState();
@@ -29,6 +34,7 @@ class _TextInputState extends State<TextInput> {
             ),
             TextField(
               onChanged: widget.onSubmit,
+              keyboardType: widget.type,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.fromLTRB(24, 8, 24, 0),
                 border: OutlineInputBorder(),

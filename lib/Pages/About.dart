@@ -19,12 +19,6 @@ class _AboutState extends State<About> {
           appBar: AppBar(title: const Text("About")),
           drawer: const Drawer(child: NavigationDrawer()),
           body: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/bg.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
               child: Column(children: const <Widget>[
                 TextLarge(label: "Introduction"),
                 Padding(

@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../Components/Utils.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -33,14 +34,6 @@ class _LoginState extends State<Login> {
       home: Scaffold(
           resizeToAvoidBottomInset: true,
           body: Stack(children: <Widget>[
-            Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/bg.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
             Center(
                 child: Container(
                     constraints: const BoxConstraints.tightForFinite(),
@@ -57,6 +50,7 @@ class _LoginState extends State<Login> {
                           TextOakar(label: error),
                           TextInput(
                             title: 'Phone Number',
+                            type: TextInputType.phone,
                             onSubmit: (value) {
                               setState(() {
                                 phone = value;
@@ -65,6 +59,7 @@ class _LoginState extends State<Login> {
                           ),
                           TextInput(
                             title: 'Password',
+                            type: TextInputType.visiblePassword,
                             onSubmit: (value) {
                               setState(() {
                                 password = value;
@@ -128,8 +123,9 @@ Future<Message> login(String phone, String password) async {
       error: "Password is too short!",
     );
   }
+
   final response = await http.post(
-    Uri.parse('http://192.168.1.114:3002/api/users/login'),
+    Uri.parse("${getUrl()}users/login"),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },

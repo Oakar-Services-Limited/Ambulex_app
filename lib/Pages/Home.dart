@@ -2,13 +2,17 @@ import 'package:ambulex_app/Components/AlertDialog.dart';
 import 'package:ambulex_app/Components/Map.dart';
 import 'package:ambulex_app/Components/NavigationDrawer.dart';
 import 'package:ambulex_app/Components/ReportButton.dart';
+import 'package:ambulex_app/Pages/Login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:slider_button/slider_button.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../Components/Utils.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -18,7 +22,9 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final storage = new FlutterSecureStorage();
   String location = '';
+  String phone = '';
   bool servicestatus = false;
   bool haspermission = false;
   late LocationPermission permission;
@@ -29,8 +35,24 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+    getToken();
     checkGps();
     super.initState();
+  }
+
+  getToken() async {
+    var token = await storage.read(key: "jwt");
+    var decoded = parseJwt(token.toString());
+    if (decoded["error"] == "Invalid token") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+    } else {
+      setState(() {
+        phone = decoded["Phone"];
+        lat = decoded["Latitude"] ?? 0.0;
+        long = decoded["Longitude"] ?? 0.0;
+        location = 'Saved location Lat: $lat Lon: $long';
+      });
+    }
   }
 
   checkGps() async {
@@ -79,7 +101,7 @@ class _HomeState extends State<Home> {
           long.toString();
     });
 
-    LocationSettings locationSettings = LocationSettings(
+    LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high, //accuracy of the location data
       distanceFilter: 100, //minimum distance (measured in meters) a
       //device must move horizontally before an update event is generated;
@@ -107,111 +129,86 @@ class _HomeState extends State<Home> {
         home: Scaffold(
             appBar: AppBar(title: const Text("Home")),
             drawer: const Drawer(child: NavigationDrawer()),
+            floatingActionButton: FloatingActionButton(
+                elevation: 10.0,
+                child: Icon(Icons.call),
+                backgroundColor: Colors.blue,
+                onPressed: () {}),
             body: Stack(children: [
               Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage("assets/images/bg.png"),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  child: SingleChildScrollView(
-                      child: Column(children: <Widget>[
-                    const Map(),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                  child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                child: Column(
+                  children: [
+                    Flexible(
+                        flex: 2,
+                        fit: FlexFit.tight,
+                        child: Map(
+                          lat: lat,
+                          lon: long,
+                        )),
                     Text(location),
                     const SizedBox(
                       height: 10,
                     ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                      child: Column(
-                        children: <Widget>[
-                          ReportButton(
-                            label: "Gender Based Violence",
-                            icon: Icons.handshake_sharp,
-                            color1: const Color.fromARGB(255, 251, 189, 107),
-                            color2: Colors.deepOrange,
-                            onButtonPressed: () async {
-                              setState(() {
-                                isLoading =
-                                    LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Colors.blue,
-                                  size: 100,
-                                );
-                              });
-                              var res = await report("GBV", long, lat);
-                              setState(() {
-                                isLoading = null;
-                              });
+                    Flexible(
+                      flex: 1,
+                      fit: FlexFit.tight,
+                      child: ReportButton(
+                        label: "Gender Based Violence",
+                        icon: Icons.handshake_sharp,
+                        color1: Colors.orange,
+                        onButtonPressed: () async {
+                          setState(() {
+                            isLoading =
+                                LoadingAnimationWidget.staggeredDotsWave(
+                              color: Colors.blue,
+                              size: 100,
+                            );
+                          });
+                          var res = await report("GBV", long, lat);
+                          setState(() {
+                            isLoading = null;
+                          });
 
-                              if (res.error == null) {
-                                showDialog<String>(
-                                    context: context,
-                                    builder: (BuildContext context) =>
-                                        AlertDialog(
-                                          title: const Text(
-                                              'Gender Based Violence'),
-                                          content: const Text(
-                                              'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
-                                          actions: <Widget>[
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context, 'OK'),
-                                              child: const Text('OK'),
-                                            ),
-                                          ],
-                                        ));
-                              }
-                            },
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          ReportButton(
-                              label: "Medical Emergency",
-                              icon: Icons.medical_services,
-                              color1: const Color.fromARGB(255, 251, 107, 225),
-                              color2: Colors.red,
-                              onButtonPressed: () async {
-                                setState(() {
-                                  isLoading =
-                                      LoadingAnimationWidget.staggeredDotsWave(
-                                    color: Colors.blue,
-                                    size: 100,
-                                  );
-                                });
-
-                                var res = await report("ME", long, lat);
-                                setState(() {
-                                  isLoading = null;
-                                });
-
-                                if (res.error == null) {
-                                  showDialog<String>(
-                                      context: context,
-                                      builder: (BuildContext context) =>
-                                          AlertDialog(
-                                            title:
-                                                const Text('Medical Emergency'),
-                                            content: const Text(
-                                                'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
-                                            actions: <Widget>[
-                                              TextButton(
-                                                onPressed: () => Navigator.pop(
-                                                    context, 'OK'),
-                                                child: const Text('OK'),
-                                              ),
-                                            ],
-                                          ));
-                                }
-                              }),
-                        ],
+                          if (res.error == null) {
+                            dialog(context, "Gender Based Violence");
+                          }
+                        },
                       ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    Flexible(
+                      flex: 1,
+                      fit: FlexFit.tight,
+                      child: ReportButton(
+                          label: "Medical Emergency",
+                          icon: Icons.medical_services,
+                          color1: Colors.red,
+                          onButtonPressed: () async {
+                            setState(() {
+                              isLoading =
+                                  LoadingAnimationWidget.staggeredDotsWave(
+                                color: Colors.blue,
+                                size: 100,
+                              );
+                            });
+
+                            var res = await report("ME", long, lat);
+                            setState(() {
+                              isLoading = null;
+                            });
+
+                            if (res.error == null) {
+                              dialog(context, "Medical Emergency");
+                            }
+                          }),
                     )
-                  ]))),
+                  ],
+                ),
+              )),
               Center(child: isLoading),
             ])));
   }
@@ -219,7 +216,7 @@ class _HomeState extends State<Home> {
 
 Future<Message> report(String type, double lon, double lat) async {
   final response = await http.post(
-    Uri.parse('http://192.168.1.114:3002/api/reports/create'),
+    Uri.parse('${getUrl()}reports/create'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -295,4 +292,20 @@ Future<Position> determinePosition() async {
         'Location permissions are permanently denied, we cannot request permissions.');
   }
   return await Geolocator.getCurrentPosition();
+}
+
+Future<dynamic> dialog(dynamic context, String type) {
+  return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+            title: Text(type),
+            content: const Text(
+                'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context, 'OK'),
+                child: const Text('OK'),
+              ),
+            ],
+          ));
 }

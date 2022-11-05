@@ -1,35 +1,52 @@
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter/material.dart';
+import 'Utils.dart';
+import 'dart:io';
+import 'dart:async';
 
 class Map extends StatefulWidget {
-  const Map({Key? key}) : super(key: key);
+  final double lat;
+  final double lon;
+  const Map({super.key, required this.lat, required this.lon});
 
   @override
   State<Map> createState() => _MapState();
 }
 
 class _MapState extends State<Map> {
+  var controller = null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (Platform.isAndroid) {
+      WebView.platform = SurfaceAndroidWebView();
+    }
+  }
+
+
+  @mustCallSuper
+  @protected
+  void didUpdateWidget(covariant oldWidget) {
+     if(controller != null){controller
+        .evaluateJavascript("adjustMarker('${widget.lon}','${widget.lat}')");}
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-        child: Column(children: const <Widget>[
-         SizedBox(
-              width: double.infinity,
-              child:  Text("Physical Location",
-                  textAlign: TextAlign.left,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
-                  ))),
-          SizedBox(
-            height: 10,
-          ),
-          SizedBox(
-            height: 200,
-            child:WebView(
-            initialUrl: 'http://demo.osl.co.ke:444/api/homepage',
-          ))
-        ]));
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 12),
+        child: Card(
+            clipBehavior: Clip.hardEdge,
+            elevation: 2,
+            child: WebView(
+              initialUrl: "${getUrl()}homepage",
+              javascriptMode: JavascriptMode.unrestricted,
+              onWebViewCreated: (WebViewController webViewController) {
+                controller = webViewController;
+                webViewController.evaluateJavascript(
+                    "adjustMarker('${widget.lon}','${widget.lat}')");
+              },
+            )));
   }
 }

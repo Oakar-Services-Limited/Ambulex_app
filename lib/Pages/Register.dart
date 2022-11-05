@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-
+import '../Components/Utils.dart';
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -33,14 +33,6 @@ class _RegisterState extends State<Register> {
       home: Scaffold(
           resizeToAvoidBottomInset: true,
           body: Stack(children: <Widget>[
-            Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage("assets/images/bg.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
             Center(
                 child: Container(
                     constraints: const BoxConstraints.tightForFinite(),
@@ -57,6 +49,7 @@ class _RegisterState extends State<Register> {
                           TextOakar(label: error),
                           TextInput(
                             title: 'Full Name',
+                            type: TextInputType.text,
                             onSubmit: (value) {
                               setState(() {
                                 name = value;
@@ -65,6 +58,7 @@ class _RegisterState extends State<Register> {
                           ),
                           TextInput(
                             title: 'Phone Number',
+                            type: TextInputType.phone,
                             onSubmit: (value) {
                               setState(() {
                                 phone = value;
@@ -73,6 +67,7 @@ class _RegisterState extends State<Register> {
                           ),
                           TextInput(
                             title: 'Password',
+                            type: TextInputType.visiblePassword,
                             onSubmit: (value) {
                               setState(() {
                                 password = value;
@@ -99,17 +94,14 @@ class _RegisterState extends State<Register> {
                                 }
                               });
 
-                              if(res.error == null){
+                              if (res.error == null) {
                                 Timer(const Duration(seconds: 2), () {
-                                 Navigator.push(
+                                  Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) =>
-                                              const Login()));
+                                          builder: (_) => const Login()));
                                 });
                               }
-
-                             
                             },
                           ),
                           const NavigationButton(
@@ -124,14 +116,14 @@ class _RegisterState extends State<Register> {
 }
 
 Future<Message> register(String name, String phone, String password) async {
-    if (name == '') {
+  if (name == '') {
     return Message(
       token: null,
       success: null,
       error: "Please enter your name!",
     );
   }
-   if (phone.length != 10) {
+  if (phone.length != 10) {
     return Message(
       token: null,
       success: null,
@@ -145,10 +137,9 @@ Future<Message> register(String name, String phone, String password) async {
       error: "Password is too short!",
     );
   }
-  
-  
+
   final response = await http.post(
-    Uri.parse('http://192.168.1.114:3002/api/users/register'),
+    Uri.parse('${getUrl()}users/register'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },

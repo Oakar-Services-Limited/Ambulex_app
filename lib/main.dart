@@ -1,9 +1,11 @@
 import 'package:ambulex_app/Pages/Home.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'Pages/Login.dart';
 import 'Pages/Register.dart';
 import 'Pages/GettingStarted.dart';
 import 'dart:async';
+import 'Components/Utils.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -21,20 +23,28 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final storage = new FlutterSecureStorage();
+
+    getToken() async {
+      var token = await storage.read(key: "jwt");
+      var decoded = parseJwt(token.toString());
+      if (decoded["error"] == "Invalid token") {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const Login()));
+      } else {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const Home()));
+      }
+    }
+
     Timer(const Duration(seconds: 2), () {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+      getToken();
     });
 
     return MaterialApp(
         title: 'Ambulex',
         home: Scaffold(
           body: Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage("assets/images/bg.png"),
-                fit: BoxFit.cover,
-              ),
-            ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,

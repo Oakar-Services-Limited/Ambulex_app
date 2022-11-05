@@ -4,7 +4,6 @@ class ReportButton extends StatefulWidget {
   final String label;
   final IconData icon;
   final Color color1;
-  final Color color2;
   var onButtonPressed;
 
   ReportButton(
@@ -12,7 +11,6 @@ class ReportButton extends StatefulWidget {
       required this.label,
       required this.icon,
       required this.color1,
-      required this.color2,
       required this.onButtonPressed});
 
   @override
@@ -25,19 +23,23 @@ class _ReportButtonState extends State<ReportButton> {
     return TextButton(
         onPressed: widget.onButtonPressed,
         clipBehavior: Clip.none,
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.zero,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         child: Card(
             elevation: 5,
             color: Colors.blue,
             clipBehavior: Clip.hardEdge,
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
                   widget.color1,
-                  Colors.deepOrange,
+                  widget.color1,
                 ],
               )),
               child: Center(

@@ -40,6 +40,7 @@ dependencies:
   http: ^0.13.5
   flutter_secure_storage:
   loading_animation_widget:
+  flutter_inappwebview:
   slider_button: ^2.0.0
   geolocator: ^9.0.2
 
