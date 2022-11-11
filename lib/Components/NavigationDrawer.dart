@@ -29,11 +29,7 @@ class NavigationDrawer extends StatelessWidget {
           padding: const EdgeInsets.all(0),
           children: [
             DrawerHeader(
-                decoration: const BoxDecoration(
-                    image: DecorationImage(
-                  image: AssetImage("assets/images/bg.png"),
-                  fit: BoxFit.cover,
-                )),
+                decoration: const BoxDecoration(color: Colors.white),
                 child: Center(child: Image.asset('assets/images/logo.png'))),
             ListTile(
               title: const Text(

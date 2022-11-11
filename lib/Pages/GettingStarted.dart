@@ -37,6 +37,7 @@ class _GettingStartedState extends State<GettingStarted> {
   String houseno = '';
   String error = '';
   String id = '';
+  String gender = '';
   var isLoading = null;
 
   @override
@@ -52,7 +53,7 @@ class _GettingStartedState extends State<GettingStarted> {
     if (decoded["error"] == "Invalid token") {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
     } else {
-       print(decoded);
+      print(decoded);
       setState(() {
         id = decoded["UserID"];
       });
@@ -168,6 +169,16 @@ class _GettingStartedState extends State<GettingStarted> {
                                         },
                                       ),
                                       MyTextInput(
+                                        title: 'Gender',
+                                        value: '',
+                                        type: TextInputType.text,
+                                        onSubmit: (value) {
+                                          setState(() {
+                                            gender = value;
+                                          });
+                                        },
+                                      ),
+                                      MyTextInput(
                                         title: 'City',
                                         value: '',
                                         type: TextInputType.text,
@@ -230,6 +241,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           var res = await update(
                                               id,
                                               email,
+                                              gender,
                                               city,
                                               address,
                                               landmark,
@@ -268,6 +280,7 @@ class _GettingStartedState extends State<GettingStarted> {
 Future<Message> update(
     String id,
     String email,
+    String gender,
     String city,
     String address,
     String landmark,
@@ -303,6 +316,7 @@ Future<Message> update(
     },
     body: jsonEncode(<String, dynamic>{
       'Email': email,
+      'Gender': gender,
       'City': city,
       'Address': address,
       'Landmark': landmark,

@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
-import 'package:ambulex_app/Pages/Home.dart';
 import '../Components/NavigationDrawer.dart';
 import 'package:ambulex_app/Pages/Login.dart';
 import 'package:flutter/material.dart';
@@ -30,6 +28,7 @@ class _SettingsState extends State<Settings> {
   late LocationPermission permission;
   late Position position;
   double long = 0.0, lat = 0.0;
+  double long1 = 0.0, lat1 = 0.0;
   late StreamSubscription<Position> positionStream;
   String email = '';
   String city = '';
@@ -38,13 +37,19 @@ class _SettingsState extends State<Settings> {
   String buildingname = '';
   String houseno = '';
   String error = '';
+  String email1 = '';
+  String city1 = '';
+  String address1 = '';
+  String landmark1 = '';
+  String buildingname1 = '';
+  String houseno1 = '';
   String id = '';
   var isLoading = null;
 
   @override
   void initState() {
-    checkGps();
     super.initState();
+    checkGps();
     getToken();
   }
 
@@ -116,12 +121,12 @@ class _SettingsState extends State<Settings> {
     } else {
       setState(() {
         id = decoded["UserID"];
-        email = decoded["Email"];
-        city = decoded["City"];
-        address = decoded["Address"];
-        landmark = decoded["Landmark"];
-        buildingname = decoded["BuildingName"];
-        houseno = decoded["HouseNumber"];
+        email1 = decoded["Email"];
+        city1 = decoded["City"];
+        address1 = decoded["Address"];
+        landmark1 = decoded["Landmark"];
+        buildingname1 = decoded["BuildingName"];
+        houseno1 = decoded["HouseNumber"];
         lat = double.parse(decoded["Latitude"]) ?? 0.0;
         long = double.parse(decoded["Longitude"]) ?? 0.0;
         location =
@@ -158,9 +163,10 @@ class _SettingsState extends State<Settings> {
                       TextOakar(label: error),
                       MyTextInput(
                         title: 'Email',
-                        value: email,
+                        value: email1,
                         type: TextInputType.emailAddress,
                         onSubmit: (value) {
+                          print(value);
                           setState(() {
                             email = value;
                           });
@@ -168,7 +174,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       MyTextInput(
                         title: 'City',
-                        value: city,
+                        value: city1,
                         type: TextInputType.text,
                         onSubmit: (value) {
                           setState(() {
@@ -178,7 +184,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       MyTextInput(
                         title: 'Address',
-                        value: address,
+                        value: address1,
                         type: TextInputType.text,
                         onSubmit: (value) {
                           setState(() {
@@ -188,7 +194,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       MyTextInput(
                         title: 'Nearest Landmark',
-                        value: landmark,
+                        value: landmark1,
                         type: TextInputType.text,
                         onSubmit: (value) {
                           setState(() {
@@ -198,7 +204,7 @@ class _SettingsState extends State<Settings> {
                       ),
                       MyTextInput(
                         title: 'Building Name',
-                        value: buildingname,
+                        value: buildingname1,
                         type: TextInputType.text,
                         onSubmit: (value) {
                           setState(() {
@@ -208,12 +214,13 @@ class _SettingsState extends State<Settings> {
                       ),
                       MyTextInput(
                         title: 'House Number',
-                        value: houseno,
+                        value: houseno1,
                         type: TextInputType.text,
                         onSubmit: (value) {
                           setState(() {
                             houseno = value;
                           });
+                          print(houseno);
                         },
                       ),
                       SubmitButton(
@@ -226,8 +233,17 @@ class _SettingsState extends State<Settings> {
                               size: 100,
                             );
                           });
-                          var res = await update(id, email, city, address,
-                              landmark, buildingname, houseno, lat, long);
+                          var res = await update(
+                            id,
+                            email == '' ? email1 : email,
+                            city == '' ? city1 : city,
+                            address == '' ? address1 : address,
+                            landmark == '' ? landmark1 : landmark,
+                            buildingname == '' ? buildingname1 : buildingname,
+                            houseno == '' ? houseno1 : houseno,
+                            lat == 0.0 ? lat1 : lat,
+                            long == 0.0 ? long1 : long,
+                          );
                           setState(() {
                             isLoading = null;
                             if (res.error == null) {
@@ -286,6 +302,8 @@ Future<Message> update(
       error: "All fields are required!",
     );
   }
+
+  print(houseno);
 
   final response = await http.put(
     Uri.parse('${getUrl()}users/${id}'),

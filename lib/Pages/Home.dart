@@ -16,7 +16,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Components/Utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-final Uri _url = Uri.parse('tel://+254714816920');
+final Uri _url = Uri.parse('tel://+254702898989');
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -107,7 +107,7 @@ class _HomeState extends State<Home> {
 
     LocationSettings locationSettings = const LocationSettings(
       accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 10, //minimum distance (measured in meters) a
+      distanceFilter: 1, //minimum distance (measured in meters) a
       //device must move horizontally before an update event is generated;
     );
 
