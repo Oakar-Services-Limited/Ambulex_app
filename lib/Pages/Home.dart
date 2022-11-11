@@ -246,7 +246,9 @@ Future<Message> report(
       'Phone': phone,
       'Type': type,
       'Latitude': lat,
-      'Longitude': lon
+      'Longitude': lon,
+      'Status': 'Received',
+      'ER_ID': ''
     }),
   );
 
