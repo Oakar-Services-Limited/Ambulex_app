@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 String getUrl() {
-  return "http://192.168.100.89:3002/api/";
+  return "http://demo.osl.co.ke:444/api/";
 }
 
 Map<String, dynamic> parseJwt(String token) {
