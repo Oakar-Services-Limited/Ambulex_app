@@ -1,4 +1,4 @@
-package com.example.ambulex_app
+package com.osl.ambulex
 
 import io.flutter.embedding.android.FlutterActivity
 
