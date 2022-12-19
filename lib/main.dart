@@ -8,39 +8,60 @@ import 'dart:async';
 import 'Components/Utils.dart';
 
 void main() {
-  runApp(MaterialApp(
-    home: const MyApp(), // Becomes the route named '/'.
-    routes: <String, WidgetBuilder>{
-      '/login': (context) => const Login(),
-      '/register': (context) => const Register(),
-      '/gettingstarted': (context) => const GettingStarted(),
-    },
-  ));
+  runApp(const MaterialApp(home: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final storage = new FlutterSecureStorage();
+  State<StatefulWidget> createState() => _MyAppState();
+}
 
-    getToken() async {
-      var token = await storage.read(key: "jwt");
-      var decoded = parseJwt(token.toString());
-      if (decoded["error"] == "Invalid token") {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const Login()));
-      } else {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const Home()));
-      }
-    }
+class _MyAppState extends State<MyApp> {
+  final storage = new FlutterSecureStorage();
 
+  @override
+  void initState() {
     Timer(const Duration(seconds: 2), () {
       getToken();
     });
+    super.initState();
+  }
 
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        Timer(const Duration(seconds: 2), () {
+          getToken();
+        });
+        break;
+      case AppLifecycleState.inactive:
+        // Handle this case
+        break;
+      case AppLifecycleState.paused:
+        // Handle this case
+        break;
+      case AppLifecycleState.detached:
+       Timer(const Duration(seconds: 2), () {
+          getToken();
+        });
+        break;
+    }
+  }
+
+  getToken() async {
+    var token = await storage.read(key: "jwt");
+    var decoded = parseJwt(token.toString());
+    if (decoded["error"] == "Invalid token") {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+    } else {
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const Home()));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp(
         title: 'Ambulex',
         home: Scaffold(
