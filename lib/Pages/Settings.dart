@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:ambulex_app/Components/Map.dart';
 import 'package:ambulex_app/Components/TextOakar.dart';
-import '../Components/NavigationDrawer.dart';
+import '../Components/NavigationDrawer2.dart';
 import 'package:ambulex_app/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -145,7 +145,7 @@ class _SettingsState extends State<Settings> {
               title: "Settings",
               home: Scaffold(
                   appBar: AppBar(title: const Text("Settings")),
-                  drawer: const Drawer(child: NavigationDrawer()),
+                  drawer: const Drawer(child: NavigationDrawer2()),
                   body: Stack(children: [
                     Container(
                         child: SingleChildScrollView(

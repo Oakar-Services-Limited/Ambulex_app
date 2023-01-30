@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({super.key});
+class NavigationDrawer2 extends StatelessWidget {
+  const NavigationDrawer2({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,5 @@
 import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/NavigationDrawer.dart';
+import 'package:ambulex_app/Components/NavigationDrawer2.dart';
 import 'package:ambulex_app/Components/TextLarge.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +17,7 @@ class _AboutState extends State<About> {
         title: "About",
         home: Scaffold(
           appBar: AppBar(title: const Text("About")),
-          drawer: const Drawer(child: NavigationDrawer()),
+          drawer: const Drawer(child: NavigationDrawer2()),
           body: Container(
               child: Column(children: const <Widget>[
                 TextLarge(label: "Introduction"),

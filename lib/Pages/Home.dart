@@ -1,6 +1,7 @@
 import 'package:ambulex_app/Components/AlertDialog.dart';
+import 'package:ambulex_app/Components/DropDownSpinnerDummy.dart';
 import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/NavigationDrawer.dart';
+import 'package:ambulex_app/Components/NavigationDrawer2.dart';
 import 'package:ambulex_app/Components/ReportButton.dart';
 import 'package:ambulex_app/Pages/GettingStarted.dart';
 import 'package:ambulex_app/Pages/Login.dart';
@@ -127,7 +128,7 @@ class _HomeState extends State<Home> {
         title: "Home",
         home: Scaffold(
             appBar: AppBar(title: const Text("Home")),
-            drawer: const Drawer(child: NavigationDrawer()),
+            drawer: const Drawer(child: NavigationDrawer2()),
             floatingActionButton: FloatingActionButton(
                 elevation: 10.0,
                 child: Icon(Icons.call),
@@ -190,23 +191,26 @@ class _HomeState extends State<Home> {
                           icon: Icons.medical_services,
                           color1: Colors.red,
                           onButtonPressed: () async {
-                            setState(() {
-                              isLoading =
-                                  LoadingAnimationWidget.staggeredDotsWave(
-                                color: Colors.blue,
-                                size: 100,
-                              );
-                            });
+                            DropDownSpinner(context, "Emergency Response DropDown");
+                            // setState(() {
+                            //   isLoading =
+                            //       LoadingAnimationWidget.staggeredDotsWave(
+                            //     color: Colors.blue,
+                            //     size: 100,
+                            //   );
+                            // });
 
-                            var res =
-                                await report(context, phone, "ME", long, lat);
-                            setState(() {
-                              isLoading = null;
-                            });
-
-                            if (res.error == null) {
-                              dialog(context, "Medical Emergency");
-                            }
+                            // var res =
+                            //     await report(context, phone, "ME", long, lat);
+                            // setState(() {
+                            //   isLoading = null;
+                            // });
+                            //
+                            // print("THER ERROR IS "+ res.error);
+                            //
+                            // if (res.error != null) {
+                            //   DropDownSpinner(type: 'EMR',);
+                            // }
                           }),
                     )
                   ],
@@ -332,4 +336,44 @@ Future<dynamic> dialog(dynamic context, String type) {
               ),
             ],
           ));
+}
+
+Future<dynamic> DropDownSpinner(dynamic context, String type) {
+  List listItem = ["one", "two", "three"];
+  String currentItem = listItem[index];
+
+  return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(type),
+        content: DropdownButton(
+          hint: Text("Select Items"),
+          dropdownColor: Colors.grey,
+          icon: Icon(Icons.arrow_drop_down),
+          iconSize: 36,
+          isExpanded: true,
+          underline: SizedBox(),
+          style: TextStyle(
+              color: Colors.black,
+              fontSize: 22
+          ),
+          value: currentItem,
+          onChanged: (newValue) {
+            currentItem = newValue.toString();
+          },
+          items: listItem.map((valueItem){
+            return DropdownMenuItem(
+              value: valueItem,
+              child: Text(valueItem),
+            );
+          }).toList(),
+        ),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'OK'),
+            child: const Text('OK'),
+          ),
+        ],
+
+      ));
 }
