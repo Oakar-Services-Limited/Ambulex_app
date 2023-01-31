@@ -1,14 +1,11 @@
-import 'package:ambulex_app/Components/AlertDialog.dart';
-import 'package:ambulex_app/Components/DropDownSpinnerDummy.dart';
+import 'package:ambulex_app/Components/EMRSpinnerDialog.dart';
 import 'package:ambulex_app/Components/Map.dart';
 import 'package:ambulex_app/Components/NavigationDrawer2.dart';
 import 'package:ambulex_app/Components/ReportButton.dart';
 import 'package:ambulex_app/Pages/GettingStarted.dart';
 import 'package:ambulex_app/Pages/Login.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:slider_button/slider_button.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -30,6 +27,7 @@ class _HomeState extends State<Home> {
   final storage = new FlutterSecureStorage();
   String location = '';
   String phone = '';
+  String category = '';
   bool servicestatus = false;
   bool haspermission = false;
   late LocationPermission permission;
@@ -169,12 +167,12 @@ class _HomeState extends State<Home> {
                             );
                           });
                           var res =
-                              await report(context, phone, "GBV", long, lat);
+                              await report(context, phone, "GBV", long, lat, category);
                           setState(() {
                             isLoading = null;
                           });
 
-                          if (res.error == null) {
+                          if (res.error != null) {
                             dialog(context, "Gender Based Violence");
                           }
                         },
@@ -191,27 +189,17 @@ class _HomeState extends State<Home> {
                           icon: Icons.medical_services,
                           color1: Colors.red,
                           onButtonPressed: () async {
-                            DropDownSpinner(context, "Emergency Response DropDown");
-                            // setState(() {
-                            //   isLoading =
-                            //       LoadingAnimationWidget.staggeredDotsWave(
-                            //     color: Colors.blue,
-                            //     size: 100,
-                            //   );
-                            // });
+                            var res =
+                            await report(context, phone, "EMR", long, lat, category);
+                            setState(() {
+                              isLoading = null;
+                            });
 
-                            // var res =
-                            //     await report(context, phone, "ME", long, lat);
-                            // setState(() {
-                            //   isLoading = null;
-                            // });
-                            //
-                            // print("THER ERROR IS "+ res.error);
-                            //
-                            // if (res.error != null) {
-                            //   DropDownSpinner(type: 'EMR',);
-                            // }
-                          }),
+                            if (res.error != null) {
+                              EMRDialog(context, "Emergency Medical Response");
+                            }
+                          },
+                      ),
                     )
                   ],
                 ),
@@ -228,7 +216,7 @@ Future<void> _launchUrl() async {
 }
 
 Future<Message> report(
-    var context, String phone, String type, double lon, double lat) async {
+    var context, String phone, String type, double lon, double lat, String category) async {
   if (phone == '') {
     Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
   }
@@ -338,42 +326,13 @@ Future<dynamic> dialog(dynamic context, String type) {
           ));
 }
 
-Future<dynamic> DropDownSpinner(dynamic context, String type) {
-  List listItem = ["one", "two", "three"];
-  String currentItem = listItem[index];
-
+Future<dynamic> EMRDialog(dynamic context, String type) {
   return showDialog<String>(
       context: context,
-      builder: (BuildContext context) => AlertDialog(
-        title: Text(type),
-        content: DropdownButton(
-          hint: Text("Select Items"),
-          dropdownColor: Colors.grey,
-          icon: Icon(Icons.arrow_drop_down),
-          iconSize: 36,
-          isExpanded: true,
-          underline: SizedBox(),
-          style: TextStyle(
-              color: Colors.black,
-              fontSize: 22
-          ),
-          value: currentItem,
-          onChanged: (newValue) {
-            currentItem = newValue.toString();
-          },
-          items: listItem.map((valueItem){
-            return DropdownMenuItem(
-              value: valueItem,
-              child: Text(valueItem),
-            );
-          }).toList(),
-        ),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'OK'),
-            child: const Text('OK'),
-          ),
-        ],
+      builder: (BuildContext context) => const EMRSpinnerDialog(
+          // _currentType: _currentType,
+      )
 
-      ));
+  );
 }
+
