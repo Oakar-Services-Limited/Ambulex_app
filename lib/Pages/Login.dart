@@ -91,7 +91,7 @@ class _LoginState extends State<Login> {
                                 await storage.write(
                                     key: 'jwt', value: res.token);
                                 Timer(const Duration(seconds: 2), () {
-                                  Navigator.push(
+                                  Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
                                           builder: (_) => const Home()));

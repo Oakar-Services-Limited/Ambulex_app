@@ -47,10 +47,10 @@ class _HomeState extends State<Home> {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
     if (decoded["error"] == "Invalid token") {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Login()));
     } else {
       if (decoded["Latitude"] == null || decoded["Latitude"] == null) {
-        Navigator.push(
+        Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const GettingStarted()));
       } else {
         setState(() {
@@ -185,20 +185,27 @@ class _HomeState extends State<Home> {
                       flex: 1,
                       fit: FlexFit.tight,
                       child: ReportButton(
-                          label: "Medical Emergency",
+                          label: "Emergency Response System",
                           icon: Icons.medical_services,
                           color1: Colors.red,
-                          onButtonPressed: () async {
-                            var res =
-                            await report(context, phone, "EMR", long, lat, category);
-                            setState(() {
-                              isLoading = null;
-                            });
+                        onButtonPressed: () async {
+                          setState(() {
+                            isLoading =
+                                LoadingAnimationWidget.staggeredDotsWave(
+                                  color: Colors.blue,
+                                  size: 100,
+                                );
+                          });
+                          var res =
+                          await report(context, phone, "EMR", long, lat, category);
+                          setState(() {
+                            isLoading = null;
+                          });
 
-                            if (res.error != null) {
-                              EMRDialog(context, "Emergency Medical Response");
-                            }
-                          },
+                          if (res.error != null) {
+                            dialog(context, "Emergency Response System");
+                          }
+                        },
                       ),
                     )
                   ],
@@ -218,7 +225,7 @@ Future<void> _launchUrl() async {
 Future<Message> report(
     var context, String phone, String type, double lon, double lat, String category) async {
   if (phone == '') {
-    Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Login()));
   }
 
   if (lat == 0.0 || lon == 0.0) {

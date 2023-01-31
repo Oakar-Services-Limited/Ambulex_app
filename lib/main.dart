@@ -54,9 +54,9 @@ class _MyAppState extends State<MyApp> {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
     if (decoded["error"] == "Invalid token") {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Login()));
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Home()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Home()));
     }
   }
 
