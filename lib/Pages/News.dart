@@ -1,0 +1,89 @@
+// ignore_for_file: file_names, library_private_types_in_public_api
+import 'package:ambulex_app/Components/NavigationButton.dart';
+import 'package:ambulex_app/Components/NavigationDrawer2.dart';
+import 'package:ambulex_app/Components/Stat.dart';
+import 'package:ambulex_app/Pages/Login.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
+import 'package:http/http.dart';
+import '../Components/Utils.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+
+import '../Scroll/NewsScrollController.dart';
+
+class News extends StatefulWidget {
+  const News({super.key});
+
+  @override
+  State<StatefulWidget> createState() => _NewsState();
+}
+
+class _NewsState extends State<News> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  final storage = const FlutterSecureStorage();
+  String name = '';
+  // String completed = "";
+  // String total = "";
+  // int appTotal = 0;
+  // String pending = "";
+  String title = '';
+  String type = '';
+
+  bool servicestatus = false;
+  bool haspermission = false;
+  late LocationPermission permission;
+  late Position position;
+  double long = 0.0, lat = 0.0;
+  late StreamSubscription<Position> positionStream;
+  var isLoading;
+
+  @override
+  void initState() {
+    // flutterLocalNotificationsPlugin.cancelAll();
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        title: "News",
+        home: Scaffold(
+          // Puts appbar at the top of the page
+          appBar: AppBar(title: const Text("News")),
+          //Adds a navigation menu at the side
+          drawer: const Drawer(child: NavigationDrawer2()),
+          body: Column(children: const <Widget>[
+            Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                    padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+                    child: Text(
+                      "News List",
+                      style: TextStyle(
+                          fontSize: 24,
+                          color: Colors.blue,
+                          fontWeight: FontWeight.bold),
+                    ))),
+            // Creates a scrollable list of client calls below
+            Flexible(
+                flex: 1,
+                fit: FlexFit.tight,
+                child: InfiniteNewsScrollPaginatorDemo()),
+            SizedBox(
+              height: 12,
+            )
+          ]),
+        ));
+  }
+}
+
+
+
+//comment

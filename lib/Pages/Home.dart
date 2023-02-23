@@ -47,7 +47,8 @@ class _HomeState extends State<Home> {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
     if (decoded["error"] == "Invalid token") {
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Login()));
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const Login()));
     } else {
       if (decoded["Latitude"] == null || decoded["Latitude"] == null) {
         Navigator.pushReplacement(
@@ -166,13 +167,13 @@ class _HomeState extends State<Home> {
                               size: 100,
                             );
                           });
-                          var res =
-                              await report(context, phone, "GBV", long, lat, category);
+                          var res = await report(
+                              context, phone, "GBV", long, lat, category);
                           setState(() {
                             isLoading = null;
                           });
 
-                          if (res.error != null) {
+                          if (res.error == null) {
                             dialog(context, "Gender Based Violence");
                           }
                         },
@@ -185,25 +186,27 @@ class _HomeState extends State<Home> {
                       flex: 1,
                       fit: FlexFit.tight,
                       child: ReportButton(
-                          label: "Emergency Response System",
-                          icon: Icons.medical_services,
-                          color1: Colors.red,
+                        label: "Medical Emergency",
+                        icon: Icons.medical_services,
+                        color1: Colors.red,
                         onButtonPressed: () async {
                           setState(() {
                             isLoading =
                                 LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Colors.blue,
-                                  size: 100,
-                                );
+                              color: Colors.blue,
+                              size: 100,
+                            );
                           });
-                          var res =
-                          await report(context, phone, "EMR", long, lat, category);
+                          var res = await report(
+                              context, phone, "ME", long, lat, category);
                           setState(() {
                             isLoading = null;
                           });
 
-                          if (res.error != null) {
-                            dialog(context, "Emergency Response System");
+                          print(res.error);
+
+                          if (res.error == null) {
+                            dialog(context, "Medical Emergency");
                           }
                         },
                       ),
@@ -222,10 +225,11 @@ Future<void> _launchUrl() async {
   }
 }
 
-Future<Message> report(
-    var context, String phone, String type, double lon, double lat, String category) async {
+Future<Message> report(var context, String phone, String type, double lon,
+    double lat, String category) async {
   if (phone == '') {
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Login()));
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (_) => const Login()));
   }
 
   if (lat == 0.0 || lon == 0.0) {
@@ -332,14 +336,3 @@ Future<dynamic> dialog(dynamic context, String type) {
             ],
           ));
 }
-
-Future<dynamic> EMRDialog(dynamic context, String type) {
-  return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => const EMRSpinnerDialog(
-          // _currentType: _currentType,
-      )
-
-  );
-}
-

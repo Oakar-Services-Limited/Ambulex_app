@@ -1,6 +1,10 @@
 // ignore_for_file: file_names
 import 'dart:convert';
 
+// String getUrl() {
+//   return "http://192.168.1.122:3002/";
+// }
+
 String getUrl() {
   return "http://185.215.180.181:9934/api/";
 }

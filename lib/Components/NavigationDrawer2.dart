@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import '../Pages/News.dart';
+
 class NavigationDrawer2 extends StatelessWidget {
   const NavigationDrawer2({super.key});
 
@@ -74,6 +76,16 @@ class NavigationDrawer2 extends StatelessWidget {
                 store.deleteAll();
                 Navigator.push(
                     context, MaterialPageRoute(builder: (_) => const MyApp()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'News',
+                style: style,
+              ),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const News()));
               },
             ),
           ],
