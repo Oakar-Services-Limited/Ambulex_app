@@ -48,6 +48,11 @@ dependencies:
   infinite_scroll_pagination: ^3.2.0
   intl: ^0.18.0
   shared_preferences: ^2.0.17
+  flutter_compass: ^0.7.0
+  google_map_polyline_new: ^0.3.0+2
+  google_maps_flutter: ^2.2.8
+  permission_handler: ^10.2.0
+  geocoding: ^2.1.0
 
 dev_dependencies:
   flutter_test:

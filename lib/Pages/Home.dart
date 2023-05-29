@@ -1,9 +1,14 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:ambulex_app/Components/EMRSpinnerDialog.dart';
 import 'package:ambulex_app/Components/Map.dart';
+import 'package:ambulex_app/Components/MyHomePage.dart';
 import 'package:ambulex_app/Components/NavigationDrawer2.dart';
 import 'package:ambulex_app/Components/ReportButton.dart';
 import 'package:ambulex_app/Pages/GettingStarted.dart';
+import 'package:ambulex_app/Pages/Incident.dart';
 import 'package:ambulex_app/Pages/Login.dart';
+import 'package:ambulex_app/Pages/News.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
@@ -27,6 +32,7 @@ class _HomeState extends State<Home> {
   final storage = new FlutterSecureStorage();
   String location = '';
   String phone = '';
+  String id = '';
   String category = '';
   bool servicestatus = false;
   bool haspermission = false;
@@ -58,6 +64,7 @@ class _HomeState extends State<Home> {
           phone = decoded["Phone"];
           lat = double.parse(decoded["Latitude"]) ?? 0.0;
           long = double.parse(decoded["Longitude"]) ?? 0.0;
+          id = decoded["UserID"]!;
           location =
               "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
         });
@@ -168,13 +175,13 @@ class _HomeState extends State<Home> {
                             );
                           });
                           var res = await report(
-                              context, phone, "GBV", long, lat, category);
+                              context, phone, "GBV", long, lat, category,);
                           setState(() {
                             isLoading = null;
                           });
 
                           if (res.error == null) {
-                            dialog(context, "Gender Based Violence");
+                            dialog(context, "Gender Based Violence", id);
                           }
                         },
                       ),
@@ -206,7 +213,7 @@ class _HomeState extends State<Home> {
                           print(res.error);
 
                           if (res.error == null) {
-                            dialog(context, "Medical Emergency");
+                            dialog(context, "Medical Emergency", id);
                           }
                         },
                       ),
@@ -321,7 +328,7 @@ Future<Position> determinePosition() async {
   return await Geolocator.getCurrentPosition();
 }
 
-Future<dynamic> dialog(dynamic context, String type) {
+Future<dynamic> dialog(dynamic context, String type, String userid) {
   return showDialog<String>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
@@ -330,7 +337,15 @@ Future<dynamic> dialog(dynamic context, String type) {
                 'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
             actions: <Widget>[
               TextButton(
-                onPressed: () => Navigator.pop(context, 'OK'),
+                onPressed: () => {
+                  Navigator.pop(context),
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => Incident(
+                                id: userid,
+                              ))),
+                },
                 child: const Text('OK'),
               ),
             ],
