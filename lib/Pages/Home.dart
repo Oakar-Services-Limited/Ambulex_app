@@ -2,11 +2,9 @@
 
 import 'package:ambulex_app/Components/EMRSpinnerDialog.dart';
 import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/MyHomePage.dart';
 import 'package:ambulex_app/Components/NavigationDrawer2.dart';
 import 'package:ambulex_app/Components/ReportButton.dart';
 import 'package:ambulex_app/Pages/GettingStarted.dart';
-import 'package:ambulex_app/Pages/Incident.dart';
 import 'package:ambulex_app/Pages/Login.dart';
 import 'package:ambulex_app/Pages/News.dart';
 import 'package:flutter/material.dart';
@@ -339,12 +337,6 @@ Future<dynamic> dialog(dynamic context, String type, String userid) {
               TextButton(
                 onPressed: () => {
                   Navigator.pop(context),
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => Incident(
-                                id: userid,
-                              ))),
                 },
                 child: const Text('OK'),
               ),
