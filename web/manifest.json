@@ -1,6 +1,6 @@
 {
-    "name": "ambulex_app",
-    "short_name": "ambulex_app",
+    "name": "ambulex_users",
+    "short_name": "ambulex_users",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

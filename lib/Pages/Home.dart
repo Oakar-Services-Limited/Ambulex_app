@@ -1,12 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:ambulex_app/Components/EMRSpinnerDialog.dart';
-import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/NavigationDrawer2.dart';
-import 'package:ambulex_app/Components/ReportButton.dart';
-import 'package:ambulex_app/Pages/GettingStarted.dart';
-import 'package:ambulex_app/Pages/Login.dart';
-import 'package:ambulex_app/Pages/News.dart';
+
+import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Components/NavigationDrawer2.dart';
+import 'package:ambulex_users/Components/ReportButton.dart';
+import 'package:ambulex_users/Pages/GettingStarted.dart';
+import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';

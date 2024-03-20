@@ -1,7 +1,9 @@
-import 'package:ambulex_app/Components/NavigationButton.dart';
-import 'package:ambulex_app/Components/TextLarge.dart';
-import 'package:ambulex_app/Components/TextOakar.dart';
-import 'package:ambulex_app/Pages/Home.dart';
+
+import 'package:ambulex_users/Components/NavigationButton.dart';
+import 'package:ambulex_users/Components/TextLarge.dart';
+import 'package:ambulex_users/Components/TextOakar.dart';
+import 'package:ambulex_users/Pages/Home.dart';
+
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
 import 'Register.dart';

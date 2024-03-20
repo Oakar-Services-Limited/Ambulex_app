@@ -1,9 +1,7 @@
-import 'package:ambulex_app/Pages/Home.dart';
+import 'package:ambulex_users/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'Pages/Login.dart';
-import 'Pages/Register.dart';
-import 'Pages/GettingStarted.dart';
 import 'dart:async';
 import 'Components/Utils.dart';
 
@@ -19,7 +17,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
 
   @override
   void initState() {
@@ -47,6 +45,8 @@ class _MyAppState extends State<MyApp> {
           getToken();
         });
         break;
+      case AppLifecycleState.hidden:
+        // TODO: Handle this case.
     }
   }
 

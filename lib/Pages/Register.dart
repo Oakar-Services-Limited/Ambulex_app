@@ -1,7 +1,8 @@
-import 'package:ambulex_app/Components/NavigationButton.dart';
-import 'package:ambulex_app/Components/TextLarge.dart';
-import 'package:ambulex_app/Components/TextOakar.dart';
-import 'package:ambulex_app/Pages/GettingStarted.dart';
+
+import 'package:ambulex_users/Components/NavigationButton.dart';
+import 'package:ambulex_users/Components/TextLarge.dart';
+import 'package:ambulex_users/Components/TextOakar.dart';
+import 'package:ambulex_users/Pages/GettingStarted.dart';
 import 'package:flutter/material.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
@@ -102,7 +103,8 @@ class _RegisterState extends State<Register> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) => const GettingStarted()));
+                                          builder: (_) =>
+                                              const GettingStarted()));
                                 });
                               }
                             },

@@ -1,6 +1,6 @@
-import 'package:ambulex_app/Components/Map.dart';
-import 'package:ambulex_app/Components/NavigationDrawer2.dart';
-import 'package:ambulex_app/Components/TextLarge.dart';
+
+import 'package:ambulex_users/Components/NavigationDrawer2.dart';
+import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:flutter/material.dart';
 
 class About extends StatefulWidget {
@@ -19,7 +19,7 @@ class _AboutState extends State<About> {
           appBar: AppBar(title: const Text("About")),
           drawer: const Drawer(child: NavigationDrawer2()),
           body: Container(
-              child: Column(children: const <Widget>[
+              child: const Column(children: <Widget>[
                 TextLarge(label: "Introduction"),
                 Padding(
                   padding: EdgeInsets.fromLTRB(24, 12,24,12),
