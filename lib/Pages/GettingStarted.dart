@@ -24,7 +24,7 @@ class GettingStarted extends StatefulWidget {
 }
 
 class _GettingStartedState extends State<GettingStarted> {
-  final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
   String location = '';
   bool servicestatus = false;
   bool haspermission = false;
@@ -41,88 +41,56 @@ class _GettingStartedState extends State<GettingStarted> {
   String error = '';
   String id = '';
   String gender = '';
-  var isLoading = null;
+  dynamic isLoading;
 
   @override
   void initState() {
+    getLocation();
+
     getToken();
-    checkGps();
     super.initState();
   }
 
-  getToken() async {
+  Future<void> getToken() async {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
-    if (decoded["error"] == "Invalid token") {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
-    } else {
-      print(decoded);
-      setState(() {
-        id = decoded["UserID"];
-      });
-    }
-  }
-
-  checkGps() async {
-    servicestatus = await Geolocator.isLocationServiceEnabled();
-    if (servicestatus) {
-      permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          print('Location permissions are denied');
-        } else if (permission == LocationPermission.deniedForever) {
-          print("'Location permissions are permanently denied");
-        } else {
-          haspermission = true;
-        }
-      } else {
-        haspermission = true;
-      }
-
-      if (haspermission) {
-        getLocation();
-      }
-    } else {
-      print("GPS Service is not enabled, turn on GPS location");
-    }
 
     setState(() {
-      //refresh the UI
+      id = decoded["UserID"];
     });
+    print("useridmy: $id");
   }
 
   getLocation() async {
-    position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    setState(() {
-      long = position.longitude;
-      lat = position.latitude;
-      location = 'Current location Lat: ' +
-          lat.toString() +
-          ' Lon: ' +
-          long.toString();
-    });
-
-    LocationSettings locationSettings = const LocationSettings(
-      accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 10, //minimum distance (measured in meters) a
-      //device must move horizontally before an update event is generated;
-    );
-
-    StreamSubscription<Position> positionStream =
-        Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((Position position) {
-      print(position.longitude); //Output: 80.24599079
-      print(position.latitude); //Output: 29.6593457
+    try {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
 
       setState(() {
         long = position.longitude;
         lat = position.latitude;
+        location = 'Current location Lat: $lat Lon: $long';
       });
-    });
+
+      LocationSettings locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high, //accuracy of the location data
+        distanceFilter: 10, //minimum distance (measured in meters) a
+        //device must move horizontally before an update event is generated;
+      );
+
+      Geolocator.getPositionStream(locationSettings: locationSettings)
+          .listen((Position position) {
+        print(position.longitude); //Output: 80.24599079
+        print(position.latitude); //Output: 29.6593457
+
+        setState(() {
+          long = position.longitude;
+          lat = position.latitude;
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override

@@ -46,7 +46,7 @@ class _NewsStatState extends State<NewsBar> {
                   child: Row(
                     children: [
                       Image.network(
-                        'http://185.215.180.181:9934/${widget.image}',
+                        'http://194.163.135.205:4733/${widget.image}',
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,

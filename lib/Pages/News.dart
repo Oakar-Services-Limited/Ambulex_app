@@ -52,7 +52,7 @@ class _NewsState extends State<News> {
           appBar: AppBar(title: const Text("News")),
           //Adds a navigation menu at the side
           drawer: const Drawer(child: NavigationDrawer2()),
-          body: Column(children: const <Widget>[
+          body: const Column(children: <Widget>[
             Align(
                 alignment: Alignment.topCenter,
                 child: Padding(

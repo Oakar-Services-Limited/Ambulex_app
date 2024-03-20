@@ -2,8 +2,8 @@
 import 'dart:convert';
 
 String getUrl() {
-  // return "http://185.215.180.181:9934/api/";
-  return "https://api.ambulexsolutions.org/api/";
+  return "http://194.163.135.205:4733/api/";
+  // return "https://api.ambulexsolutions.org/api/";
 }
 
 // String getUrl() {
