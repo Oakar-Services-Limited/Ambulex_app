@@ -1,4 +1,3 @@
-
 import 'package:ambulex_users/Components/NavigationButton.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
@@ -26,6 +25,7 @@ class _LoginState extends State<Login> {
   String phone = '';
   String password = '';
   String error = '';
+  bool successful = false;
   var isLoading = null;
   final storage = new FlutterSecureStorage();
 
@@ -49,7 +49,7 @@ class _LoginState extends State<Login> {
                                     children: <Widget>[
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Login"),
-                          TextOakar(label: error),
+                          TextOakar(label: error, issuccessful: successful),
                           MyTextInput(
                             title: 'Phone Number',
                             value: '',
@@ -84,8 +84,10 @@ class _LoginState extends State<Login> {
                               setState(() {
                                 isLoading = null;
                                 if (res.error == null) {
+                                  successful = true;
                                   error = res.success;
                                 } else {
+                                  successful = false;
                                   error = res.error;
                                 }
                               });
@@ -104,7 +106,7 @@ class _LoginState extends State<Login> {
                           const NavigationButton(
                               label: "Register", object: Register()),
                           const TextOakar(
-                              label: "Powered by \n Oakar Services Ltd.")
+                              label: "Powered by \n Oakar Services")
                         ])))))),
             Center(child: isLoading),
           ])),

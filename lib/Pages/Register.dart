@@ -1,4 +1,3 @@
-
 import 'package:ambulex_users/Components/NavigationButton.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
@@ -25,6 +24,7 @@ class _RegisterState extends State<Register> {
   String phone = '';
   String name = '';
   String password = '';
+  bool successful = false;
   var isLoading = null;
 
   @override
@@ -47,7 +47,7 @@ class _RegisterState extends State<Register> {
                                     children: <Widget>[
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Register"),
-                          TextOakar(label: error),
+                          TextOakar(label: error, issuccessful: successful),
                           MyTextInput(
                             title: 'Full Name',
                             value: '',
@@ -92,8 +92,12 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 isLoading = null;
                                 if (res.error == null) {
+                                  successful = true;
+
                                   error = res.success;
                                 } else {
+                                  successful = true;
+
                                   error = res.error;
                                 }
                               });

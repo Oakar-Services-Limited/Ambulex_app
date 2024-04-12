@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Components/MySelectInput.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Login.dart';
@@ -139,16 +140,16 @@ class _GettingStartedState extends State<GettingStarted> {
                                           });
                                         },
                                       ),
-                                      MyTextInput(
-                                        title: 'Gender',
-                                        value: '',
-                                        type: TextInputType.text,
-                                        onSubmit: (value) {
-                                          setState(() {
-                                            gender = value;
-                                          });
-                                        },
-                                      ),
+                                       MySelectInput(
+                                          label: 'Gender',
+                                          onSubmit: (value) {
+                                            setState(() {
+                                              gender = value;
+                                            });
+                                          },
+                                          list: const ['Male', 'Female'],
+                                          value: gender),
+                                      
                                       MyTextInput(
                                         title: 'City',
                                         value: '',

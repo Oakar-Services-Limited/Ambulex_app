@@ -74,7 +74,7 @@ class _MyMapState extends State<MyMap> {
   void didUpdateWidget(covariant MyMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.lat != widget.lat || oldWidget.lon != widget.lon) {
-      controller.runJavaScript('adjustMarker(${widget.lat},${widget.lon})');
+      controller.runJavaScript('adjustMarker(${widget.lon},${widget.lat})');
     }
   }
 

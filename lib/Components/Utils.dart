@@ -2,13 +2,9 @@
 import 'dart:convert';
 
 String getUrl() {
-  return "http://194.163.135.205:4733/api/";
-  // return "https://api.ambulexsolutions.org/api/";
+  // return "http://194.163.135.205:4733/api/";
+  return "https://api-dashboard.ambulexsolutions.org/api/";
 }
-
-// String getUrl() {
-//   return "http://192.168.1.114:3002/api/";
-// }
 
 Map<String, dynamic> parseJwt(String token) {
   final parts = token.split('.');
