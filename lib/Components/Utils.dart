@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 String getUrl() {
-  // return "http://194.163.135.205:4733/api/";
+  // return "http://192.168.1.136:3003/api/";
   return "https://api-dashboard.ambulexsolutions.org/api/";
 }
 

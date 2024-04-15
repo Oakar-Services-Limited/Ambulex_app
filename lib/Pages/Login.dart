@@ -92,6 +92,8 @@ class _LoginState extends State<Login> {
                                 }
                               });
                               if (res.error == null) {
+                                print("token is ${res.token}");
+                                print("res error: ${res.error}");
                                 await storage.write(
                                     key: 'jwt', value: res.token);
                                 Timer(const Duration(seconds: 2), () {
@@ -100,13 +102,16 @@ class _LoginState extends State<Login> {
                                       MaterialPageRoute(
                                           builder: (_) => const Home()));
                                 });
+                              } else {
+                                print("token is ${res.token}");
+
+                                print("error is ${res.error}");
                               }
                             },
                           ),
                           const NavigationButton(
                               label: "Register", object: Register()),
-                          const TextOakar(
-                              label: "Powered by \n Oakar Services")
+                          const TextOakar(label: "Powered by \n Oakar Services")
                         ])))))),
             Center(child: isLoading),
           ])),
@@ -138,11 +143,14 @@ Future<Message> login(String phone, String password) async {
     body: jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
   );
 
+  print("password is : $password}");
+
   if (response.statusCode == 200 || response.statusCode == 203) {
     // If the server did return a 200 OK response,
     // then parse the JSON.
     return Message.fromJson(jsonDecode(response.body));
   } else {
+    print("response error: ${response.statusCode}, ${response.body}");
     // If the server did not return a 200 OK response,
     // then throw an exception.
     return Message(

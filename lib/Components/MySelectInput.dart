@@ -58,7 +58,7 @@ class _MySelectInputState extends State<MySelectInput> {
   Widget build(BuildContext context) {
     return Theme(
       data: Theme.of(context).copyWith(
-          canvasColor: Colors.blue,
+          canvasColor: Colors.white,
           hintColor: Colors.black,
           inputDecorationTheme: const InputDecorationTheme(
               border: OutlineInputBorder(
@@ -120,7 +120,7 @@ class _MySelectInputState extends State<MySelectInput> {
                     value: value,
                     child: Text(
                       value,
-                      style: const TextStyle(color: Colors.black12),
+                      style: const TextStyle(color: Colors.black),
                     ),
                   );
                 }).toList(),

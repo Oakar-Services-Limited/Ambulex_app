@@ -1,8 +1,11 @@
+import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Components/MySelectInput.dart';
 import 'package:ambulex_users/Components/NavigationButton.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/GettingStarted.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
 import 'Login.dart';
@@ -24,8 +27,56 @@ class _RegisterState extends State<Register> {
   String phone = '';
   String name = '';
   String password = '';
+  String email = '';
+  String city = '';
+  String address = '';
+  String landmark = '';
+  String buildingname = '';
+  String houseno = '';
+  String gender = '';
+  double long = 0.0, lat = 0.0;
+  late Position position;
+  String location = '';
   bool successful = false;
   var isLoading = null;
+
+  @override
+  void initState() {
+    getLocation();
+    super.initState();
+  }
+
+  getLocation() async {
+    try {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+
+      setState(() {
+        long = position.longitude;
+        lat = position.latitude;
+        location = 'Current location Lat: $lat Lon: $long';
+      });
+
+      LocationSettings locationSettings = const LocationSettings(
+        accuracy: LocationAccuracy.high, //accuracy of the location data
+        distanceFilter: 10, //minimum distance (measured in meters) a
+        //device must move horizontally before an update event is generated;
+      );
+
+      Geolocator.getPositionStream(locationSettings: locationSettings)
+          .listen((Position position) {
+        print(position.longitude); //Output: 80.24599079
+        print(position.latitude); //Output: 29.6593457
+
+        setState(() {
+          long = position.longitude;
+          lat = position.latitude;
+        });
+      });
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +98,15 @@ class _RegisterState extends State<Register> {
                                     children: <Widget>[
                           Image.asset('assets/images/logo.png'),
                           const TextLarge(label: "Register"),
-                          TextOakar(label: error, issuccessful: successful),
+                          Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                              child: SizedBox(
+                                height: 250,
+                                child: MyMap(
+                                  lat: lat,
+                                  lon: long,
+                                ),
+                              )),
                           MyTextInput(
                             title: 'Full Name',
                             value: '',
@@ -69,6 +128,16 @@ class _RegisterState extends State<Register> {
                             },
                           ),
                           MyTextInput(
+                            title: 'Email',
+                            value: '',
+                            type: TextInputType.emailAddress,
+                            onSubmit: (value) {
+                              setState(() {
+                                email = value;
+                              });
+                            },
+                          ),
+                          MyTextInput(
                             title: 'Password',
                             value: '',
                             type: TextInputType.visiblePassword,
@@ -78,6 +147,66 @@ class _RegisterState extends State<Register> {
                               });
                             },
                           ),
+                          MySelectInput(
+                              label: 'Gender',
+                              onSubmit: (value) {
+                                setState(() {
+                                  gender = value;
+                                });
+                              },
+                              list: const ['Male', 'Female'],
+                              value: gender),
+                          MyTextInput(
+                            title: 'City',
+                            value: '',
+                            type: TextInputType.text,
+                            onSubmit: (value) {
+                              setState(() {
+                                city = value;
+                              });
+                            },
+                          ),
+                          MyTextInput(
+                            title: 'Address',
+                            value: '',
+                            type: TextInputType.text,
+                            onSubmit: (value) {
+                              setState(() {
+                                address = value;
+                              });
+                            },
+                          ),
+                          MyTextInput(
+                            title: 'Nearest Landmark',
+                            value: '',
+                            type: TextInputType.text,
+                            onSubmit: (value) {
+                              setState(() {
+                                landmark = value;
+                              });
+                            },
+                          ),
+                          MyTextInput(
+                            title: 'Building Name',
+                            value: '',
+                            type: TextInputType.text,
+                            onSubmit: (value) {
+                              setState(() {
+                                buildingname = value;
+                              });
+                            },
+                          ),
+                          MyTextInput(
+                            title: 'House Number',
+                            value: '',
+                            type: TextInputType.text,
+                            onSubmit: (value) {
+                              setState(() {
+                                houseno = value;
+                              });
+                            },
+                          ),
+                          TextOakar(label: error, issuccessful: successful),
                           SubmitButton(
                             label: "Submit",
                             onButtonPressed: () async {
@@ -88,7 +217,19 @@ class _RegisterState extends State<Register> {
                                   size: 100,
                                 );
                               });
-                              var res = await register(name, phone, password);
+                              var res = await register(
+                                  name,
+                                  phone,
+                                  email,
+                                  password,
+                                  gender,
+                                  city,
+                                  address,
+                                  landmark,
+                                  buildingname,
+                                  houseno,
+                                  lat,
+                                  long);
                               setState(() {
                                 isLoading = null;
                                 if (res.error == null) {
@@ -107,8 +248,7 @@ class _RegisterState extends State<Register> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) =>
-                                              const GettingStarted()));
+                                          builder: (_) => const Login()));
                                 });
                               }
                             },
@@ -124,7 +264,19 @@ class _RegisterState extends State<Register> {
   }
 }
 
-Future<Message> register(String name, String phone, String password) async {
+Future<Message> register(
+    String name,
+    String phone,
+    String email,
+    String password,
+    String gender,
+    String city,
+    String address,
+    String landmark,
+    String buildingname,
+    String houseno,
+    double lat,
+    double lon) async {
   if (name == '') {
     return Message(
       token: null,
@@ -152,8 +304,20 @@ Future<Message> register(String name, String phone, String password) async {
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
-    body: jsonEncode(
-        <String, String>{'Phone': phone, 'Password': password, 'Name': name}),
+    body: jsonEncode(<String, dynamic>{
+      'Name': name,
+      'Phone': phone,
+      'Email': email,
+      'Password': password,
+      'Gender': gender,
+      'City': city,
+      'Address': address,
+      'Landmark': landmark,
+      'BuildingName': buildingname,
+      'HouseNumber': houseno,
+      'Latitude': lat,
+      'Longitude': lon
+    }),
   );
 
   if (response.statusCode == 200 || response.statusCode == 203) {

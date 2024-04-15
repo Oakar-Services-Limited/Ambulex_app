@@ -52,7 +52,7 @@ class _GettingStartedState extends State<GettingStarted> {
     super.initState();
   }
 
-  Future<void> getToken() async {
+  getToken() async {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
 
@@ -140,7 +140,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           });
                                         },
                                       ),
-                                       MySelectInput(
+                                      MySelectInput(
                                           label: 'Gender',
                                           onSubmit: (value) {
                                             setState(() {
@@ -149,7 +149,6 @@ class _GettingStartedState extends State<GettingStarted> {
                                           },
                                           list: const ['Male', 'Female'],
                                           value: gender),
-                                      
                                       MyTextInput(
                                         title: 'City',
                                         value: '',

@@ -1,11 +1,11 @@
 // ignore_for_file: use_build_context_synchronously
 
-
 import 'package:ambulex_users/Components/Map.dart';
 import 'package:ambulex_users/Components/NavigationDrawer2.dart';
 import 'package:ambulex_users/Components/ReportButton.dart';
 import 'package:ambulex_users/Pages/GettingStarted.dart';
 import 'package:ambulex_users/Pages/Login.dart';
+import 'package:ambulex_users/Pages/Register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
@@ -41,31 +41,25 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
+    getLocation();
     getToken();
-    checkGps();
     super.initState();
   }
 
   getToken() async {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
+    print("decoded is $decoded");
     if (decoded["error"] == "Invalid token") {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
     } else {
-      if (decoded["Latitude"] == null || decoded["Latitude"] == null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const GettingStarted()));
-      } else {
-        setState(() {
-          phone = decoded["Phone"];
-          lat = double.parse(decoded["Latitude"]) ?? 0.0;
-          long = double.parse(decoded["Longitude"]) ?? 0.0;
-          id = decoded["UserID"]!;
-          location =
-              "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
-        });
-      }
+      setState(() {
+        phone = decoded["Phone"];
+        id = decoded["UserID"]!;
+        location =
+            "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+      });
     }
   }
 
@@ -108,21 +102,7 @@ class _HomeState extends State<Home> {
     setState(() {
       location = 'Current location Lat: $lat Lon: $long';
     });
-
-    LocationSettings locationSettings = const LocationSettings(
-      accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 1, //minimum distance (measured in meters) a
-      //device must move horizontally before an update event is generated;
-    );
-
-    StreamSubscription<Position> positionStream =
-        Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((Position position) {
-      setState(() {
-        long = position.longitude;
-        lat = position.latitude;
-      });
-    });
+    print("current location: $long, $lat");
   }
 
   @override
@@ -172,7 +152,13 @@ class _HomeState extends State<Home> {
                             );
                           });
                           var res = await report(
-                              context, phone, "GBV", long, lat, category,);
+                            context,
+                            phone,
+                            "GBV",
+                            long,
+                            lat,
+                            category,
+                          );
                           setState(() {
                             isLoading = null;
                           });
