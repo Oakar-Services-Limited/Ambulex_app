@@ -115,7 +115,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 name = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Phone Number',
@@ -125,7 +125,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 phone = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Email',
@@ -135,7 +135,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 email = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Password',
@@ -145,7 +145,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 password = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MySelectInput(
                               label: 'Gender',
@@ -164,7 +164,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 city = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Address',
@@ -174,7 +174,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 address = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Nearest Landmark',
@@ -184,7 +184,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 landmark = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Building Name',
@@ -194,7 +194,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 buildingname = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'House Number',
@@ -204,7 +204,7 @@ class _RegisterState extends State<Register> {
                               setState(() {
                                 houseno = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           TextOakar(label: error, issuccessful: successful),
                           SubmitButton(

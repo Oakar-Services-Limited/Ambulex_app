@@ -138,7 +138,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           setState(() {
                                             email = value;
                                           });
-                                        },
+                                        }, lines: 1,
                                       ),
                                       MySelectInput(
                                           label: 'Gender',
@@ -157,7 +157,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           setState(() {
                                             city = value;
                                           });
-                                        },
+                                        }, lines: 1,
                                       ),
                                       MyTextInput(
                                         title: 'Address',
@@ -167,7 +167,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           setState(() {
                                             address = value;
                                           });
-                                        },
+                                        }, lines: 1,
                                       ),
                                       MyTextInput(
                                         title: 'Nearest Landmark',
@@ -177,7 +177,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           setState(() {
                                             landmark = value;
                                           });
-                                        },
+                                        }, lines: 1,
                                       ),
                                       MyTextInput(
                                         title: 'Building Name',
@@ -187,7 +187,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           setState(() {
                                             buildingname = value;
                                           });
-                                        },
+                                        }, lines: 1,
                                       ),
                                       MyTextInput(
                                         title: 'House Number',
@@ -197,7 +197,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                           setState(() {
                                             houseno = value;
                                           });
-                                        },
+                                        }, lines: 1,
                                       ),
                                       SubmitButton(
                                         label: "Submit",

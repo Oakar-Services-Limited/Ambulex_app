@@ -173,7 +173,7 @@ class _SettingsState extends State<Settings> {
                           setState(() {
                             email = value;
                           });
-                        },
+                        }, lines: 1,
                       ),
                       MyTextInput(
                         title: 'City',
@@ -183,7 +183,7 @@ class _SettingsState extends State<Settings> {
                           setState(() {
                             city = value;
                           });
-                        },
+                        }, lines: 1,
                       ),
                       MyTextInput(
                         title: 'Address',
@@ -193,7 +193,7 @@ class _SettingsState extends State<Settings> {
                           setState(() {
                             address = value;
                           });
-                        },
+                        }, lines: 1,
                       ),
                       MyTextInput(
                         title: 'Nearest Landmark',
@@ -203,7 +203,7 @@ class _SettingsState extends State<Settings> {
                           setState(() {
                             landmark = value;
                           });
-                        },
+                        }, lines: 1,
                       ),
                       MyTextInput(
                         title: 'Building Name',
@@ -213,7 +213,7 @@ class _SettingsState extends State<Settings> {
                           setState(() {
                             buildingname = value;
                           });
-                        },
+                        }, lines: 1,
                       ),
                       MyTextInput(
                         title: 'House Number',
@@ -224,7 +224,7 @@ class _SettingsState extends State<Settings> {
                             houseno = value;
                           });
                           print(houseno);
-                        },
+                        }, lines: 1,
                       ),
                       SubmitButton(
                         label: "Submit",

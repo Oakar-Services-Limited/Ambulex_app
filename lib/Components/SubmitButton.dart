@@ -4,7 +4,8 @@ class SubmitButton extends StatefulWidget {
   final String label;
   final onButtonPressed;
 
-  const SubmitButton({super.key, required this.label, required this.onButtonPressed});
+  const SubmitButton(
+      {super.key, required this.label, required this.onButtonPressed});
 
   @override
   State<StatefulWidget> createState() => _SubmitButton();
@@ -23,7 +24,7 @@ class _SubmitButton extends State<SubmitButton> {
         onPressed: widget.onButtonPressed,
         child: Text(
           widget.label,
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
     );

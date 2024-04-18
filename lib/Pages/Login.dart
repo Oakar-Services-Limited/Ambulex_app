@@ -58,7 +58,7 @@ class _LoginState extends State<Login> {
                               setState(() {
                                 phone = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           MyTextInput(
                             title: 'Password',
@@ -68,7 +68,7 @@ class _LoginState extends State<Login> {
                               setState(() {
                                 password = value;
                               });
-                            },
+                            }, lines: 1,
                           ),
                           SubmitButton(
                             label: "Login",
