@@ -1,4 +1,4 @@
-package com.example.ambulex_users
+package ke.co.osl.ambulex_users
 
 import io.flutter.embedding.android.FlutterActivity
 

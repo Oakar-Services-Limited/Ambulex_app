@@ -35,7 +35,6 @@ class _InfiniteNewsScrollPaginatorDemoState
   }
 
   Future<void> _fetchPage(int pageKey) async {
-    var offset = pageKey == 0 ? pageKey : pageKey + _numberOfPostsPerRequest;
     try {
       final response = await get(
         Uri.parse("${getUrl()}news"),
@@ -53,8 +52,6 @@ class _InfiniteNewsScrollPaginatorDemoState
               data['Link'],
               data['Image']))
           .toList();
-
-      print("news meta are: $responseList");
 
       final isLastPage = postList.length < _numberOfPostsPerRequest;
       if (isLastPage) {

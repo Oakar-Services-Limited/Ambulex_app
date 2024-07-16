@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, file_names, prefer_typing_uninitialized_variables
 
 import 'dart:async';
 import 'package:ambulex_users/Components/Map.dart';
@@ -24,7 +24,7 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
   String location = '';
   bool servicestatus = false;
   bool haspermission = false;
@@ -47,7 +47,7 @@ class _SettingsState extends State<Settings> {
   String buildingname1 = '';
   String houseno1 = '';
   String id = '';
-  var isLoading = null;
+  var isLoading;
 
   @override
   void initState() {
@@ -64,9 +64,7 @@ class _SettingsState extends State<Settings> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          print('Location permissions are denied');
         } else if (permission == LocationPermission.deniedForever) {
-          print("'Location permissions are permanently denied");
         } else {
           haspermission = true;
         }
@@ -77,9 +75,7 @@ class _SettingsState extends State<Settings> {
       if (haspermission) {
         getLocation();
       }
-    } else {
-      print("GPS Service is not enabled, turn on GPS location");
-    }
+    } else {}
 
     setState(() {
       //refresh the UI
@@ -93,10 +89,7 @@ class _SettingsState extends State<Settings> {
     setState(() {
       long = position.longitude;
       lat = position.latitude;
-      location = 'Current location Lat: ' +
-          lat.toString() +
-          ' Lon: ' +
-          long.toString();
+      location = 'Current location Lat: $lat Lon: $long';
     });
 
     LocationSettings locationSettings = const LocationSettings(
@@ -105,9 +98,8 @@ class _SettingsState extends State<Settings> {
       //device must move horizontally before an update event is generated;
     );
 
-    StreamSubscription<Position> positionStream =
-        Geolocator.getPositionStream(locationSettings: locationSettings)
-            .listen((Position position) {
+    Geolocator.getPositionStream(locationSettings: locationSettings)
+        .listen((Position position) {
       setState(() {
         long = position.longitude;
         lat = position.latitude;
@@ -150,9 +142,8 @@ class _SettingsState extends State<Settings> {
                   appBar: AppBar(title: const Text("Settings")),
                   drawer: const Drawer(child: NavigationDrawer2()),
                   body: Stack(children: [
-                    Container(
-                        child: SingleChildScrollView(
-                            child: Column(children: <Widget>[
+                    SingleChildScrollView(
+                        child: Column(children: <Widget>[
                       Padding(
                           padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                           child: SizedBox(
@@ -169,7 +160,6 @@ class _SettingsState extends State<Settings> {
                         value: email1,
                         type: TextInputType.emailAddress,
                         onSubmit: (value) {
-                          print(value);
                           setState(() {
                             email = value;
                           });
@@ -223,7 +213,6 @@ class _SettingsState extends State<Settings> {
                           setState(() {
                             houseno = value;
                           });
-                          print(houseno);
                         },
                       ),
                       SubmitButton(
@@ -266,11 +255,11 @@ class _SettingsState extends State<Settings> {
                           }
                         },
                       ),
-                    ]))),
+                    ])),
                     Center(child: isLoading),
                   ])));
         } else {
-          return CircularProgressIndicator();
+          return const CircularProgressIndicator();
         }
       });
 }
@@ -306,10 +295,8 @@ Future<Message> update(
     );
   }
 
-  print(houseno);
-
   final response = await http.put(
-    Uri.parse('${getUrl()}users/${id}'),
+    Uri.parse('${getUrl()}users/$id'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
@@ -326,7 +313,6 @@ Future<Message> update(
   );
 
   if (response.statusCode == 200 || response.statusCode == 203) {
-    print(response.body);
     return Message.fromJson(jsonDecode(response.body));
   } else {
     return Message(

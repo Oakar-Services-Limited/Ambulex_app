@@ -1,8 +1,9 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, file_names, unused_import, avoid_init_to_null, prefer_typing_uninitialized_variables
 
 import 'package:ambulex_users/Components/Map.dart';
 import 'package:ambulex_users/Components/NavigationDrawer2.dart';
 import 'package:ambulex_users/Components/ReportButton.dart';
+import 'package:ambulex_users/Components/Utils.dart';
 import 'package:ambulex_users/Pages/GettingStarted.dart';
 import 'package:ambulex_users/Pages/Login.dart';
 import 'package:ambulex_users/Pages/Register.dart';
@@ -13,7 +14,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:geolocator/geolocator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../Components/Utils.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 final Uri _url = Uri.parse('tel://+254702898989');
@@ -26,7 +26,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final storage = new FlutterSecureStorage();
+  final storage = const FlutterSecureStorage();
   String location = '';
   String phone = '';
   String id = '';
@@ -49,7 +49,6 @@ class _HomeState extends State<Home> {
   getToken() async {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
-    print("decoded is $decoded");
     if (decoded["error"] == "Invalid token") {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
@@ -71,9 +70,7 @@ class _HomeState extends State<Home> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          print('Location permissions are denied');
         } else if (permission == LocationPermission.deniedForever) {
-          print("'Location permissions are permanently denied");
         } else {
           haspermission = true;
         }
@@ -85,7 +82,6 @@ class _HomeState extends State<Home> {
         getLocation();
       }
     } else {
-      print("GPS Service is not enabled, turn on GPS location");
     }
 
     setState(() {
@@ -102,7 +98,6 @@ class _HomeState extends State<Home> {
     setState(() {
       location = 'Current location Lat: $lat Lon: $long';
     });
-    print("current location: $long, $lat");
   }
 
   @override
@@ -114,96 +109,94 @@ class _HomeState extends State<Home> {
             drawer: const Drawer(child: NavigationDrawer2()),
             floatingActionButton: FloatingActionButton(
                 elevation: 10.0,
-                child: Icon(Icons.call),
                 backgroundColor: Colors.blue,
                 onPressed: () {
                   _launchUrl();
-                }),
+                },
+                child: const Icon(Icons.call)),
             body: Stack(children: [
-              Container(
-                  child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                child: Column(
-                  children: [
-                    Flexible(
-                        flex: 2,
-                        fit: FlexFit.tight,
-                        child: MyMap(
-                          lat: lat,
-                          lon: long,
-                        )),
-                    Text(location),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Flexible(
-                      flex: 1,
-                      fit: FlexFit.tight,
-                      child: ReportButton(
-                        label: "Gender Based Violence",
-                        icon: Icons.handshake_sharp,
-                        color1: Colors.orange,
-                        onButtonPressed: () async {
-                          setState(() {
-                            isLoading =
-                                LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.blue,
-                              size: 100,
-                            );
-                          });
-                          var res = await report(
-                            context,
-                            phone,
-                            "GBV",
-                            long,
-                            lat,
-                            category,
-                          );
-                          setState(() {
-                            isLoading = null;
-                          });
-
-                          if (res.error == null) {
-                            dialog(context, "Gender Based Violence", id);
-                          }
-                        },
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Flexible(
-                      flex: 1,
-                      fit: FlexFit.tight,
-                      child: ReportButton(
-                        label: "Medical Emergency",
-                        icon: Icons.medical_services,
-                        color1: Colors.red,
-                        onButtonPressed: () async {
-                          setState(() {
-                            isLoading =
-                                LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.blue,
-                              size: 100,
-                            );
-                          });
-                          var res = await report(
-                              context, phone, "ME", long, lat, category);
-                          setState(() {
-                            isLoading = null;
-                          });
-
-                          print(res.error);
-
-                          if (res.error == null) {
-                            dialog(context, "Medical Emergency", id);
-                          }
-                        },
-                      ),
-                    )
-                  ],
+              Padding(
+                              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+                              child: Column(
+              children: [
+                Flexible(
+                    flex: 2,
+                    fit: FlexFit.tight,
+                    child: MyMap(
+                      lat: lat,
+                      lon: long,
+                    )),
+                Text(location),
+                const SizedBox(
+                  height: 10,
                 ),
-              )),
+                Flexible(
+                  flex: 1,
+                  fit: FlexFit.tight,
+                  child: ReportButton(
+                    label: "Gender Based Violence",
+                    icon: Icons.handshake_sharp,
+                    color1: Colors.orange,
+                    onButtonPressed: () async {
+                      setState(() {
+                        isLoading =
+                            LoadingAnimationWidget.staggeredDotsWave(
+                          color: Colors.blue,
+                          size: 100,
+                        );
+                      });
+                      var res = await report(
+                        context,
+                        phone,
+                        "GBV",
+                        long,
+                        lat,
+                        category,
+                      );
+                      setState(() {
+                        isLoading = null;
+                      });
+              
+                      if (res.error == null) {
+                        dialog(context, "Gender Based Violence", id);
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                Flexible(
+                  flex: 1,
+                  fit: FlexFit.tight,
+                  child: ReportButton(
+                    label: "Medical Emergency",
+                    icon: Icons.medical_services,
+                    color1: Colors.red,
+                    onButtonPressed: () async {
+                      setState(() {
+                        isLoading =
+                            LoadingAnimationWidget.staggeredDotsWave(
+                          color: Colors.blue,
+                          size: 100,
+                        );
+                      });
+                      var res = await report(
+                          context, phone, "ME", long, lat, category);
+                      setState(() {
+                        isLoading = null;
+                      });
+              
+              
+                      if (res.error == null) {
+                        dialog(context, "Medical Emergency", id);
+                      }
+                    },
+                  ),
+                )
+              ],
+                              ),
+                            ),
               Center(child: isLoading),
             ])));
   }
@@ -235,6 +228,7 @@ Future<Message> report(var context, String phone, String type, double lon,
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
+    
     body: jsonEncode(<String, dynamic>{
       'Phone': phone,
       'Type': type,
@@ -258,11 +252,7 @@ Future<Message> report(var context, String phone, String type, double lon,
       error: "Connection to server failed!",
     );
   }
-  // return Message(
-  //   token: null,
-  //   success: null,
-  //   error: "Connection to server failed!",
-  // );
+  
 }
 
 class Message {

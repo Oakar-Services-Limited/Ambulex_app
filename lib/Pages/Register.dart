@@ -1,3 +1,5 @@
+// ignore_for_file: file_names, unused_import, avoid_init_to_null, prefer_typing_uninitialized_variables, empty_catches
+
 import 'package:ambulex_users/Components/Map.dart';
 import 'package:ambulex_users/Components/MySelectInput.dart';
 import 'package:ambulex_users/Components/NavigationButton.dart';
@@ -65,8 +67,8 @@ class _RegisterState extends State<Register> {
 
       Geolocator.getPositionStream(locationSettings: locationSettings)
           .listen((Position position) {
-        print(position.longitude); //Output: 80.24599079
-        print(position.latitude); //Output: 29.6593457
+        //Output: 80.24599079
+        //Output: 29.6593457
 
         setState(() {
           long = position.longitude;
@@ -74,7 +76,6 @@ class _RegisterState extends State<Register> {
         });
       });
     } catch (e) {
-      print(e);
     }
   }
 
