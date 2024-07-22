@@ -1,4 +1,4 @@
-import 'package:ambulex_users/Pages/Home.dart';
+import 'package:ambulex_appv1/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -116,7 +116,7 @@ class _MyAppState extends State<MyApp> {
                               builder: (BuildContext context) => AlertDialog(
                                 title: const Text('Location Permission'),
                                 content: const Text(
-                                    'This app collects location data to enable route navigation to various assets'),
+                                    'This app collects location data only when the application is in use.'),
                                 actions: <Widget>[
                                   TextButton(
                                     onPressed: () =>

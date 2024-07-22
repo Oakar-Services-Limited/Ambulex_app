@@ -1,12 +1,10 @@
 // ignore_for_file: file_names, library_private_types_in_public_api
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../Components/NewsBar.dart';
 import '../Components/Utils.dart';
-
 import '../Model/NewsItem.dart';
 
 class InfiniteNewsScrollPaginatorDemo extends StatefulWidget {

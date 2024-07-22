@@ -1,11 +1,11 @@
 // ignore_for_file: file_names, unused_import, avoid_init_to_null, prefer_typing_uninitialized_variables, empty_catches
 
-import 'package:ambulex_users/Components/Map.dart';
-import 'package:ambulex_users/Components/MySelectInput.dart';
-import 'package:ambulex_users/Components/NavigationButton.dart';
-import 'package:ambulex_users/Components/TextLarge.dart';
-import 'package:ambulex_users/Components/TextOakar.dart';
-import 'package:ambulex_users/Pages/GettingStarted.dart';
+import 'package:ambulex_appv1/Components/Map.dart';
+import 'package:ambulex_appv1/Components/MySelectInput.dart';
+import 'package:ambulex_appv1/Components/NavigationButton.dart';
+import 'package:ambulex_appv1/Components/TextLarge.dart';
+import 'package:ambulex_appv1/Components/TextOakar.dart';
+import 'package:ambulex_appv1/Pages/GettingStarted.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../Components/SubmitButton.dart';
@@ -75,8 +75,7 @@ class _RegisterState extends State<Register> {
           lat = position.latitude;
         });
       });
-    } catch (e) {
-    }
+    } catch (e) {}
   }
 
   @override

@@ -1,6 +1,5 @@
-
-import 'package:ambulex_users/Components/NavigationDrawer2.dart';
-import 'package:ambulex_users/Components/TextLarge.dart';
+import 'package:ambulex_appv1/Components/NavigationDrawer2.dart';
+import 'package:ambulex_appv1/Components/TextLarge.dart';
 import 'package:flutter/material.dart';
 
 class About extends StatefulWidget {
@@ -20,28 +19,30 @@ class _AboutState extends State<About> {
           drawer: const Drawer(child: NavigationDrawer2()),
           body: Container(
               child: const Column(children: <Widget>[
-                TextLarge(label: "Introduction"),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, 12,24,12),
-                  child: Text(
-                      "Ambulex Solutions is a Kenyan start-up that seeks to have a significant socio-economic impact in Kenya by contributing to the healthcare system to give residents of low-income areas access to affordable and timely emergency medical care, saving lives and giving people a second chance at life and a chance to be active participants in their communities."),
-                ),
-                TextLarge(label: "Scope"),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
-                  child: Text(
-                      "Ambulex through this mobile application offers emergency response services for the following incidences"),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
-                  child: Text("GENDER BASED VIOLENCE"),
-                ),
-                Padding(
-                  padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
-                  child: Text("MEDICAL EMERGENCIES",
-                  textAlign: TextAlign.left,),
-                ),
-              ])),
+            TextLarge(label: "Introduction"),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
+              child: Text(
+                  "Ambulex Solutions is a Kenyan start-up that seeks to have a significant socio-economic impact in Kenya by contributing to the healthcare system to give residents of low-income areas access to affordable and timely emergency medical care, saving lives and giving people a second chance at life and a chance to be active participants in their communities."),
+            ),
+            TextLarge(label: "Scope"),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
+              child: Text(
+                  "Ambulex through this mobile application offers emergency response services for the following incidences"),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
+              child: Text("GENDER BASED VIOLENCE"),
+            ),
+            Padding(
+              padding: EdgeInsets.fromLTRB(24, 12, 24, 12),
+              child: Text(
+                "MEDICAL EMERGENCIES",
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ])),
         ));
   }
 }

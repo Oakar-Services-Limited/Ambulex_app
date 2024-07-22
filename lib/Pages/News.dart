@@ -1,12 +1,11 @@
 // ignore_for_file: file_names, library_private_types_in_public_api
 
-import 'package:ambulex_users/Components/NavigationDrawer2.dart';
+import 'package:ambulex_appv1/Components/NavigationDrawer2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
 import '../Scroll/NewsScrollController.dart';
 
 class News extends StatefulWidget {

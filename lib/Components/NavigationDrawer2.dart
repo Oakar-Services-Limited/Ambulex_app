@@ -1,8 +1,7 @@
-
-import 'package:ambulex_users/Pages/About.dart';
-import 'package:ambulex_users/Pages/Home.dart';
-import 'package:ambulex_users/Pages/Settings.dart';
-import 'package:ambulex_users/main.dart';
+import 'package:ambulex_appv1/Pages/About.dart';
+import 'package:ambulex_appv1/Pages/Home.dart';
+import 'package:ambulex_appv1/Pages/Settings.dart';
+import 'package:ambulex_appv1/main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 

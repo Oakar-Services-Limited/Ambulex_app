@@ -1,13 +1,14 @@
-// ignore_for_file: must_be_immutable, file_names, prefer_typing_uninitialized_variables
-
+// ignore_for_file: file_names
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MyTextInput extends StatefulWidget {
-  String title;
-  String value;
-  var type;
-  Function(String) onSubmit;
-  MyTextInput(
+  final String title;
+  final String value;
+  final TextInputType type;
+  final Function(dynamic) onSubmit;
+
+  const MyTextInput(
       {super.key,
       required this.title,
       required this.value,
@@ -19,20 +20,67 @@ class MyTextInput extends StatefulWidget {
 }
 
 class _MyTextInputState extends State<MyTextInput> {
+  TextEditingController _controller = new TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didUpdateWidget(covariant MyTextInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      setState(() {
+        _controller.text =
+            widget.value != "null" ? widget.value.toString() : '';
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 12, 24, 12),
-        child: TextFormField(
-          initialValue: widget.value,
-            onChanged: widget.onSubmit,
-            keyboardType: widget.type,
-            decoration: InputDecoration(
-              contentPadding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
-              border: const OutlineInputBorder(),
-              filled: false,
-              label: Text(widget.title.toString()),
-              floatingLabelBehavior: FloatingLabelBehavior.always
-            )));
+    return Theme(
+      data: Theme.of(context).copyWith(
+          hintColor: Colors.blue,
+          inputDecorationTheme: const InputDecorationTheme(
+              border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.blue)),
+              focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.red)))),
+      child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+          child: TextField(
+              onChanged: (value) {
+                widget.onSubmit(value);
+              },
+              keyboardType: widget.type,
+              inputFormatters: widget.type ==
+                      const TextInputType.numberWithOptions(decimal: false)
+                  ? <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly]
+                  : null,
+              controller: _controller,
+              style: const TextStyle(color: Colors.blue),
+              cursorColor: Colors.blue,
+              obscureText:
+                  widget.type == TextInputType.visiblePassword ? true : false,
+              enableSuggestions: true,
+              autocorrect: false,
+              decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.all(8),
+                  hintStyle: const TextStyle(color: Colors.blue),
+                  enabledBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 0.0),
+                  ),
+                  focusColor: Colors.red,
+                  border: const OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.red, width: 2.0)),
+                  filled: false,
+                  label: Text(
+                    widget.title.toString(),
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                  floatingLabelBehavior: FloatingLabelBehavior.auto))),
+    );
   }
 }

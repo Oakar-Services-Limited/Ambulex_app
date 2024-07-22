@@ -32,7 +32,7 @@ class _TextOakarState extends State<TextOakar> {
         widget.label,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.bold,
           color: textColor, // Apply the determined text color
         ),
