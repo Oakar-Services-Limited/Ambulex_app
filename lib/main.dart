@@ -1,6 +1,5 @@
 import 'package:ambulex_appv1/Pages/Home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Pages/Login.dart';
@@ -20,7 +19,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final storage = const FlutterSecureStorage();
   bool permission = false;
   dynamic isLoading;
 

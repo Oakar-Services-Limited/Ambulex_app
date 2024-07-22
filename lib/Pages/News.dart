@@ -2,7 +2,6 @@
 
 import 'package:ambulex_appv1/Components/NavigationDrawer2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -18,13 +17,7 @@ class News extends StatefulWidget {
 class _NewsState extends State<News> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
-
-  final storage = const FlutterSecureStorage();
   String name = '';
-  // String completed = "";
-  // String total = "";
-  // int appTotal = 0;
-  // String pending = "";
   String title = '';
   String type = '';
 

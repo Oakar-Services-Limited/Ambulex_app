@@ -12,7 +12,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Components/Utils.dart';
 
 class Login extends StatefulWidget {
@@ -28,7 +27,6 @@ class _LoginState extends State<Login> {
   String error = '';
   bool successful = false;
   var isLoading = null;
-  final storage = new FlutterSecureStorage();
 
   @override
   Widget build(BuildContext context) {

@@ -7,7 +7,6 @@ import 'package:ambulex_appv1/Pages/Login.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/NavigationDrawer2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
 import '../Components/Utils.dart';
@@ -24,7 +23,6 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  final storage = const FlutterSecureStorage();
   String location = '';
   bool servicestatus = false;
   bool haspermission = false;

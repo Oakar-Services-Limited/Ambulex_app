@@ -8,7 +8,6 @@ import 'package:ambulex_appv1/Pages/GettingStarted.dart';
 import 'package:ambulex_appv1/Pages/Login.dart';
 import 'package:ambulex_appv1/Pages/Register.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -27,7 +26,6 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final storage = const FlutterSecureStorage();
   String location = '';
   String phone = '';
   String id = '';
