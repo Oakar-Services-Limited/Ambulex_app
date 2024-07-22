@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:ambulex_appv1/Components/Map.dart';
 import 'package:ambulex_appv1/Components/TextOakar.dart';
 import 'package:ambulex_appv1/Pages/Login.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/NavigationDrawer2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -108,160 +108,156 @@ class _SettingsState extends State<Settings> {
   }
 
   Future<bool> getToken() async {
-    var token = await storage.read(key: "jwt");
-    var decoded = parseJwt(token.toString());
-    if (decoded["error"] == "Invalid token") {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString("jwt");
+    if (token!.isNotEmpty) {
+      var decoded = parseJwt(token.toString());
+      print(decoded);
+      if (decoded["error"] == "Invalid token") {
+        Navigator.push(
+            context, MaterialPageRoute(builder: (_) => const Login()));
+        return false;
+      } else {
+        setState(() {
+          id = decoded["UserID"];
+          email1 = decoded["Email"];
+          city1 = decoded["City"];
+          address1 = decoded["Address"];
+          landmark1 = decoded["Landmark"];
+          buildingname1 = decoded["BuildingName"];
+          houseno1 = decoded["HouseNumber"];
+          lat = double.parse(decoded["Latitude"]);
+          long = double.parse(decoded["Longitude"]);
+          location =
+              "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+        });
+        return true;
+      }
+    } else
       Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
-      return false;
-    } else {
-      setState(() {
-        id = decoded["UserID"];
-        email1 = decoded["Email"];
-        city1 = decoded["City"];
-        address1 = decoded["Address"];
-        landmark1 = decoded["Landmark"];
-        buildingname1 = decoded["BuildingName"];
-        houseno1 = decoded["HouseNumber"];
-        lat = double.parse(decoded["Latitude"]);
-        long = double.parse(decoded["Longitude"]);
-        location =
-            "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
-      });
-      return true;
-    }
+    return false;
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(
-      future: getToken(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return MaterialApp(
-              title: "Settings",
-              home: Scaffold(
-                  appBar: AppBar(title: const Text("Settings")),
-                  drawer: const Drawer(child: NavigationDrawer2()),
-                  body: Stack(children: [
-                    SingleChildScrollView(
-                        child: Column(children: <Widget>[
-                      Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                          child: SizedBox(
-                            height: 250,
-                            child: MyMap(
-                              lat: lat,
-                              lon: long,
-                            ),
-                          )),
-                      Text(location),
-                      TextOakar(label: error),
-                      MyTextInput(
-                        title: 'Email',
-                        value: email1,
-                        type: TextInputType.emailAddress,
-                        onSubmit: (value) {
-                          setState(() {
-                            email = value;
-                          });
-                        },
-                      ),
-                      MyTextInput(
-                        title: 'City',
-                        value: city1,
-                        type: TextInputType.text,
-                        onSubmit: (value) {
-                          setState(() {
-                            city = value;
-                          });
-                        },
-                      ),
-                      MyTextInput(
-                        title: 'Address',
-                        value: address1,
-                        type: TextInputType.text,
-                        onSubmit: (value) {
-                          setState(() {
-                            address = value;
-                          });
-                        },
-                      ),
-                      MyTextInput(
-                        title: 'Nearest Landmark',
-                        value: landmark1,
-                        type: TextInputType.text,
-                        onSubmit: (value) {
-                          setState(() {
-                            landmark = value;
-                          });
-                        },
-                      ),
-                      MyTextInput(
-                        title: 'Building Name',
-                        value: buildingname1,
-                        type: TextInputType.text,
-                        onSubmit: (value) {
-                          setState(() {
-                            buildingname = value;
-                          });
-                        },
-                      ),
-                      MyTextInput(
-                        title: 'House Number',
-                        value: houseno1,
-                        type: TextInputType.text,
-                        onSubmit: (value) {
-                          setState(() {
-                            houseno = value;
-                          });
-                        },
-                      ),
-                      SubmitButton(
-                        label: "Submit",
-                        onButtonPressed: () async {
-                          setState(() {
-                            isLoading =
-                                LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.blue,
-                              size: 100,
-                            );
-                          });
-                          var res = await update(
-                            id,
-                            email == '' ? email1 : email,
-                            city == '' ? city1 : city,
-                            address == '' ? address1 : address,
-                            landmark == '' ? landmark1 : landmark,
-                            buildingname == '' ? buildingname1 : buildingname,
-                            houseno == '' ? houseno1 : houseno,
-                            lat == 0.0 ? lat1 : lat,
-                            long == 0.0 ? long1 : long,
-                          );
-                          setState(() {
-                            isLoading = null;
-                            if (res.error == null) {
-                              error = res.success;
-                            } else {
-                              error = res.error;
-                            }
-                          });
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(title: const Text("Settings")),
+        drawer: const Drawer(child: NavigationDrawer2()),
+        body: Stack(children: [
+          SingleChildScrollView(
+              child: Column(children: <Widget>[
+            Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                child: SizedBox(
+                  height: 250,
+                  child: MyMap(
+                    lat: lat,
+                    lon: long,
+                  ),
+                )),
+            Text(location),
+            TextOakar(label: error),
+            MyTextInput(
+              title: 'Email',
+              value: email1,
+              type: TextInputType.emailAddress,
+              onSubmit: (value) {
+                setState(() {
+                  email = value;
+                });
+              },
+            ),
+            MyTextInput(
+              title: 'City',
+              value: city1,
+              type: TextInputType.text,
+              onSubmit: (value) {
+                setState(() {
+                  city = value;
+                });
+              },
+            ),
+            MyTextInput(
+              title: 'Address',
+              value: address1,
+              type: TextInputType.text,
+              onSubmit: (value) {
+                setState(() {
+                  address = value;
+                });
+              },
+            ),
+            MyTextInput(
+              title: 'Nearest Landmark',
+              value: landmark1,
+              type: TextInputType.text,
+              onSubmit: (value) {
+                setState(() {
+                  landmark = value;
+                });
+              },
+            ),
+            MyTextInput(
+              title: 'Building Name',
+              value: buildingname1,
+              type: TextInputType.text,
+              onSubmit: (value) {
+                setState(() {
+                  buildingname = value;
+                });
+              },
+            ),
+            MyTextInput(
+              title: 'House Number',
+              value: houseno1,
+              type: TextInputType.text,
+              onSubmit: (value) {
+                setState(() {
+                  houseno = value;
+                });
+              },
+            ),
+            SubmitButton(
+              label: "Submit",
+              onButtonPressed: () async {
+                setState(() {
+                  isLoading = LoadingAnimationWidget.staggeredDotsWave(
+                    color: Colors.blue,
+                    size: 100,
+                  );
+                });
+                var res = await update(
+                  id,
+                  email == '' ? email1 : email,
+                  city == '' ? city1 : city,
+                  address == '' ? address1 : address,
+                  landmark == '' ? landmark1 : landmark,
+                  buildingname == '' ? buildingname1 : buildingname,
+                  houseno == '' ? houseno1 : houseno,
+                  lat == 0.0 ? lat1 : lat,
+                  long == 0.0 ? long1 : long,
+                );
+                setState(() {
+                  isLoading = null;
+                  if (res.error == null) {
+                    error = res.success;
+                  } else {
+                    error = res.error;
+                  }
+                });
 
-                          if (res.error == null) {
-                            Timer(const Duration(seconds: 2), () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const Login()));
-                            });
-                          }
-                        },
-                      ),
-                    ])),
-                    Center(child: isLoading),
-                  ])));
-        } else {
-          return const CircularProgressIndicator();
-        }
-      });
+                if (res.error == null) {
+                  Timer(const Duration(seconds: 2), () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const Login()));
+                  });
+                }
+              },
+            ),
+          ])),
+          Center(child: isLoading),
+        ]));
+  }
 }
 
 Future<Message> update(

@@ -3,8 +3,7 @@ import 'package:ambulex_appv1/Pages/Home.dart';
 import 'package:ambulex_appv1/Pages/Settings.dart';
 import 'package:ambulex_appv1/main.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../Pages/News.dart';
 
 class NavigationDrawer2 extends StatelessWidget {
@@ -47,7 +46,7 @@ class NavigationDrawer2 extends StatelessWidget {
             ),
             ListTile(
               title: Text(
-                'Settings',
+                'My Profile',
                 style: style,
               ),
               onTap: () {
@@ -67,24 +66,24 @@ class NavigationDrawer2 extends StatelessWidget {
             ),
             ListTile(
               title: Text(
-                'Logout',
-                style: style,
-              ),
-              onTap: () {
-                final store = new FlutterSecureStorage();
-                store.deleteAll();
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const MyApp()));
-              },
-            ),
-            ListTile(
-              title: Text(
                 'News',
                 style: style,
               ),
               onTap: () {
                 Navigator.push(
                     context, MaterialPageRoute(builder: (_) => const News()));
+              },
+            ),
+            ListTile(
+              title: Text(
+                'Logout',
+                style: style,
+              ),
+              onTap: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                prefs.setString("jwt", "");
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const MyApp()));
               },
             ),
           ],
