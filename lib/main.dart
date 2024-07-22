@@ -2,6 +2,7 @@ import 'package:ambulex_users/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'Pages/Login.dart';
 import 'dart:async';
 import 'Components/Utils.dart';
@@ -55,26 +56,37 @@ class _MyAppState extends State<MyApp> {
   }
 
   getToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       isLoading = LoadingAnimationWidget.fallingDot(
         color: Colors.deepOrangeAccent,
         size: 100,
       );
     });
-    var token = await storage.read(key: "jwt");
-    var decoded = parseJwt(token.toString());
-    if (decoded["error"] == "Invalid token") {
-      setState(() {
-        isLoading = null;
-      });
+    String? token = prefs.getString("jwt");
+    try {
+      if (token!.isNotEmpty) {
+        var decoded = parseJwt(token.toString());
+        if (decoded["error"] == "Invalid token") {
+          setState(() {
+            isLoading = null;
+          });
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const Login()));
+        } else {
+          setState(() {
+            isLoading = null;
+          });
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => const Home()));
+        }
+      } else {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const Login()));
+      }
+    } catch (e) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
-    } else {
-      setState(() {
-        isLoading = null;
-      });
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const Home()));
     }
   }
 

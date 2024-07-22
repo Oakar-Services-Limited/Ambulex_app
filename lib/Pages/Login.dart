@@ -2,6 +2,7 @@ import 'package:ambulex_users/Components/NavigationButton.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
@@ -80,7 +81,10 @@ class _LoginState extends State<Login> {
                                   size: 100,
                                 );
                               });
+
                               var res = await login(phone, password);
+                              SharedPreferences prefs =
+                                  await SharedPreferences.getInstance();
                               setState(() {
                                 isLoading = null;
                                 if (res.error == null) {
@@ -92,10 +96,7 @@ class _LoginState extends State<Login> {
                                 }
                               });
                               if (res.error == null) {
-                                print("token is ${res.token}");
-                                print("res error: ${res.error}");
-                                await storage.write(
-                                    key: 'jwt', value: res.token);
+                                prefs.setString('jwt', res.token);
                                 Timer(const Duration(seconds: 2), () {
                                   Navigator.pushReplacement(
                                       context,
@@ -103,9 +104,6 @@ class _LoginState extends State<Login> {
                                           builder: (_) => const Home()));
                                 });
                               } else {
-                                print("token is ${res.token}");
-
-                                print("error is ${res.error}");
                               }
                             },
                           ),
@@ -142,8 +140,6 @@ Future<Message> login(String phone, String password) async {
     },
     body: jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
   );
-
-  print("password is : $password}");
 
   if (response.statusCode == 200 || response.statusCode == 203) {
     // If the server did return a 200 OK response,
