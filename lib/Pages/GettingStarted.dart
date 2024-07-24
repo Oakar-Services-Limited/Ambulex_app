@@ -2,11 +2,11 @@
 
 import 'dart:async';
 
-import 'package:ambulex_appv1/Components/Map.dart';
-import 'package:ambulex_appv1/Components/MySelectInput.dart';
-import 'package:ambulex_appv1/Components/TextLarge.dart';
-import 'package:ambulex_appv1/Components/TextOakar.dart';
-import 'package:ambulex_appv1/Pages/Login.dart';
+import 'package:ambulex/Components/Map.dart';
+import 'package:ambulex/Components/MySelectInput.dart';
+import 'package:ambulex/Components/TextLarge.dart';
+import 'package:ambulex/Components/TextOakar.dart';
+import 'package:ambulex/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/SubmitButton.dart';

@@ -1,7 +1,7 @@
-import 'package:ambulex_appv1/Pages/About.dart';
-import 'package:ambulex_appv1/Pages/Home.dart';
-import 'package:ambulex_appv1/Pages/Settings.dart';
-import 'package:ambulex_appv1/main.dart';
+import 'package:ambulex/Pages/About.dart';
+import 'package:ambulex/Pages/Home.dart';
+import 'package:ambulex/Pages/Settings.dart';
+import 'package:ambulex/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Pages/News.dart';

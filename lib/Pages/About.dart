@@ -1,5 +1,5 @@
-import 'package:ambulex_appv1/Components/NavigationDrawer2.dart';
-import 'package:ambulex_appv1/Components/TextLarge.dart';
+import 'package:ambulex/Components/NavigationDrawer2.dart';
+import 'package:ambulex/Components/TextLarge.dart';
 import 'package:flutter/material.dart';
 
 class About extends StatefulWidget {

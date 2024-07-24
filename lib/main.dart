@@ -1,4 +1,4 @@
-import 'package:ambulex_appv1/Pages/Home.dart';
+import 'package:ambulex/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
         size: 100,
       );
     });
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(const Duration(seconds: 2));
     String? token = prefs.getString("jwt");
     try {
       if (token!.isNotEmpty) {

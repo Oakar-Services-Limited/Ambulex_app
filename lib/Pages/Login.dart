@@ -1,7 +1,7 @@
-import 'package:ambulex_appv1/Components/NavigationButton.dart';
-import 'package:ambulex_appv1/Components/TextLarge.dart';
-import 'package:ambulex_appv1/Components/TextOakar.dart';
-import 'package:ambulex_appv1/Pages/Home.dart';
+import 'package:ambulex/Components/NavigationButton.dart';
+import 'package:ambulex/Components/TextLarge.dart';
+import 'package:ambulex/Components/TextOakar.dart';
+import 'package:ambulex/Pages/Home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Components/SubmitButton.dart';
