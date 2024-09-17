@@ -21,6 +21,7 @@ class MyTextInput extends StatefulWidget {
 
 class _MyTextInputState extends State<MyTextInput> {
   TextEditingController _controller = new TextEditingController();
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -62,8 +63,9 @@ class _MyTextInputState extends State<MyTextInput> {
               controller: _controller,
               style: const TextStyle(color: Colors.blue),
               cursorColor: Colors.blue,
-              obscureText:
-                  widget.type == TextInputType.visiblePassword ? true : false,
+              obscureText: widget.type == TextInputType.visiblePassword
+                  ? _obscureText
+                  : false,
               enableSuggestions: true,
               autocorrect: false,
               decoration: InputDecoration(
@@ -80,6 +82,20 @@ class _MyTextInputState extends State<MyTextInput> {
                     widget.title.toString(),
                     style: const TextStyle(color: Colors.blue),
                   ),
+                  suffixIcon: widget.type == TextInputType.visiblePassword
+                      ? IconButton(
+                          icon: Icon(
+                            _obscureText
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _obscureText = !_obscureText;
+                            });
+                          },
+                        )
+                      : null,
                   floatingLabelBehavior: FloatingLabelBehavior.auto))),
     );
   }

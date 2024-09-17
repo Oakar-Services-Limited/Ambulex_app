@@ -1,3 +1,4 @@
+import 'package:ambulex/Components/ForgotPasswordDialog.dart';
 import 'package:ambulex/Components/NavigationButton.dart';
 import 'package:ambulex/Components/TextLarge.dart';
 import 'package:ambulex/Components/TextOakar.dart';
@@ -27,6 +28,15 @@ class _LoginState extends State<Login> {
   String error = '';
   bool successful = false;
   var isLoading = null;
+
+  void resetPassword() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return const ForgotPasswordDialog();
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +114,39 @@ class _LoginState extends State<Login> {
                               } else {}
                             },
                           ),
-                          const NavigationButton(
-                              label: "Register", object: Register()),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (_) => const Register()));
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                  ),
+                                  child: const Text(
+                                    "Register",
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                              TextButton(
+                                  onPressed: () {
+                                    resetPassword();
+                                  },
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                  ),
+                                  child: const Text(
+                                    "Reset Password",
+                                    style: TextStyle(color: Colors.white),
+                                  )),
+                            ],
+                          ),
                           const TextOakar(label: "Powered by \n Oakar Services")
                         ])))))),
             Center(child: isLoading),

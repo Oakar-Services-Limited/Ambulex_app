@@ -1,29 +1,40 @@
+// ignore_for_file: file_names
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 class SubmitButton extends StatefulWidget {
   final String label;
-  final onButtonPressed;
-
-  const SubmitButton({super.key, required this.label, required this.onButtonPressed});
+  final Function() onButtonPressed;
+  const SubmitButton(
+      {super.key, required this.label, required this.onButtonPressed});
 
   @override
-  State<StatefulWidget> createState() => _SubmitButton();
+  State<SubmitButton> createState() => _SubmitButtonState();
 }
 
-class _SubmitButton extends State<SubmitButton> {
+class _SubmitButtonState extends State<SubmitButton> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(44, 12, 44, 12),
+    return DecoratedBox(
+      decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(50),
+          // boxShadow: const <BoxShadow>[
+          //   BoxShadow(
+          //       color: Color.fromRGBO(0, 0, 0, 0.57), //shadow for button
+          //       blurRadius: 10) //blur radius of shadow
+          // ]
+          ),
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.blue,
-          minimumSize: const Size.fromHeight(50), // NEW
-        ),
         onPressed: widget.onButtonPressed,
+        style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: const EdgeInsets.fromLTRB(50, 0, 50, 0)),
         child: Text(
           widget.label,
-          style: const TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
     );

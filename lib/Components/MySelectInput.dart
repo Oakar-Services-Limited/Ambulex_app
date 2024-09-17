@@ -59,10 +59,10 @@ class _MySelectInputState extends State<MySelectInput> {
     return Theme(
       data: Theme.of(context).copyWith(
           canvasColor: Colors.white,
-          hintColor: Colors.black,
+          hintColor: Colors.blue,
           inputDecorationTheme: const InputDecorationTheme(
               border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black)),
+                  borderSide: BorderSide(color: Colors.blue)),
               focusedBorder: OutlineInputBorder(
                   borderSide: BorderSide(color: Colors.yellow)))),
       child: Padding(
@@ -78,12 +78,12 @@ class _MySelectInputState extends State<MySelectInput> {
               style: const TextStyle(color: Colors.transparent),
               decoration: InputDecoration(
                   contentPadding: const EdgeInsets.all(8),
-                  hintStyle: const TextStyle(color: Colors.black),
+                  hintStyle: const TextStyle(color: Colors.blue),
                   enabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 0.0),
+                    borderSide: BorderSide(color: Colors.blue, width: 0.0),
                   ),
                   disabledBorder: const OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.black, width: 0.0),
+                    borderSide: BorderSide(color: Colors.blue, width: 0.0),
                   ),
                   focusColor: Colors.yellow,
                   border: const OutlineInputBorder(
@@ -91,7 +91,7 @@ class _MySelectInputState extends State<MySelectInput> {
                   filled: false,
                   label: Text(
                     widget.label,
-                    style: const TextStyle(color: Colors.black),
+                    style: const TextStyle(color: Colors.blue),
                   ),
                   floatingLabelBehavior: FloatingLabelBehavior.always),
             ),
@@ -102,7 +102,7 @@ class _MySelectInputState extends State<MySelectInput> {
                   alignment: Alignment.centerRight,
                   child: Icon(
                     Icons.keyboard_arrow_down,
-                    color: Colors.black,
+                    color: Colors.blue,
                   ),
                 ),
                 isExpanded: true,
@@ -120,7 +120,7 @@ class _MySelectInputState extends State<MySelectInput> {
                     value: value,
                     child: Text(
                       value,
-                      style: const TextStyle(color: Colors.black),
+                      style: const TextStyle(color: Colors.blue),
                     ),
                   );
                 }).toList(),
