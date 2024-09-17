@@ -3,6 +3,7 @@
 import 'package:ambulex/Components/MyTextInput.dart';
 import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:ambulex/Components/TextOakar.dart';
+import 'package:ambulex/Pages/Home.dart';
 import 'package:ambulex/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -74,7 +75,8 @@ class _SettingsState extends State<Settings> {
               ),
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pushReplacement(
+                      context, MaterialPageRoute(builder: (_) => const Home()));
                 },
                 child: const Icon(Icons.arrow_back),
               )
