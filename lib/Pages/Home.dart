@@ -1,8 +1,8 @@
 // ignore_for_file: use_build_context_synchronously, file_names, unused_import, avoid_init_to_null, prefer_typing_uninitialized_variables
 
-import 'package:ambulex/Components/NavigationDrawer2.dart';
+import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:ambulex/Components/Map.dart';
-import 'package:ambulex/Components/NavigationDrawer2.dart';
+import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:ambulex/Components/ReportButton.dart';
 import 'package:ambulex/Components/Utils.dart';
 import 'package:ambulex/Pages/GettingStarted.dart';
@@ -108,7 +108,7 @@ class _HomeState extends State<Home> {
         title: "Home",
         home: Scaffold(
             appBar: AppBar(title: const Text("Home")),
-            drawer: const Drawer(child: NavigationDrawer2()),
+            drawer: const Drawer(child: MyDrawer()),
             floatingActionButton: FloatingActionButton(
                 elevation: 10.0,
                 backgroundColor: Colors.blue,

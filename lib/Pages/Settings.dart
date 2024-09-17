@@ -1,19 +1,18 @@
-// ignore_for_file: use_build_context_synchronously, file_names, prefer_typing_uninitialized_variables
+// ignore_for_file: file_names, library_private_types_in_public_api, use_build_context_synchronously, prefer_typing_uninitialized_variables
 
-import 'dart:async';
-import 'package:ambulex/Components/Map.dart';
+import 'package:ambulex/Components/MyTextInput.dart';
+import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:ambulex/Components/TextOakar.dart';
 import 'package:ambulex/Pages/Login.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../Components/NavigationDrawer2.dart';
 import 'package:flutter/material.dart';
-import '../Components/SubmitButton.dart';
-import '../Components/MyTextInput.dart';
-import '../Components/Utils.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../Components/SubmitButton.dart';
+import '../Components/Utils.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -23,296 +22,301 @@ class Settings extends StatefulWidget {
 }
 
 class _SettingsState extends State<Settings> {
-  String location = '';
-  bool servicestatus = false;
-  bool haspermission = false;
-  late LocationPermission permission;
-  late Position position;
-  double long = 0.0, lat = 0.0;
-  double long1 = 0.0, lat1 = 0.0;
-  late StreamSubscription<Position> positionStream;
-  String email = '';
-  String city = '';
-  String address = '';
-  String landmark = '';
-  String buildingname = '';
-  String houseno = '';
+  Color mpurple = const Color.fromRGBO(90, 66, 92, 1);
+  String date = '';
+  final storage = const FlutterSecureStorage();
+  bool checkedin = false;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  var userDetails;
+  String oldPass = "";
+  String nePass = "";
+  String cPass = "";
   String error = '';
-  String email1 = '';
-  String city1 = '';
-  String address1 = '';
-  String landmark1 = '';
-  String buildingname1 = '';
-  String houseno1 = '';
-  String id = '';
   var isLoading;
+  bool successful = false;
 
   @override
-  void initState() {
+  initState() {
     super.initState();
-    checkGps();
     getToken();
   }
 
-  checkGps() async {
-    servicestatus = await Geolocator.isLocationServiceEnabled();
-    if (servicestatus) {
-      permission = await Geolocator.checkPermission();
-
-      if (permission == LocationPermission.denied) {
-        permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-        } else if (permission == LocationPermission.deniedForever) {
-        } else {
-          haspermission = true;
-        }
-      } else {
-        haspermission = true;
-      }
-
-      if (haspermission) {
-        getLocation();
-      }
-    } else {}
-
-    setState(() {
-      //refresh the UI
-    });
-  }
-
-  getLocation() async {
-    position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    setState(() {
-      long = position.longitude;
-      lat = position.latitude;
-      location = 'Current location Lat: $lat Lon: $long';
-    });
-
-    LocationSettings locationSettings = const LocationSettings(
-      accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 10, //minimum distance (measured in meters) a
-      //device must move horizontally before an update event is generated;
-    );
-
-    Geolocator.getPositionStream(locationSettings: locationSettings)
-        .listen((Position position) {
-      setState(() {
-        long = position.longitude;
-        lat = position.latitude;
-      });
-    });
-  }
-
-  Future<bool> getToken() async {
+  getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("jwt");
+    String? token = await prefs.getString("jwt");
     if (token!.isNotEmpty) {
       var decoded = parseJwt(token.toString());
-      print(decoded);
       if (decoded["error"] == "Invalid token") {
-        Navigator.push(
+        Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const Login()));
-        return false;
       } else {
         setState(() {
-          id = decoded["UserID"];
-          email1 = decoded["Email"];
-          city1 = decoded["City"];
-          address1 = decoded["Address"];
-          landmark1 = decoded["Landmark"];
-          buildingname1 = decoded["BuildingName"];
-          houseno1 = decoded["HouseNumber"];
-          lat = double.parse(decoded["Latitude"]);
-          long = double.parse(decoded["Longitude"]);
-          location =
-              "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+          userDetails = decoded;
         });
-        return true;
       }
-    } else
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
-    return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("Settings")),
-        drawer: const Drawer(child: NavigationDrawer2()),
-        body: Stack(children: [
-          SingleChildScrollView(
-              child: Column(children: <Widget>[
+        key: _scaffoldKey,
+        appBar: AppBar(
+          title: Row(
+            children: [
+              const Flexible(
+                flex: 1,
+                fit: FlexFit.tight,
+                child: Text(
+                  "My Account",
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Icon(Icons.arrow_back),
+              )
+            ],
+          ),
+          backgroundColor: const Color.fromRGBO(0, 96, 177, 1),
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        drawer: const MyDrawer(),
+        body: Container(
+          width: MediaQuery.of(context).size.width,
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+          decoration: const BoxDecoration(
+              //     gradient: LinearGradient(
+              //   colors: [
+              //     Color.fromRGBO(0, 96, 177, 1),
+              //     Color.fromRGBO(0, 96, 177, 1)
+              //   ],
+              //   begin: Alignment.topCenter,
+              //   end: Alignment.bottomCenter,
+              // )
+              ),
+          child: Stack(children: [
             Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                child: SizedBox(
-                  height: 250,
-                  child: MyMap(
-                    lat: lat,
-                    lon: long,
-                  ),
-                )),
-            Text(location),
-            TextOakar(label: error),
-            MyTextInput(
-              title: 'Email',
-              value: email1,
-              type: TextInputType.emailAddress,
-              onSubmit: (value) {
-                setState(() {
-                  email = value;
-                });
-              },
+              padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 10, 16, 10),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "User Details",
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Name: ${userDetails != null ? userDetails["Name"] : ""}",
+                            style: const TextStyle(
+                                color: Colors.blue, fontSize: 16),
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Phone: ${userDetails != null ? userDetails["Phone"] : ""}",
+                            style: const TextStyle(
+                                color: Colors.blue, fontSize: 16),
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Email: ${userDetails != null ? userDetails["Email"] : ""}",
+                            style: const TextStyle(
+                                color: Colors.blue, fontSize: 16),
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Building Name: ${userDetails != null ? userDetails["BuildingName"] : ""}",
+                            style: const TextStyle(
+                                color: Colors.blue, fontSize: 16),
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Address: ${userDetails != null ? userDetails["Address"] : ""}",
+                            style: const TextStyle(
+                                color: Colors.blue, fontSize: 16),
+                          )),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "City: ${userDetails != null ? userDetails["City"] : ""}",
+                            style: const TextStyle(
+                                color: Colors.blue, fontSize: 16),
+                          )),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Change Password",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
+                        ),
+                      ),
+                    ),
+                    MyTextInput(
+                      title: "Current Password",
+                      value: "",
+                      onSubmit: (v) {
+                        setState(() {
+                          oldPass = v;
+                        });
+                      },
+                      type: TextInputType.visiblePassword,
+                    ),
+                    MyTextInput(
+                      title: "New Password",
+                      value: "",
+                      onSubmit: (v) {
+                        setState(() {
+                          nePass = v;
+                        });
+                      },
+                      type: TextInputType.visiblePassword,
+                    ),
+                    MyTextInput(
+                      title: "Confirm Password",
+                      value: "",
+                      onSubmit: (v) {
+                        setState(() {
+                          cPass = v;
+                        });
+                      },
+                      type: TextInputType.visiblePassword,
+                    ),
+                    TextOakar(label: error, issuccessful: successful),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    SubmitButton(
+                      label: "Submit",
+                      onButtonPressed: () async {
+                        setState(() {
+                          isLoading = LoadingAnimationWidget.staggeredDotsWave(
+                            color: Colors.blue,
+                            size: 100,
+                          );
+                        });
+                        var res = await changePass(
+                            oldPass, nePass, cPass, userDetails["UserID"]);
+                        setState(() {
+                          isLoading = null;
+                          if (res.error == null) {
+                            successful = true;
+                            error = res.success;
+                          } else {
+                            successful = false;
+                            error = res.error;
+                          }
+                        });
+                        if (res.error == null) {
+                          await storage.write(key: 'jwt', value: "");
+                          Timer(const Duration(seconds: 1), () {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const Login()));
+                          });
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ),
-            MyTextInput(
-              title: 'City',
-              value: city1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  city = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Address',
-              value: address1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  address = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Nearest Landmark',
-              value: landmark1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  landmark = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Building Name',
-              value: buildingname1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  buildingname = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'House Number',
-              value: houseno1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  houseno = value;
-                });
-              },
-            ),
-            SubmitButton(
-              label: "Submit",
-              onButtonPressed: () async {
-                setState(() {
-                  isLoading = LoadingAnimationWidget.staggeredDotsWave(
-                    color: Colors.blue,
-                    size: 100,
-                  );
-                });
-                var res = await update(
-                  id,
-                  email == '' ? email1 : email,
-                  city == '' ? city1 : city,
-                  address == '' ? address1 : address,
-                  landmark == '' ? landmark1 : landmark,
-                  buildingname == '' ? buildingname1 : buildingname,
-                  houseno == '' ? houseno1 : houseno,
-                  lat == 0.0 ? lat1 : lat,
-                  long == 0.0 ? long1 : long,
-                );
-                setState(() {
-                  isLoading = null;
-                  if (res.error == null) {
-                    error = res.success;
-                  } else {
-                    error = res.error;
-                  }
-                });
-
-                if (res.error == null) {
-                  Timer(const Duration(seconds: 2), () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const Login()));
-                  });
-                }
-              },
-            ),
-          ])),
-          Center(child: isLoading),
-        ]));
+            Center(child: isLoading),
+          ]),
+        ));
   }
 }
 
-Future<Message> update(
-    String id,
-    String email,
-    String city,
-    String address,
-    String landmark,
-    String buildingname,
-    String houseno,
-    double lat,
-    double lon) async {
-  if (lat == 0.0 || lon == 0.0) {
+Future<Message> changePass(
+    String oldPass, String newPass, String cPass, String id) async {
+  if (oldPass.length < 5 || newPass.length < 5 || cPass.length < 5) {
     return Message(
       token: null,
       success: null,
-      error: "Location not acquired! Please turn on your location.",
+      error: "One of the Passwords is too short!",
     );
   }
-  if (id == '' ||
-      email == '' ||
-      city == '' ||
-      address == '' ||
-      landmark == '' ||
-      buildingname == '' ||
-      houseno == '') {
+  if (newPass != cPass) {
     return Message(
       token: null,
       success: null,
-      error: "All fields are required!",
+      error: "Passwords do not match!",
+    );
+  }
+  if (id == "") {
+    return Message(
+      token: null,
+      success: null,
+      error: "You are not logged in!",
     );
   }
 
-  final response = await http.put(
-    Uri.parse('${getUrl()}users/$id'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, dynamic>{
-      'Email': email,
-      'City': city,
-      'Address': address,
-      'Landmark': landmark,
-      'BuildingName': buildingname,
-      'HouseNumber': houseno,
-      'Latitude': lat,
-      'Longitude': lon
-    }),
-  );
-
-  if (response.statusCode == 200 || response.statusCode == 203) {
-    return Message.fromJson(jsonDecode(response.body));
-  } else {
+  try {
+    final response = await http.put(
+      Uri.parse("${getUrl()}users/$id"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(
+          <String, String>{'NewPassword': newPass, 'Password': oldPass}),
+    );
+    if (response.statusCode == 200 || response.statusCode == 203) {
+      return Message.fromJson(jsonDecode(response.body));
+    } else {
+      return Message(
+        token: null,
+        success: null,
+        error: "Connection to server failed!",
+      );
+    }
+  } catch (e) {
     return Message(
       token: null,
       success: null,
-      error: "Connection to server failed!",
+      error: "Server connection failed! Check your internet.",
     );
   }
 }

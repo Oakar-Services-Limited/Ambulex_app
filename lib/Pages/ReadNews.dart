@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:ambulex/Components/NavigationDrawer2.dart';
+import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import '../Components/Utils.dart';
@@ -68,7 +68,7 @@ class _ReadNewsState extends State<ReadNews> {
                 icon: Icon(Icons.arrow_back, color: Colors.white),
                 onPressed: () => Navigator.of(context).pop(),
               )),
-          drawer: const Drawer(child: NavigationDrawer2()),
+          drawer: const Drawer(child: MyDrawer()),
           body: Padding(
               padding: const EdgeInsets.fromLTRB(24, 5, 24, 0),
               child: SingleChildScrollView(

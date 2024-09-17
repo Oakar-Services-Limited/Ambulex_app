@@ -56,7 +56,7 @@ class _MyAppState extends State<MyApp> {
   getToken() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      isLoading = LoadingAnimationWidget.fallingDot(
+      isLoading = LoadingAnimationWidget.staggeredDotsWave(
         color: Colors.deepOrangeAccent,
         size: 100,
       );

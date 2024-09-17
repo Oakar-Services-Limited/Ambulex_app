@@ -1,13 +1,14 @@
 import 'package:ambulex/Pages/About.dart';
 import 'package:ambulex/Pages/Home.dart';
 import 'package:ambulex/Pages/Settings.dart';
+import 'package:ambulex/Pages/UpdateResidence.dart';
 import 'package:ambulex/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Pages/News.dart';
 
-class NavigationDrawer2 extends StatelessWidget {
-  const NavigationDrawer2({super.key});
+class MyDrawer extends StatelessWidget {
+  const MyDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -46,12 +47,12 @@ class NavigationDrawer2 extends StatelessWidget {
             ),
             ListTile(
               title: Text(
-                'My Profile',
+                'Update Residence',
                 style: style,
               ),
               onTap: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const Settings()));
+                    MaterialPageRoute(builder: (_) => const UpdateResidence()));
               },
             ),
             ListTile(
@@ -72,6 +73,16 @@ class NavigationDrawer2 extends StatelessWidget {
               onTap: () {
                 Navigator.push(
                     context, MaterialPageRoute(builder: (_) => const News()));
+              },
+            ),
+             ListTile(
+              title: Text(
+                'Settings',
+                style: style,
+              ),
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const Settings()));
               },
             ),
             ListTile(

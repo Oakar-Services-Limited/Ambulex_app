@@ -1,6 +1,6 @@
 // ignore_for_file: file_names, library_private_types_in_public_api
 
-import 'package:ambulex/Components/NavigationDrawer2.dart';
+import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
@@ -43,7 +43,7 @@ class _NewsState extends State<News> {
           // Puts appbar at the top of the page
           appBar: AppBar(title: const Text("News")),
           //Adds a navigation menu at the side
-          drawer: const Drawer(child: NavigationDrawer2()),
+          drawer: const Drawer(child: MyDrawer()),
           body: const Column(children: <Widget>[
             Align(
                 alignment: Alignment.topCenter,
