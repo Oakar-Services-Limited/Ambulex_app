@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:ambulex/Components/Map.dart';
 import 'package:ambulex/Components/TextOakar.dart';
 import 'package:ambulex/Pages/Login.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/MyDrawer.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class UpdateResidence extends StatefulWidget {
 }
 
 class _UpdateResidenceState extends State<UpdateResidence> {
+  final storage = const FlutterSecureStorage();
   String location = '';
   bool servicestatus = false;
   bool haspermission = false;
@@ -106,11 +108,10 @@ class _UpdateResidenceState extends State<UpdateResidence> {
   }
 
   Future<bool> getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("jwt");
-    if (token!.isNotEmpty) {
-      var decoded = parseJwt(token.toString());
-      print(decoded);
+    var token = await storage.read(key: "erjwt");
+    var decoded = decodeJwtToken(token.toString());
+
+    if (decoded != null) {
       if (decoded["error"] == "Invalid token") {
         Navigator.push(
             context, MaterialPageRoute(builder: (_) => const Login()));

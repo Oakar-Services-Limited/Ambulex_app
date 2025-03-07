@@ -43,18 +43,15 @@ class _SettingsState extends State<Settings> {
   }
 
   getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = await prefs.getString("jwt");
-    if (token!.isNotEmpty) {
-      var decoded = parseJwt(token.toString());
-      if (decoded["error"] == "Invalid token") {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Login()));
-      } else {
-        setState(() {
-          userDetails = decoded;
-        });
-      }
+    var token = await storage.read(key: "jwt");
+    var decoded = decodeJwtToken(token.toString());
+    if (decoded == null) {
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const Login()));
+    } else {
+      setState(() {
+        userDetails = decoded;
+      });
     }
   }
 

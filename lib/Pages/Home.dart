@@ -2,13 +2,13 @@
 
 import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:ambulex/Components/Map.dart';
-import 'package:ambulex/Components/MyDrawer.dart';
 import 'package:ambulex/Components/ReportButton.dart';
 import 'package:ambulex/Components/Utils.dart';
 import 'package:ambulex/Pages/GettingStarted.dart';
 import 'package:ambulex/Pages/Login.dart';
 import 'package:ambulex/Pages/Register.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -27,6 +27,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final storage = const FlutterSecureStorage();
+
   String location = '';
   String phone = '';
   String id = '';
@@ -42,27 +44,27 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     getLocation();
-    getToken();
+    authenticateUser();
     super.initState();
   }
 
-  getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = await prefs.getString("jwt");
-    if (token!.isNotEmpty) {
-      var decoded = parseJwt(token.toString());
-      if (decoded["error"] == "Invalid token") {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Login()));
-      } else {
+  authenticateUser() async {
+    try {
+      var token = await storage.read(key: "jwt");
+      var decoded = decodeJwtToken(token.toString());
+
+      if (decoded != null) {
         setState(() {
           phone = decoded["Phone"];
           id = decoded["UserID"]!;
           location =
               "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
         });
+      } else {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const Login()));
       }
-    }
+    } catch (e) {}
   }
 
   checkGps() async {
@@ -148,6 +150,7 @@ class _HomeState extends State<Home> {
                             );
                           });
                           var res = await report(
+                            id,
                             context,
                             phone,
                             "GBV",
@@ -184,7 +187,7 @@ class _HomeState extends State<Home> {
                             );
                           });
                           var res = await report(
-                              context, phone, "ME", long, lat, category);
+                              id, context, phone, "ME", long, lat, category);
                           setState(() {
                             isLoading = null;
                           });
@@ -209,8 +212,8 @@ Future<void> _launchUrl() async {
   }
 }
 
-Future<Message> report(var context, String phone, String type, double lon,
-    double lat, String category) async {
+Future<Message> report(String userid, var context, String phone, String type,
+    double lon, double lat, String category) async {
   if (phone == '') {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => const Login()));
@@ -235,7 +238,8 @@ Future<Message> report(var context, String phone, String type, double lon,
       'Latitude': lat,
       'Longitude': lon,
       'Status': 'Received',
-      'ER_ID': ''
+      'ER_ID': '',
+      'UserID': userid
     }),
   );
 

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "600750672728",
+    "project_id": "ambulexusers",
+    "storage_bucket": "ambulexusers.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600750672728:android:6efde8f3184c6830bc332d",
+        "android_client_info": {
+          "package_name": "ke.co.osl.ambulex_users"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAt-74-t19JBm9hmSfIIkDZqfR0fOKL3xY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

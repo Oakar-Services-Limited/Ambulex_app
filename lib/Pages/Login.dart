@@ -3,6 +3,9 @@ import 'package:ambulex/Components/NavigationButton.dart';
 import 'package:ambulex/Components/TextLarge.dart';
 import 'package:ambulex/Components/TextOakar.dart';
 import 'package:ambulex/Pages/Home.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Components/SubmitButton.dart';
@@ -23,11 +26,15 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+    String userid = '';
+
   String phone = '';
   String password = '';
   String error = '';
   bool successful = false;
   var isLoading = null;
+  final storage = const FlutterSecureStorage();
+  late FirebaseMessaging messaging;
 
   void resetPassword() {
     showDialog(
@@ -37,6 +44,32 @@ class _LoginState extends State<Login> {
       },
     );
   }
+
+  Future<void> sendTokenToBackend(String token) async {
+    var usertoken = await storage.read(key: "jwt");
+    var decoded = decodeJwtToken(usertoken.toString());
+    userid = decoded?['UserID'];
+
+    final response = await post(
+      Uri.parse("${getUrl()}fcmtoken/create"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{'FCMToken': token, 'UserID': userid}),
+    );
+
+    if (response.statusCode == 200) {
+      print('Token registered successfully');
+    } else {
+      print('Failed to register token');
+    }
+  }
+
+    @override
+  void initState() {
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -91,8 +124,7 @@ class _LoginState extends State<Login> {
                               });
 
                               var res = await login(phone, password);
-                              SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                             
                               setState(() {
                                 isLoading = null;
                                 if (res.error == null) {
@@ -104,7 +136,12 @@ class _LoginState extends State<Login> {
                                 }
                               });
                               if (res.error == null) {
-                                prefs.setString('jwt', res.token);
+                                await storage.write(
+                                    key: 'jwt', value: res.token);
+                                 messaging = FirebaseMessaging.instance;
+                                messaging.getToken().then((token) async {
+                                  await sendTokenToBackend(token!);
+                                });
                                 Timer(const Duration(seconds: 2), () {
                                   Navigator.pushReplacement(
                                       context,

@@ -1,4 +1,9 @@
+import 'dart:convert';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:http/http.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ambulex/Pages/Home.dart';
@@ -16,6 +21,10 @@ class Landing extends StatefulWidget {
 class _LandingState extends State<Landing> {
   bool permission = false;
   dynamic isLoading;
+  final storage = const FlutterSecureStorage();
+  String userid = '';
+  String name = '';
+  late FirebaseMessaging messaging;
 
   @override
   void initState() {
@@ -26,7 +35,7 @@ class _LandingState extends State<Landing> {
   Future<void> _checkLocationPermission() async {
     PermissionStatus status = await Permission.location.status;
     if (status.isGranted) {
-      getToken();
+      authenticateUser();
       setState(() {
         permission = true;
       });
@@ -40,13 +49,29 @@ class _LandingState extends State<Landing> {
   Future<void> requestLocationPermission() async {
     PermissionStatus status = await Permission.location.request();
     if (status == PermissionStatus.granted) {
-      getToken();
+      authenticateUser();
     } else {
       openAppSettings();
     }
   }
 
-  Future<void> getToken() async {
+  Future<void> sendTokenToBackend(String token, String userid) async {
+    final response = await post(
+      Uri.parse("${getUrl()}fcmtoken/create"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{'FCMToken': token, 'UserID': userid}),
+    );
+
+    if (response.statusCode == 200) {
+      print('Token registered successfully');
+    } else {
+      print('Failed to register token');
+    }
+  }
+
+  Future<void> authenticateUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       isLoading = LoadingAnimationWidget.staggeredDotsWave(
@@ -57,24 +82,28 @@ class _LandingState extends State<Landing> {
     await Future.delayed(const Duration(seconds: 2));
     String? token = prefs.getString("jwt");
     try {
-      if (token != null && token.isNotEmpty) {
-        var decoded = parseJwt(token);
-        if (decoded["error"] == "Invalid token") {
-          setState(() {
-            isLoading = null;
-          });
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const Login()));
-        } else {
-          setState(() {
-            isLoading = null;
-          });
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => const Home()));
-        }
-      } else {
+      var token = await storage.read(key: "erjwt");
+      var decoded = decodeJwtToken(token.toString());
+
+      if (decoded == null) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Login()));
+          context,
+          MaterialPageRoute(builder: (_) => const Login()),
+        );
+      } else {
+        userid = decoded['UserID'];
+        name = decoded['Name'];
+
+        await storage.write(key: "userid", value: userid);
+
+        // Get the FCM token
+        messaging = FirebaseMessaging.instance;
+        messaging.getToken().then((token) async {
+          await sendTokenToBackend(token!, userid);
+        });
+
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const Home()));
       }
     } catch (e) {
       Navigator.pushReplacement(

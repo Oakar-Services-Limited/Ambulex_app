@@ -8,6 +8,7 @@ import 'package:ambulex/Components/TextLarge.dart';
 import 'package:ambulex/Components/TextOakar.dart';
 import 'package:ambulex/Pages/Login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
@@ -25,6 +26,8 @@ class GettingStarted extends StatefulWidget {
 }
 
 class _GettingStartedState extends State<GettingStarted> {
+  final storage = const FlutterSecureStorage();
+
   String location = '';
   bool servicestatus = false;
   bool haspermission = false;
@@ -52,14 +55,16 @@ class _GettingStartedState extends State<GettingStarted> {
   }
 
   getToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString("jwt");
-    if (token!.isNotEmpty) {
-      var decoded = parseJwt(token.toString());
-      setState(() {
-        id = decoded["UserID"];
-      });
-    }
+    try {
+      var token = await storage.read(key: "jwt");
+      var decoded = decodeJwtToken(token.toString());
+
+      if (decoded != null) {
+        setState(() {
+          id = decoded["UserID"]!;
+        });
+      }
+    } catch (e) {}
   }
 
   getLocation() async {
