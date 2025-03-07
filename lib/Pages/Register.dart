@@ -1,11 +1,11 @@
 // ignore_for_file: file_names, unused_import, avoid_init_to_null, prefer_typing_uninitialized_variables, empty_catches
 
-import 'package:ambulex/Components/Map.dart';
-import 'package:ambulex/Components/MySelectInput.dart';
-import 'package:ambulex/Components/NavigationButton.dart';
-import 'package:ambulex/Components/TextLarge.dart';
-import 'package:ambulex/Components/TextOakar.dart';
-import 'package:ambulex/Pages/GettingStarted.dart';
+import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Components/MySelectInput.dart';
+import 'package:ambulex_users/Components/NavigationButton.dart';
+import 'package:ambulex_users/Components/TextLarge.dart';
+import 'package:ambulex_users/Components/TextOakar.dart';
+import 'package:ambulex_users/Pages/GettingStarted.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import '../Components/SubmitButton.dart';

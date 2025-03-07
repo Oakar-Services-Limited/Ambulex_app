@@ -1,12 +1,12 @@
 // ignore_for_file: use_build_context_synchronously, file_names, unused_import, avoid_init_to_null, prefer_typing_uninitialized_variables
 
-import 'package:ambulex/Components/MyDrawer.dart';
-import 'package:ambulex/Components/Map.dart';
-import 'package:ambulex/Components/ReportButton.dart';
-import 'package:ambulex/Components/Utils.dart';
-import 'package:ambulex/Pages/GettingStarted.dart';
-import 'package:ambulex/Pages/Login.dart';
-import 'package:ambulex/Pages/Register.dart';
+import 'package:ambulex_users/Components/MyDrawer.dart';
+import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Components/ReportButton.dart';
+import 'package:ambulex_users/Components/Utils.dart';
+import 'package:ambulex_users/Pages/GettingStarted.dart';
+import 'package:ambulex_users/Pages/Login.dart';
+import 'package:ambulex_users/Pages/Register.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';

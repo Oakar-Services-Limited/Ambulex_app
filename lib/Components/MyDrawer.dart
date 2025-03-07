@@ -1,8 +1,8 @@
-import 'package:ambulex/Pages/About.dart';
-import 'package:ambulex/Pages/Home.dart';
-import 'package:ambulex/Pages/Settings.dart';
-import 'package:ambulex/Pages/UpdateResidence.dart';
-import 'package:ambulex/main.dart';
+import 'package:ambulex_users/Pages/About.dart';
+import 'package:ambulex_users/Pages/Home.dart';
+import 'package:ambulex_users/Pages/Settings.dart';
+import 'package:ambulex_users/Pages/UpdateResidence.dart';
+import 'package:ambulex_users/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Pages/News.dart';
@@ -75,14 +75,14 @@ class MyDrawer extends StatelessWidget {
                     context, MaterialPageRoute(builder: (_) => const News()));
               },
             ),
-             ListTile(
+            ListTile(
               title: Text(
                 'Settings',
                 style: style,
               ),
               onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const Settings()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const Settings()));
               },
             ),
             ListTile(

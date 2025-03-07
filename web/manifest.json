@@ -1,6 +1,6 @@
 {
-    "name": "ambulex_appv1",
-    "short_name": "ambulex_appv1",
+    "name": "publicredesign",
+    "short_name": "publicredesign",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

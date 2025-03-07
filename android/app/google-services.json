@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "600750672728",
-    "project_id": "ambulexusers",
-    "storage_bucket": "ambulexusers.firebasestorage.app"
+    "project_number": "884436955084",
+    "project_id": "ambulexert-eb236",
+    "storage_bucket": "ambulexert-eb236.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:600750672728:android:6efde8f3184c6830bc332d",
+        "mobilesdk_app_id": "1:884436955084:android:4947c32d029c64c2beb769",
         "android_client_info": {
           "package_name": "ke.co.osl.ambulex_users"
         }
@@ -15,7 +15,32 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAt-74-t19JBm9hmSfIIkDZqfR0fOKL3xY"
+          "current_key": "AIzaSyAxXqjq6OUwBfxJtPPLF2GBkQeARFhaKx0"
+        },
+        {
+          "current_key": "AIzaSyDw7E9wR3Xy7Dya6zGF8QmzwteRE8etryY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:884436955084:android:374d74e3944f30b7beb769",
+        "android_client_info": {
+          "package_name": "ke.co.osl.ambulexert"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxXqjq6OUwBfxJtPPLF2GBkQeARFhaKx0"
+        },
+        {
+          "current_key": "AIzaSyDw7E9wR3Xy7Dya6zGF8QmzwteRE8etryY"
         }
       ],
       "services": {

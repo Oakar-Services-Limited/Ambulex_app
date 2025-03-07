@@ -1,8 +1,8 @@
-import 'package:ambulex/Components/ForgotPasswordDialog.dart';
-import 'package:ambulex/Components/NavigationButton.dart';
-import 'package:ambulex/Components/TextLarge.dart';
-import 'package:ambulex/Components/TextOakar.dart';
-import 'package:ambulex/Pages/Home.dart';
+import 'package:ambulex_users/Components/ForgotPasswordDialog.dart';
+import 'package:ambulex_users/Components/NavigationButton.dart';
+import 'package:ambulex_users/Components/TextLarge.dart';
+import 'package:ambulex_users/Components/TextOakar.dart';
+import 'package:ambulex_users/Pages/Home.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
@@ -26,7 +26,7 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-    String userid = '';
+  String userid = '';
 
   String phone = '';
   String password = '';
@@ -65,11 +65,10 @@ class _LoginState extends State<Login> {
     }
   }
 
-    @override
+  @override
   void initState() {
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +123,7 @@ class _LoginState extends State<Login> {
                               });
 
                               var res = await login(phone, password);
-                             
+
                               setState(() {
                                 isLoading = null;
                                 if (res.error == null) {
@@ -138,7 +137,7 @@ class _LoginState extends State<Login> {
                               if (res.error == null) {
                                 await storage.write(
                                     key: 'jwt', value: res.token);
-                                 messaging = FirebaseMessaging.instance;
+                                messaging = FirebaseMessaging.instance;
                                 messaging.getToken().then((token) async {
                                   await sendTokenToBackend(token!);
                                 });

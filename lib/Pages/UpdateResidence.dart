@@ -1,9 +1,9 @@
 // ignore_for_file: use_build_context_synchronously, file_names, prefer_typing_uninitialized_variables
 
 import 'dart:async';
-import 'package:ambulex/Components/Map.dart';
-import 'package:ambulex/Components/TextOakar.dart';
-import 'package:ambulex/Pages/Login.dart';
+import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Components/TextOakar.dart';
+import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/MyDrawer.dart';
