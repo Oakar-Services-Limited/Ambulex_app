@@ -3,6 +3,7 @@ import 'package:ambulex_users/Components/NavigationButton.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Home.dart';
+import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
@@ -47,7 +48,7 @@ class _LoginState extends State<Login> {
 
   Future<void> sendTokenToBackend(String token) async {
     var usertoken = await storage.read(key: "jwt");
-    var decoded = decodeJwtToken(usertoken.toString());
+    var decoded = parseJwt(usertoken.toString());
     userid = decoded?['UserID'];
 
     final response = await post(
@@ -137,6 +138,7 @@ class _LoginState extends State<Login> {
                               if (res.error == null) {
                                 await storage.write(
                                     key: 'jwt', value: res.token);
+                                print('Token stored: ${res.token}');
                                 messaging = FirebaseMessaging.instance;
                                 messaging.getToken().then((token) async {
                                   await sendTokenToBackend(token!);
@@ -145,7 +147,7 @@ class _LoginState extends State<Login> {
                                   Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (_) => const Home()));
+                                          builder: (_) => Subscribe()));
                                 });
                               } else {}
                             },

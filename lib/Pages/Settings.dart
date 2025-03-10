@@ -44,7 +44,7 @@ class _SettingsState extends State<Settings> {
 
   getToken() async {
     var token = await storage.read(key: "jwt");
-    var decoded = decodeJwtToken(token.toString());
+    var decoded = parseJwt(token.toString());
     if (decoded == null) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));

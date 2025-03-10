@@ -83,7 +83,7 @@ class _LandingState extends State<Landing> {
     String? token = prefs.getString("jwt");
     try {
       var token = await storage.read(key: "erjwt");
-      var decoded = decodeJwtToken(token.toString());
+      var decoded = parseJwt(token.toString());
 
       if (decoded == null) {
         Navigator.pushReplacement(

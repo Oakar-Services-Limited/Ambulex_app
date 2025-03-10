@@ -9,7 +9,6 @@ import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
 import '../Components/Utils.dart';
@@ -57,7 +56,7 @@ class _GettingStartedState extends State<GettingStarted> {
   getToken() async {
     try {
       var token = await storage.read(key: "jwt");
-      var decoded = decodeJwtToken(token.toString());
+      var decoded = parseJwt(token.toString());
 
       if (decoded != null) {
         setState(() {

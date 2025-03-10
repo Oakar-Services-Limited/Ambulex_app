@@ -109,7 +109,7 @@ class _UpdateResidenceState extends State<UpdateResidence> {
 
   Future<bool> getToken() async {
     var token = await storage.read(key: "erjwt");
-    var decoded = decodeJwtToken(token.toString());
+    var decoded = parseJwt(token.toString());
 
     if (decoded != null) {
       if (decoded["error"] == "Invalid token") {

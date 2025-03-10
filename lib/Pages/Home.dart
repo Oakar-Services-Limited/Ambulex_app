@@ -51,7 +51,7 @@ class _HomeState extends State<Home> {
   authenticateUser() async {
     try {
       var token = await storage.read(key: "jwt");
-      var decoded = decodeJwtToken(token.toString());
+      var decoded = parseJwt(token.toString());
 
       if (decoded != null) {
         setState(() {

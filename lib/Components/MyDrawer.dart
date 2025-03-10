@@ -1,7 +1,9 @@
 import 'package:ambulex_users/Pages/About.dart';
 import 'package:ambulex_users/Pages/Home.dart';
 import 'package:ambulex_users/Pages/Settings.dart';
+import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:ambulex_users/Pages/UpdateResidence.dart';
+import 'package:ambulex_users/Pages/subscription.dart';
 import 'package:ambulex_users/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -83,6 +85,16 @@ class MyDrawer extends StatelessWidget {
               onTap: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const Settings()));
+              },
+            ),
+              ListTile(
+              title: Text(
+                'Subscriptions',
+                style: style,
+              ),
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) =>  Subscribe()));
               },
             ),
             ListTile(
