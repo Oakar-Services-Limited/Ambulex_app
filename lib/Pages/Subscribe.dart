@@ -4,7 +4,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../Components/Utils.dart';
-import '../Components/MySelectInput.dart';
 import '../Components/MyTextInput.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -17,20 +16,12 @@ class _SubscribeState extends State<Subscribe> {
   final storage = const FlutterSecureStorage();
   Map<String, dynamic>? subscriptionInfo;
   List<dynamic>? payments;
-  String? _selectedPlanType;
   bool isLoading = false;
 
-  final List<String> planTypes = [
-    'Select Plan',
-    'Diamond',
-    'Gold',
-    'Silver',
-    'Bronze'
-  ];
   final TextEditingController _amountController = TextEditingController();
   String userid = '';
-  final TextEditingController _phoneController =
-      TextEditingController(); // For phone number
+  String phoneNumber = ''; // To store the user's phone number
+  final double subscriptionAmount = 200.0; // Constant subscription amount
 
   @override
   void initState() {
@@ -48,14 +39,16 @@ class _SubscribeState extends State<Subscribe> {
 
       var decoded = parseJwt(token.toString());
       print('Decoded token: $decoded');
-      if (!decoded.containsKey("UserID")) {
-        print('Decoded token is invalid or does not contain user ID');
+      if (!decoded.containsKey("UserID") || !decoded.containsKey("Phone")) {
+        print('Decoded token is invalid or does not contain user ID or Phone');
         _showSnackbar('Invalid token. Please log in again.');
         return;
       }
 
       setState(() {
         userid = decoded["UserID"];
+        var phone = decoded["Phone"]; // Get the user's phone number
+        phoneNumber = phone.replaceFirst('0', '254');
       });
 
       await fetchSubscriptionInfo();
@@ -125,12 +118,6 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   Future<void> createSubscription() async {
-    if (_selectedPlanType == null || _amountController.text.isEmpty) {
-      _showSnackbar('Plan type and amount cannot be empty');
-      print('Plan type and amount cannot be empty');
-      return;
-    }
-
     setState(() {
       isLoading = true;
     });
@@ -144,7 +131,7 @@ class _SubscribeState extends State<Subscribe> {
     print('Request URL: $requestUrl');
     print('Request Body: ${json.encode({
           'userId': userid,
-          'amountPaid': double.tryParse(_amountController.text),
+          'amountPaid': subscriptionAmount,
           'paymentDate': paymentDate,
           'startDate': startDate,
           'endDate': endDate,
@@ -156,7 +143,7 @@ class _SubscribeState extends State<Subscribe> {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'userId': userid,
-        'amountPaid': double.tryParse(_amountController.text),
+        'amountPaid': subscriptionAmount,
         'paymentDate': paymentDate,
         'startDate': startDate,
         'endDate': endDate,
@@ -194,48 +181,30 @@ class _SubscribeState extends State<Subscribe> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Make M-Pesa Payment'),
+          title: Text('Confirm Payment'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(labelText: 'Phone Number'),
-                  keyboardType: TextInputType.phone,
-                ),
-                TextField(
-                  controller: _amountController,
-                  decoration: InputDecoration(labelText: 'Amount'),
-                  keyboardType: TextInputType.number,
-                ),
+                Text('Phone Number: $phoneNumber'),
+                Text('Amount: \$${subscriptionAmount.toString()}'),
+                SizedBox(height: 10),
+                Text('Please ensure you have enough money in your M-Pesa.'),
               ],
             ),
           ),
           actions: [
             TextButton(
               onPressed: () async {
-                String phoneNumber = _phoneController.text;
-                String amount = _amountController.text;
-
-                if (phoneNumber.isEmpty || amount.isEmpty) {
-                  _showSnackbar('Please enter both phone number and amount');
-                  return;
-                }
-
                 // Call the payment API here
-                final paymentResponse =
-                    await initiatePayment(phoneNumber, amount);
+                final paymentResponse = await initiatePayment(
+                    phoneNumber, subscriptionAmount.toString());
                 if (paymentResponse != null) {
                   _showSnackbar('Payment initiated successfully!',
                       isSuccess: true);
-                  _phoneController.clear();
-                  _amountController.clear();
                   await fetchPayments(); // Refresh payment history after payment initiation
                 } else {
                   _showSnackbar('Failed to initiate payment');
-                  _phoneController.clear();
-                  _amountController.clear();
                 }
 
                 Navigator.of(context).pop();
@@ -257,13 +226,8 @@ class _SubscribeState extends State<Subscribe> {
   Future<Map<String, dynamic>?> initiatePayment(
       String phoneNumber, String amount) async {
     if (phoneNumber.isEmpty) {
-      _showSnackbar("Enter 12 digit phone number (254xxxxxxxxx)");
+      _showSnackbar("Enter a valid phone number");
       return null;
-    }
-
-    if (phoneNumber.length == 10 && phoneNumber.startsWith('0')) {
-      // Replace the leading '0' with '254'
-      phoneNumber = phoneNumber.replaceFirst('0', '254');
     }
 
     final requestUrl =
@@ -319,24 +283,7 @@ class _SubscribeState extends State<Subscribe> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            MySelectInput(
-              label: 'Plan Type',
-              value: _selectedPlanType ?? '',
-              list: planTypes,
-              onSubmit: (String newValue) {
-                setState(() {
-                  _selectedPlanType = newValue;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Amount',
-              value: _amountController.text,
-              type: TextInputType.number,
-              onSubmit: (value) {
-                _amountController.text = value;
-              },
-            ),
+          
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: createSubscription,
