@@ -58,7 +58,8 @@ class _SubscribeState extends State<Subscribe> {
         userid = decoded["UserID"];
       });
 
-      fetchSubscriptionInfo();
+      await fetchSubscriptionInfo();
+      await fetchPayments(); // Fetch payments on user info retrieval
     } catch (e) {
       print('Error getting user info: $e');
       _showSnackbar('Error getting user info. Please try again.');
@@ -74,7 +75,6 @@ class _SubscribeState extends State<Subscribe> {
       setState(() {
         subscriptionInfo = response['data'][0]; // Access the first subscription
       });
-      await fetchPayments();
     } else {
       setState(() {
         subscriptionInfo = {};
@@ -86,6 +86,7 @@ class _SubscribeState extends State<Subscribe> {
   Future<void> fetchPayments() async {
     final response = await getPayments();
     if (response != null) {
+      print('Payments fetched: $response'); // Log the fetched payments
       setState(() {
         payments = response;
       });
@@ -112,6 +113,9 @@ class _SubscribeState extends State<Subscribe> {
   Future<List<dynamic>?> getPayments() async {
     final response =
         await http.get(Uri.parse('${getUrl()}payments/user/$userid'));
+    print('Fetching payments for user ID: $userid'); // Log the user ID
+    print('Response status: ${response.statusCode}'); // Log the response status
+    print('Response body: ${response.body}'); // Log the response body
     if (response.statusCode == 200) {
       return json.decode(response.body)['data']; // Access the 'data' field
     } else {
@@ -167,7 +171,8 @@ class _SubscribeState extends State<Subscribe> {
     if (response.statusCode == 201) {
       _showSnackbar('Subscription created successfully!', isSuccess: true);
       print('Subscription created successfully: ${response.body}');
-      fetchSubscriptionInfo();
+      await fetchSubscriptionInfo();
+      await fetchPayments(); // Refresh payment history after creating a subscription
     } else {
       _showSnackbar('Failed to create subscription: ${response.statusCode}');
       print('Failed to create subscription: ${response.statusCode}');
@@ -198,9 +203,6 @@ class _SubscribeState extends State<Subscribe> {
                   controller: _phoneController,
                   decoration: InputDecoration(labelText: 'Phone Number'),
                   keyboardType: TextInputType.phone,
-                  onTap: () {
-                    // Optionally, you can add logic here if needed
-                  },
                 ),
                 TextField(
                   controller: _amountController,
@@ -229,6 +231,7 @@ class _SubscribeState extends State<Subscribe> {
                       isSuccess: true);
                   _phoneController.clear();
                   _amountController.clear();
+                  await fetchPayments(); // Refresh payment history after payment initiation
                 } else {
                   _showSnackbar('Failed to initiate payment');
                   _phoneController.clear();
@@ -255,17 +258,24 @@ class _SubscribeState extends State<Subscribe> {
       String phoneNumber, String amount) async {
     if (phoneNumber.isEmpty) {
       _showSnackbar("Enter 12 digit phone number (254xxxxxxxxx)");
+      return null;
     }
 
     if (phoneNumber.length == 10 && phoneNumber.startsWith('0')) {
       // Replace the leading '0' with '254'
-      setState(() {
-        phoneNumber = phoneNumber.replaceFirst('0', '254');
-      });
+      phoneNumber = phoneNumber.replaceFirst('0', '254');
     }
 
     final requestUrl =
         '${getUrl()}payments/initiate'; // Adjust the endpoint as necessary
+
+    // Log the request body
+    print('Request Body: ${json.encode({
+          'phoneNumber': phoneNumber,
+          'amount': double.tryParse(amount),
+          'userId': userid, // Ensure userid is correctly set
+        })}');
+
     final response = await http
         .post(
           Uri.parse(requestUrl),
@@ -273,12 +283,16 @@ class _SubscribeState extends State<Subscribe> {
           body: json.encode({
             'phoneNumber': phoneNumber,
             'amount': double.tryParse(amount),
+            'userId': userid, // Include userId in the request body
           }),
         )
         .timeout(const Duration(seconds: 60));
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      final responseData = json.decode(response.body);
+      print(
+          'Payment initiated with ID: ${responseData['paymentId']}'); // Log the payment ID
+      return responseData;
     } else {
       print('Failed to initiate payment: ${response.statusCode}');
       return null;
@@ -376,15 +390,38 @@ class _SubscribeState extends State<Subscribe> {
                   : ListView.builder(
                       itemCount: payments!.length,
                       itemBuilder: (context, index) {
+                        // Parse the payment date
+                        DateTime paymentDate =
+                            DateTime.parse(payments![index]['paymentDate']);
+                        String formattedDate =
+                            "${paymentDate.toLocal()}".split(' ')[0]; // Date
+                        String formattedTime = "${paymentDate.toLocal()}"
+                            .split(' ')[1]
+                            .split('.')[0]; // Time
+
                         return Card(
                           margin: EdgeInsets.symmetric(vertical: 8.0),
                           child: ListTile(
                             title: Text(
                                 'Payment Amount: \$${payments![index]['amountPaid']}',
                                 style: TextStyle(color: Colors.black)),
-                            subtitle: Text(
-                                'Date: ${payments![index]['paymentDate']}',
-                                style: TextStyle(color: Colors.grey)),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Date: $formattedDate',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                Text(
+                                  'Time: $formattedTime',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                                Text(
+                                  'M-Pesa Reference: ${payments![index]['mpesaReceiptNumber']}',
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },
