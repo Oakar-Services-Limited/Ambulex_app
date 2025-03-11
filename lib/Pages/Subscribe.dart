@@ -21,7 +21,7 @@ class _SubscribeState extends State<Subscribe> {
   final TextEditingController _amountController = TextEditingController();
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
-  final double subscriptionAmount = 200.0; // Constant subscription amount
+  final double subscriptionAmount = 1.0; // Constant subscription amount
 
   @override
   void initState() {
@@ -196,13 +196,34 @@ class _SubscribeState extends State<Subscribe> {
           actions: [
             TextButton(
               onPressed: () async {
+                // Show loading animation
+                setState(() {
+                  isLoading = true; // Set loading state to true
+                });
+
                 // Call the payment API here
                 final paymentResponse = await initiatePayment(
                     phoneNumber, subscriptionAmount.toString());
+
+                // Stop loading animation
+                setState(() {
+                  isLoading = false; // Set loading state to false
+                });
+
+                // Check if paymentResponse is not null
                 if (paymentResponse != null) {
-                  _showSnackbar('Payment initiated successfully!',
-                      isSuccess: true);
-                  await fetchPayments(); // Refresh payment history after payment initiation
+                  // Check for success
+                  if (paymentResponse['success'] == true) {
+                    // Show success message if payment is successful
+                    _showSnackbar('Payment initiated successfully!',
+                        isSuccess: true);
+                    await fetchPayments(); // Refresh payment history after payment initiation
+                  } else {
+                    // Handle failure or cancellation
+                    String message =
+                        paymentResponse['message'] ?? 'Transaction failed';
+                    _showSnackbar(message);
+                  }
                 } else {
                   _showSnackbar('Failed to initiate payment');
                 }
@@ -214,6 +235,7 @@ class _SubscribeState extends State<Subscribe> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
+                _showSnackbar('User cancelled prompt');
               },
               child: Text('Cancel'),
             ),
@@ -250,12 +272,12 @@ class _SubscribeState extends State<Subscribe> {
             'userId': userid, // Include userId in the request body
           }),
         )
-        .timeout(const Duration(seconds: 60));
+        .timeout(const Duration(seconds: 120));
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
-      print(
-          'Payment initiated with ID: ${responseData['paymentId']}'); // Log the payment ID
+      print('Payment initiated with ID: ${responseData['paymentId']}');
+      _showSnackbar('Payment initiated successfully!');
       return responseData;
     } else {
       print('Failed to initiate payment: ${response.statusCode}');
@@ -283,7 +305,6 @@ class _SubscribeState extends State<Subscribe> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: createSubscription,
