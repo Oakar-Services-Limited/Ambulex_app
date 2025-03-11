@@ -29,6 +29,8 @@ class _SubscribeState extends State<Subscribe> {
   ];
   final TextEditingController _amountController = TextEditingController();
   String userid = '';
+  final TextEditingController _phoneController =
+      TextEditingController(); // For phone number
 
   @override
   void initState() {
@@ -40,14 +42,13 @@ class _SubscribeState extends State<Subscribe> {
     try {
       var token = await storage.read(key: "jwt");
       if (token == null) {
-        print('JWT token is null');
         _showSnackbar('User not logged in. Please log in again.');
         return;
       }
 
       var decoded = parseJwt(token.toString());
       print('Decoded token: $decoded');
-      if (decoded == null || !decoded.containsKey("UserID")) {
+      if (!decoded.containsKey("UserID")) {
         print('Decoded token is invalid or does not contain user ID');
         _showSnackbar('Invalid token. Please log in again.');
         return;
@@ -56,8 +57,6 @@ class _SubscribeState extends State<Subscribe> {
       setState(() {
         userid = decoded["UserID"];
       });
-
-      print('User ID: $userid');
 
       fetchSubscriptionInfo();
     } catch (e) {
@@ -68,9 +67,12 @@ class _SubscribeState extends State<Subscribe> {
 
   Future<void> fetchSubscriptionInfo() async {
     final response = await getSubscriptionInfo();
-    if (response != null) {
+    if (response != null &&
+        response['data'] != null &&
+        response['data'].isNotEmpty) {
+      print('Subscription Info: $response');
       setState(() {
-        subscriptionInfo = response;
+        subscriptionInfo = response['data'][0]; // Access the first subscription
       });
       await fetchPayments();
     } else {
@@ -96,7 +98,9 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   Future<Map<String, dynamic>?> getSubscriptionInfo() async {
-    final response = await http.get(Uri.parse('${getUrl()}subscription'));
+    print('Subscription User ID: $userid');
+    final response =
+        await http.get(Uri.parse('${getUrl()}subscriptions/user/$userid'));
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -106,9 +110,10 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   Future<List<dynamic>?> getPayments() async {
-    final response = await http.get(Uri.parse('${getUrl()}payments'));
+    final response =
+        await http.get(Uri.parse('${getUrl()}payments/user/$userid'));
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+      return json.decode(response.body)['data']; // Access the 'data' field
     } else {
       print('Failed to load payments: ${response.statusCode}');
       return null;
@@ -160,7 +165,7 @@ class _SubscribeState extends State<Subscribe> {
     });
 
     if (response.statusCode == 201) {
-      _showSnackbar('Subscription created successfully!');
+      _showSnackbar('Subscription created successfully!', isSuccess: true);
       print('Subscription created successfully: ${response.body}');
       fetchSubscriptionInfo();
     } else {
@@ -170,12 +175,114 @@ class _SubscribeState extends State<Subscribe> {
     }
   }
 
-  void _showSnackbar(String message) {
+  void _showSnackbar(String message, {bool isSuccess = false}) {
     final snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 3),
+      backgroundColor: isSuccess ? Colors.green : Colors.red,
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void _showPaymentDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Make M-Pesa Payment'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: _phoneController,
+                  decoration: InputDecoration(labelText: 'Phone Number'),
+                  keyboardType: TextInputType.phone,
+                  onTap: () {
+                    // Optionally, you can add logic here if needed
+                  },
+                ),
+                TextField(
+                  controller: _amountController,
+                  decoration: InputDecoration(labelText: 'Amount'),
+                  keyboardType: TextInputType.number,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                String phoneNumber = _phoneController.text;
+                String amount = _amountController.text;
+
+                if (phoneNumber.isEmpty || amount.isEmpty) {
+                  _showSnackbar('Please enter both phone number and amount');
+                  return;
+                }
+
+                // Call the payment API here
+                final paymentResponse =
+                    await initiatePayment(phoneNumber, amount);
+                if (paymentResponse != null) {
+                  _showSnackbar('Payment initiated successfully!',
+                      isSuccess: true);
+                  _phoneController.clear();
+                  _amountController.clear();
+                } else {
+                  _showSnackbar('Failed to initiate payment');
+                  _phoneController.clear();
+                  _amountController.clear();
+                }
+
+                Navigator.of(context).pop();
+              },
+              child: Text('Pay'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>?> initiatePayment(
+      String phoneNumber, String amount) async {
+    if (phoneNumber.isEmpty) {
+      _showSnackbar("Enter 12 digit phone number (254xxxxxxxxx)");
+    }
+
+    if (phoneNumber.length == 10 && phoneNumber.startsWith('0')) {
+      // Replace the leading '0' with '254'
+      setState(() {
+        phoneNumber = phoneNumber.replaceFirst('0', '254');
+      });
+    }
+
+    final requestUrl =
+        '${getUrl()}payments/initiate'; // Adjust the endpoint as necessary
+    final response = await http
+        .post(
+          Uri.parse(requestUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'phoneNumber': phoneNumber,
+            'amount': double.tryParse(amount),
+          }),
+        )
+        .timeout(const Duration(seconds: 60));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print('Failed to initiate payment: ${response.statusCode}');
+      return null;
+    }
   }
 
   @override
@@ -234,11 +341,16 @@ class _SubscribeState extends State<Subscribe> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Subscription: ${subscriptionInfo?['name'] ?? 'No Subscription'}',
+                      'Subscription Status: ${subscriptionInfo?['status'] ?? 'No Subscription'}',
                       style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: Colors.blue),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Amount Paid: \$${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                      style: TextStyle(fontSize: 20, color: Colors.black54),
                     ),
                     SizedBox(height: 8),
                     Text(
@@ -268,14 +380,26 @@ class _SubscribeState extends State<Subscribe> {
                           margin: EdgeInsets.symmetric(vertical: 8.0),
                           child: ListTile(
                             title: Text(
-                                'Payment: ${payments![index]['amount']}',
+                                'Payment Amount: \$${payments![index]['amountPaid']}',
                                 style: TextStyle(color: Colors.black)),
-                            subtitle: Text('Date: ${payments![index]['date']}',
+                            subtitle: Text(
+                                'Date: ${payments![index]['paymentDate']}',
                                 style: TextStyle(color: Colors.grey)),
                           ),
                         );
                       },
                     ),
+            ),
+            SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _showPaymentDialog,
+              child: Text('Make Payment'),
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white,
+                backgroundColor: Colors.blue, // Text color
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                textStyle: TextStyle(fontSize: 18),
+              ),
             ),
           ],
         ),
