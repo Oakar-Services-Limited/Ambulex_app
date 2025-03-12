@@ -6,6 +6,7 @@ import 'dart:convert';
 import '../Components/Utils.dart';
 import '../Components/MyTextInput.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'dart:async'; // Add this import
 
 class Subscribe extends StatefulWidget {
   @override
@@ -22,11 +23,25 @@ class _SubscribeState extends State<Subscribe> {
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
   final double subscriptionAmount = 1.0; // Constant subscription amount
+  Timer? _timer; // Declare a Timer variable
 
   @override
   void initState() {
     super.initState();
     getUserInfo();
+    _startPaymentUpdateTimer(); // Start the timer
+  }
+
+  void _startPaymentUpdateTimer() {
+    _timer = Timer.periodic(Duration(seconds: 10), (timer) {
+      fetchPayments(); // Fetch payments every 30 seconds
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    super.dispose();
   }
 
   Future<void> getUserInfo() async {
@@ -198,17 +213,11 @@ class _SubscribeState extends State<Subscribe> {
               onPressed: () async {
                 _showSnackbar('Initiating payment...');
 
-                // Call the payment API here
                 final paymentResponse = await initiatePayment(
                     phoneNumber, subscriptionAmount.toString());
 
-                // Stop loading animation
-                setState(() {
-                  isLoading = false; // Set loading state to false
-                });
-
-                // Check if paymentResponse is not null
                 if (paymentResponse != null) {
+                  print('Payment Response: $paymentResponse');
                   // Check for success
                   if (paymentResponse['success'] == true) {
                     // Show success message if payment is successful
@@ -222,6 +231,8 @@ class _SubscribeState extends State<Subscribe> {
                         paymentResponse['message'] ?? 'Transaction failed';
                     _showSnackbar(message);
                   }
+
+                  await fetchPayments();
                 } else {
                   _showSnackbar('Failed to initiate payment');
                 }
@@ -241,6 +252,7 @@ class _SubscribeState extends State<Subscribe> {
         );
       },
     );
+    
   }
 
   Future<Map<String, dynamic>?> initiatePayment(
