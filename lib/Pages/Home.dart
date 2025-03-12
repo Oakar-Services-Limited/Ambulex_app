@@ -16,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 final Uri _url = Uri.parse('tel://+254702898989');
 
@@ -109,19 +110,29 @@ class _HomeState extends State<Home> {
     return MaterialApp(
         title: "Home",
         home: Scaffold(
-            appBar: AppBar(title: const Text("Home")),
+            appBar: AppBar(
+              title: Text("Home", style: GoogleFonts.lato(fontSize: 24)),
+              backgroundColor: Colors.teal,
+            ),
             drawer: const Drawer(child: MyDrawer()),
             floatingActionButton: FloatingActionButton(
                 elevation: 10.0,
-                backgroundColor: Colors.blue,
+                backgroundColor: Colors.teal,
                 onPressed: () {
                   _launchUrl();
                 },
                 child: const Icon(Icons.call)),
-            body: Stack(children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-                child: Column(
+            body: Container(
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.teal.shade100, Colors.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: Stack(children: [
+                Column(
                   children: [
                     Flexible(
                         flex: 2,
@@ -130,7 +141,7 @@ class _HomeState extends State<Home> {
                           lat: lat,
                           lon: long,
                         )),
-                    Text(location),
+                    Text(location, style: GoogleFonts.lato(fontSize: 16)),
                     const SizedBox(
                       height: 10,
                     ),
@@ -145,7 +156,7 @@ class _HomeState extends State<Home> {
                           setState(() {
                             isLoading =
                                 LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.blue,
+                              color: Colors.teal,
                               size: 100,
                             );
                           });
@@ -182,7 +193,7 @@ class _HomeState extends State<Home> {
                           setState(() {
                             isLoading =
                                 LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.blue,
+                              color: Colors.teal,
                               size: 100,
                             );
                           });
@@ -200,9 +211,9 @@ class _HomeState extends State<Home> {
                     )
                   ],
                 ),
-              ),
-              Center(child: isLoading),
-            ])));
+                Center(child: isLoading),
+              ]),
+            )));
   }
 }
 

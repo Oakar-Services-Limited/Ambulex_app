@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
@@ -77,22 +78,37 @@ class _LoginState extends State<Login> {
     return MaterialApp(
       title: "Login",
       home: Scaffold(
-          resizeToAvoidBottomInset: true,
-          body: Stack(children: <Widget>[
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.teal.shade100, Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Stack(children: <Widget>[
             Center(
-                child: Container(
-                    constraints: const BoxConstraints.tightForFinite(),
-                    child: SingleChildScrollView(
-                        child: Form(
-                            child: Center(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: <Widget>[
+              child: Container(
+                constraints: const BoxConstraints.tightForFinite(),
+                child: SingleChildScrollView(
+                  child: Form(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
                           Image.asset('assets/images/logo.png'),
-                          const TextLarge(label: "Login"),
-                          TextOakar(label: error, issuccessful: successful),
+                          Text(
+                            "Login",
+                            style: GoogleFonts.lato(
+                                fontSize: 32, fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            error,
+                            style: TextStyle(
+                                color: successful ? Colors.green : Colors.red),
+                          ),
                           MyTextInput(
                             title: 'Phone Number',
                             value: '',
@@ -113,13 +129,12 @@ class _LoginState extends State<Login> {
                               });
                             },
                           ),
-                          SubmitButton(
-                            label: "Login",
-                            onButtonPressed: () async {
+                          ElevatedButton(
+                            onPressed: () async {
                               setState(() {
                                 isLoading =
                                     LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Colors.blue,
+                                  color: Colors.teal,
                                   size: 100,
                                 );
                               });
@@ -156,44 +171,63 @@ class _LoginState extends State<Login> {
                                 });
                               } else {}
                             },
+                            child: Text(
+                              "Login",
+                              style: GoogleFonts.lato(fontSize: 18),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 30, vertical: 15),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30)),
+                            ),
                           ),
-                          const SizedBox(
-                            height: 16,
-                          ),
+                          const SizedBox(height: 16),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) => const Register()));
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                  ),
-                                  child: const Text(
-                                    "Register",
-                                    style: TextStyle(color: Colors.white),
-                                  )),
+                                onPressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (_) => const Register()));
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.teal,
+                                ),
+                                child: const Text(
+                                  "Register",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                               TextButton(
-                                  onPressed: () {
-                                    resetPassword();
-                                  },
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: Colors.blue,
-                                  ),
-                                  child: const Text(
-                                    "Reset Password",
-                                    style: TextStyle(color: Colors.white),
-                                  )),
+                                onPressed: () {
+                                  resetPassword();
+                                },
+                                style: TextButton.styleFrom(
+                                  backgroundColor: Colors.teal,
+                                ),
+                                child: const Text(
+                                  "Reset Password",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ),
                             ],
                           ),
                           const TextOakar(label: "Powered by \n Oakar Services")
-                        ])))))),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
             Center(child: isLoading),
-          ])),
+          ]),
+        ),
+      ),
     );
   }
 }

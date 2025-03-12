@@ -3,7 +3,6 @@ import 'package:ambulex_users/Pages/Home.dart';
 import 'package:ambulex_users/Pages/Settings.dart';
 import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:ambulex_users/Pages/UpdateResidence.dart';
-import 'package:ambulex_users/Pages/subscription.dart';
 import 'package:ambulex_users/main.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';

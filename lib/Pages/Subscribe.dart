@@ -1,4 +1,4 @@
-import 'package:ambulex_users/Pages/subscription.dart';
+import 'package:ambulex_users/Pages/Home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -7,6 +7,7 @@ import '../Components/Utils.dart';
 import '../Components/MyTextInput.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'dart:async'; // Add this import
+import 'package:google_fonts/google_fonts.dart'; // Add Google Fonts for better typography
 
 class Subscribe extends StatefulWidget {
   @override
@@ -252,7 +253,6 @@ class _SubscribeState extends State<Subscribe> {
         );
       },
     );
-    
   }
 
   Future<Map<String, dynamic>?> initiatePayment(
@@ -299,72 +299,90 @@ class _SubscribeState extends State<Subscribe> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Subscribe'),
-        backgroundColor: Colors.blue,
+        title: Text('Subscribe', style: GoogleFonts.lato(fontSize: 24)),
+        backgroundColor: Colors.teal,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
             Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => Subscriptions()));
+                context, MaterialPageRoute(builder: (_) => Home()));
           },
         ),
       ),
       body: Container(
-        padding: EdgeInsets.all(16.0),
-        color: Colors.white,
+        padding: EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade100, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 16),
+            SizedBox(height: 20),
+            Text('Welcome to Subscription',
+                style: GoogleFonts.lato(
+                    fontSize: 28, fontWeight: FontWeight.bold)),
+            SizedBox(height: 10),
+            Text('Manage your subscriptions easily and efficiently.',
+                style: GoogleFonts.lato(fontSize: 16)),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: createSubscription,
-              child: Text('Subscribe'),
-            ),
-            SizedBox(height: 16),
-            if (isLoading)
-              Center(
-                child: loadingAnimationWidget(),
+              child:
+                  Text('Subscribe Now', style: GoogleFonts.lato(fontSize: 18)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.teal,
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
               ),
+            ),
+            SizedBox(height: 20),
+            if (isLoading) Center(child: loadingAnimationWidget()),
             Card(
-              elevation: 4,
+              elevation: 8,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Subscription Status: ${subscriptionInfo?['status'] ?? 'No Subscription'}',
-                      style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue),
-                    ),
-                    SizedBox(height: 8),
+                        'Subscription Status: ${subscriptionInfo?['status'] ?? 'No Subscription'}',
+                        style: GoogleFonts.lato(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal)),
+                    SizedBox(height: 10),
                     Text(
-                      'Amount Paid: \$${subscriptionInfo?['amountPaid'] ?? '0.00'}',
-                      style: TextStyle(fontSize: 20, color: Colors.black54),
-                    ),
-                    SizedBox(height: 8),
+                        'Amount Paid: \$${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                        style: GoogleFonts.lato(
+                            fontSize: 20, color: Colors.black54)),
+                    SizedBox(height: 10),
                     Text(
-                      'Current Balance: \$${subscriptionInfo?['balance'] ?? '0.00'}',
-                      style: TextStyle(fontSize: 20, color: Colors.black54),
-                    ),
+                        'Current Balance: \$${subscriptionInfo?['balance'] ?? '0.00'}',
+                        style: GoogleFonts.lato(
+                            fontSize: 20, color: Colors.black54)),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 20),
             Text('Payments:',
-                style: TextStyle(
-                    fontSize: 20,
+                style: GoogleFonts.lato(
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue)),
+                    color: Colors.teal)),
             Expanded(
               child: payments == null || payments!.isEmpty
                   ? Center(
                       child: Text('No payments found',
-                          style:
-                              TextStyle(color: Colors.black54, fontSize: 18)))
+                          style: GoogleFonts.lato(
+                              color: Colors.black54, fontSize: 18)))
                   : ListView.builder(
                       itemCount: payments!.length,
                       itemBuilder: (context, index) {
@@ -379,25 +397,22 @@ class _SubscribeState extends State<Subscribe> {
 
                         return Card(
                           margin: EdgeInsets.symmetric(vertical: 8.0),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
                           child: ListTile(
                             title: Text(
                                 'Payment Amount: \$${payments![index]['amountPaid']}',
-                                style: TextStyle(color: Colors.black)),
+                                style: GoogleFonts.lato(color: Colors.black)),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                Text('Date: $formattedDate',
+                                    style: TextStyle(color: Colors.grey)),
+                                Text('Time: $formattedTime',
+                                    style: TextStyle(color: Colors.grey)),
                                 Text(
-                                  'Date: $formattedDate',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                Text(
-                                  'Time: $formattedTime',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                Text(
-                                  'M-Pesa Reference: ${payments![index]['mpesaReceiptNumber']}',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
+                                    'M-Pesa Reference: ${payments![index]['mpesaReceiptNumber']}',
+                                    style: TextStyle(color: Colors.grey)),
                               ],
                             ),
                           ),
@@ -405,15 +420,16 @@ class _SubscribeState extends State<Subscribe> {
                       },
                     ),
             ),
-            SizedBox(height: 16),
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: _showPaymentDialog,
-              child: Text('Make Payment'),
+              child:
+                  Text('Make Payment', style: GoogleFonts.lato(fontSize: 18)),
               style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                backgroundColor: Colors.blue, // Text color
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                textStyle: TextStyle(fontSize: 18),
+                backgroundColor: Colors.teal,
+                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
               ),
             ),
           ],
