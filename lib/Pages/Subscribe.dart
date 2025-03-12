@@ -48,7 +48,7 @@ class _SubscribeState extends State<Subscribe> {
       setState(() {
         userid = decoded["UserID"];
         var phone = decoded["Phone"]; // Get the user's phone number
-        phoneNumber = phone.replaceFirst('0', '254');
+        phoneNumber = phone;
       });
 
       await fetchSubscriptionInfo();

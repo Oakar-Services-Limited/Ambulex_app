@@ -36,6 +36,7 @@ class _LoginState extends State<Login> {
   var isLoading = null;
   final storage = const FlutterSecureStorage();
   late FirebaseMessaging messaging;
+  final TextEditingController _phoneController = TextEditingController();
 
   void resetPassword() {
     showDialog(
@@ -123,7 +124,11 @@ class _LoginState extends State<Login> {
                                 );
                               });
 
-                              var res = await login(phone, password);
+                              String formattedPhone = phone.startsWith("0")
+                                  ? "254${phone.substring(1)}"
+                                  : phone;
+
+                              var res = await login(formattedPhone, password);
 
                               setState(() {
                                 isLoading = null;
@@ -194,13 +199,15 @@ class _LoginState extends State<Login> {
 }
 
 Future<Message> login(String phone, String password) async {
-  if (phone.length != 10) {
-    return Message(
-      token: null,
-      success: null,
-      error: "Invalid phone number!",
-    );
-  }
+  // if (phone.length != 10) {
+  //   return Message(
+  //     token: null,
+  //     success: null,
+  //     error: "Invalid phone number!",
+  //   );
+  // }
+
+  print("Phone: $phone");
   if (password.length < 5) {
     return Message(
       token: null,
