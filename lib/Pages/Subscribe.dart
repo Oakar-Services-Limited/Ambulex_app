@@ -196,10 +196,7 @@ class _SubscribeState extends State<Subscribe> {
           actions: [
             TextButton(
               onPressed: () async {
-                // Show loading animation
-                setState(() {
-                  isLoading = true; // Set loading state to true
-                });
+                _showSnackbar('Initiating payment...');
 
                 // Call the payment API here
                 final paymentResponse = await initiatePayment(
@@ -215,7 +212,8 @@ class _SubscribeState extends State<Subscribe> {
                   // Check for success
                   if (paymentResponse['success'] == true) {
                     // Show success message if payment is successful
-                    _showSnackbar('Payment initiated successfully!',
+                    _showSnackbar(
+                        'Payment initiated successfully! Receipt: ${paymentResponse['mpesaReceiptNumber']}',
                         isSuccess: true);
                     await fetchPayments(); // Refresh payment history after payment initiation
                   } else {
