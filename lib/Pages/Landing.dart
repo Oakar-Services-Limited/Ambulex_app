@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -102,12 +103,43 @@ class _LandingState extends State<Landing> {
           await sendTokenToBackend(token!, userid);
         });
 
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Home()));
+        checkSubscriptionStatus(userid);
+
+        // Navigator.pushReplacement(
+        //     context, MaterialPageRoute(builder: (_) => const Home()));
       }
     } catch (e) {
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
+    }
+  }
+
+  Future<void> checkSubscriptionStatus(String userid) async {
+    final response = await get(
+      Uri.parse('${getUrl()}payments/user/$userid'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    print("Response status code: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      print("Response data here: $data");
+      if (data['data'] != null && data['data'].isNotEmpty) {
+        print("User is subscribed.");
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Home()));
+      } else {
+        print("User is not subscribed.");
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Subscribe()));
+      }
+    } else {
+      print('Failed to check subscription status: ${response.statusCode}');
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => Subscribe()));
     }
   }
 

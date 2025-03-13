@@ -306,13 +306,6 @@ class _SubscribeState extends State<Subscribe> {
           ),
         ),
         backgroundColor: Colors.blue,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => Home()));
-          },
-        ),
       ),
       body: Container(
         padding: EdgeInsets.all(20.0),
@@ -428,14 +421,14 @@ class _SubscribeState extends State<Subscribe> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _showPaymentDialog,
-              child: Text('Make Payment',
-                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),
               ),
+              child: Text('Make Payment',
+                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
             ),
           ],
         ),
