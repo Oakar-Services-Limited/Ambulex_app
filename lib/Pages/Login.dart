@@ -242,7 +242,7 @@ class _LoginState extends State<Login> {
 
     print("Checking subscription status for user ID: $userid");
     final response = await http.get(
-      Uri.parse('${getUrl()}subscriptions/user/$userid'),
+      Uri.parse('${getUrl()}payments/user/$userid'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },

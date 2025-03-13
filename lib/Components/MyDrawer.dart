@@ -13,16 +13,13 @@ class MyDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle style = const TextStyle(
-        color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
-
     return Container(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Colors.blue,
+            Colors.blue, // Match the Subscribe page theme
             Colors.blueAccent,
           ],
         ),
@@ -36,7 +33,7 @@ class MyDrawer extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/logo.png', height: 80),
+                  Image.asset('assets/images/logo.png', height: 80), // Adjust height as needed
                   const SizedBox(height: 10),
                   Text(
                     'Welcome!',
@@ -53,6 +50,7 @@ class MyDrawer extends StatelessWidget {
           _createDrawerItem(
             context,
             title: 'Home',
+            icon: Icons.home,
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const Home()));
@@ -61,6 +59,7 @@ class MyDrawer extends StatelessWidget {
           _createDrawerItem(
             context,
             title: 'Update Residence',
+            icon: Icons.house,
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const UpdateResidence()));
@@ -69,6 +68,7 @@ class MyDrawer extends StatelessWidget {
           _createDrawerItem(
             context,
             title: 'About',
+            icon: Icons.info,
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const About()));
@@ -77,6 +77,7 @@ class MyDrawer extends StatelessWidget {
           _createDrawerItem(
             context,
             title: 'News',
+            icon: Icons.article,
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const News()));
@@ -85,6 +86,7 @@ class MyDrawer extends StatelessWidget {
           _createDrawerItem(
             context,
             title: 'Settings',
+            icon: Icons.settings,
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const Settings()));
@@ -93,14 +95,16 @@ class MyDrawer extends StatelessWidget {
           _createDrawerItem(
             context,
             title: 'Subscriptions',
+            icon: Icons.subscriptions,
             onTap: () {
               Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => Subscribe()));
+                  context, MaterialPageRoute(builder: (_) =>  Subscribe()));
             },
           ),
           _createDrawerItem(
             context,
             title: 'Logout',
+            icon: Icons.logout,
             onTap: () async {
               SharedPreferences prefs = await SharedPreferences.getInstance();
               prefs.setString("jwt", "");
@@ -114,8 +118,9 @@ class MyDrawer extends StatelessWidget {
   }
 
   Widget _createDrawerItem(BuildContext context,
-      {required String title, required VoidCallback onTap}) {
+      {required String title, required IconData icon, required VoidCallback onTap}) {
     return ListTile(
+      leading: Icon(icon, color: Colors.white), // Add icon to the list item
       title: Text(
         title,
         style: const TextStyle(
@@ -129,9 +134,9 @@ class MyDrawer extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
-      tileColor: Colors.blue.shade300,
-      hoverColor: Colors.blue.shade400,
-      selectedColor: Colors.blue.shade500,
+      tileColor: Colors.blue.shade300, // Match the Subscribe page theme
+      hoverColor: Colors.blue.shade400, // Match the Subscribe page theme
+      selectedColor: Colors.blue.shade500, // Match the Subscribe page theme
     );
   }
 }

@@ -178,7 +178,9 @@ class _HomeState extends State<Home> {
                           });
 
                           if (res.error == null) {
-                            dialog(context, "Gender Based Violence", id);
+                            _showSuccessDialog("Gender Based Violence");
+                          } else {
+                            _showSnackbar(res.error);
                           }
                         },
                       ),
@@ -208,7 +210,9 @@ class _HomeState extends State<Home> {
                           });
 
                           if (res.error == null) {
-                            dialog(context, "Medical Emergency", id);
+                            _showSuccessDialog("Medical Emergency");
+                          } else {
+                            _showSnackbar(res.error);
                           }
                         },
                       ),
@@ -218,6 +222,31 @@ class _HomeState extends State<Home> {
                 Center(child: isLoading),
               ]),
             )));
+  }
+
+  void _showSuccessDialog(String type) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) => AlertDialog(
+        title: Text(type),
+        content: const Text('Call for help received. Help is on the way!!'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSnackbar(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+      duration: Duration(seconds: 3),
+      backgroundColor: Colors.red,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
 
@@ -229,6 +258,12 @@ Future<void> _launchUrl() async {
 
 Future<Message> report(String userid, var context, String phone, String type,
     double lon, double lat, String category) async {
+  print("Phone: $phone");
+  print("Type: $type");
+  print("Lon: $lon");
+  print("Lat: $lat");
+  print("Category: $category");
+  print("Userid: $userid");
   if (phone == '') {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => const Login()));
@@ -253,12 +288,12 @@ Future<Message> report(String userid, var context, String phone, String type,
       'Latitude': lat,
       'Longitude': lon,
       'Status': 'Received',
-      'ER_ID': '',
       'UserID': userid
     }),
   );
 
   if (response.statusCode == 200 || response.statusCode == 203) {
+    print("Response body emer: ${response.body}");
     // If the server did return a 200 OK response,
     // then parse the JSON.
     return Message.fromJson(jsonDecode(response.body));
@@ -317,22 +352,4 @@ Future<Position> determinePosition() async {
         'Location permissions are permanently denied, we cannot request permissions.');
   }
   return await Geolocator.getCurrentPosition();
-}
-
-Future<dynamic> dialog(dynamic context, String type, String userid) {
-  return showDialog<String>(
-      context: context,
-      builder: (BuildContext context) => AlertDialog(
-            title: Text(type),
-            content: const Text(
-                'Your report was submitted successfully. Please be patient our emergency response team has been notified.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () => {
-                  Navigator.pop(context),
-                },
-                child: const Text('OK'),
-              ),
-            ],
-          ));
 }
