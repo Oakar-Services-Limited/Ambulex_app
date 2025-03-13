@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import '../Scroll/NewsScrollController.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class News extends StatefulWidget {
   const News({super.key});
@@ -31,44 +32,51 @@ class _NewsState extends State<News> {
 
   @override
   void initState() {
-    // flutterLocalNotificationsPlugin.cancelAll();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        title: "News",
-        home: Scaffold(
-          // Puts appbar at the top of the page
-          appBar: AppBar(title: const Text("News")),
-          //Adds a navigation menu at the side
-          drawer: const Drawer(child: MyDrawer()),
-          body: const Column(children: <Widget>[
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("News"),
+        backgroundColor: Colors.blue,
+      ),
+      drawer: const Drawer(child: MyDrawer()),
+      body: Container(
+        padding: EdgeInsets.all(20.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade100, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
             Align(
-                alignment: Alignment.topCenter,
-                child: Padding(
-                    padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
-                    child: Text(
-                      "News List",
-                      style: TextStyle(
-                          fontSize: 24,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold),
-                    ))),
-            // Creates a scrollable list of client calls below
-            Flexible(
-                flex: 1,
-                fit: FlexFit.tight,
-                child: InfiniteNewsScrollPaginatorDemo()),
-            SizedBox(
-              height: 12,
-            )
-          ]),
-        ));
+              alignment: Alignment.topCenter,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(24, 24, 24, 0),
+                child: Text(
+                  "News List",
+                  style: GoogleFonts.lato(
+                    fontSize: 24,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: InfiniteNewsScrollPaginatorDemo(),
+            ),
+            SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
   }
 }
-
-
-
-//comment

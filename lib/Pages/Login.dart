@@ -151,21 +151,20 @@ class _LoginState extends State<Login> {
                                   successful = true;
                                   error = res.success;
 
+                                  // Store the token and check subscription status
+                                  storage.write(key: 'jwt', value: res.token);
+                                  print('Token stored: ${res.token}');
+                                  messaging = FirebaseMessaging.instance;
+                                  messaging.getToken().then((token) async {
+                                    await sendTokenToBackend(token!);
+                                  });
+
                                   checkSubscriptionStatus();
                                 } else {
                                   successful = false;
                                   error = res.error;
                                 }
                               });
-                              if (res.error == null) {
-                                await storage.write(
-                                    key: 'jwt', value: res.token);
-                                print('Token stored: ${res.token}');
-                                messaging = FirebaseMessaging.instance;
-                                messaging.getToken().then((token) async {
-                                  await sendTokenToBackend(token!);
-                                });
-                              } else {}
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,

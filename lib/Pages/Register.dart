@@ -77,212 +77,207 @@ class _RegisterState extends State<Register> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Register",
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Register",
-            style: GoogleFonts.lato(fontSize: 24),
-          ),
-          backgroundColor: Colors.blue,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => Login()));
-            },
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Register",
+          style: GoogleFonts.lato(fontSize: 24),
+        ),
+        backgroundColor: Colors.blue,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Login()));
+          },
+        ),
+      ),
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade100, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-        resizeToAvoidBottomInset: true,
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade100, Colors.white],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Stack(children: <Widget>[
-            Center(
-                child: Container(
-                    constraints: const BoxConstraints.tightForFinite(),
-                    child: SingleChildScrollView(
-                        child: Form(
-                            child: Center(
-                                child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: <Widget>[
-                          Padding(
-                              padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                              child: SizedBox(
-                                height: 250,
-                                child: MyMap(
-                                  lat: lat,
-                                  lon: long,
-                                ),
-                              )),
-                          MyTextInput(
-                            title: 'Full Name',
-                            value: '',
-                            type: TextInputType.text,
+        child: Stack(children: <Widget>[
+          Center(
+              child: Container(
+                  constraints: const BoxConstraints.tightForFinite(),
+                  child: SingleChildScrollView(
+                      child: Form(
+                          child: Center(
+                              child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: <Widget>[
+                        Padding(
+                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
+                            child: SizedBox(
+                              height: 250,
+                              child: MyMap(
+                                lat: lat,
+                                lon: long,
+                              ),
+                            )),
+                        MyTextInput(
+                          title: 'Full Name',
+                          value: '',
+                          type: TextInputType.text,
+                          onSubmit: (value) {
+                            setState(() {
+                              name = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'Phone Number',
+                          value: '',
+                          type: TextInputType.phone,
+                          onSubmit: (value) {
+                            setState(() {
+                              phone = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'Email',
+                          value: '',
+                          type: TextInputType.emailAddress,
+                          onSubmit: (value) {
+                            setState(() {
+                              email = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'Password',
+                          value: '',
+                          type: TextInputType.visiblePassword,
+                          onSubmit: (value) {
+                            setState(() {
+                              password = value;
+                            });
+                          },
+                        ),
+                        MySelectInput(
+                            label: 'Gender',
                             onSubmit: (value) {
                               setState(() {
-                                name = value;
+                                gender = value;
                               });
                             },
-                          ),
-                          MyTextInput(
-                            title: 'Phone Number',
-                            value: '',
-                            type: TextInputType.phone,
-                            onSubmit: (value) {
-                              setState(() {
-                                phone = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'Email',
-                            value: '',
-                            type: TextInputType.emailAddress,
-                            onSubmit: (value) {
-                              setState(() {
-                                email = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'Password',
-                            value: '',
-                            type: TextInputType.visiblePassword,
-                            onSubmit: (value) {
-                              setState(() {
-                                password = value;
-                              });
-                            },
-                          ),
-                          MySelectInput(
-                              label: 'Gender',
-                              onSubmit: (value) {
-                                setState(() {
-                                  gender = value;
-                                });
-                              },
-                              list: const ['Male', 'Female'],
-                              value: gender),
-                          MyTextInput(
-                            title: 'City',
-                            value: '',
-                            type: TextInputType.text,
-                            onSubmit: (value) {
-                              setState(() {
-                                city = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'Address',
-                            value: '',
-                            type: TextInputType.text,
-                            onSubmit: (value) {
-                              setState(() {
-                                address = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'Nearest Landmark',
-                            value: '',
-                            type: TextInputType.text,
-                            onSubmit: (value) {
-                              setState(() {
-                                landmark = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'Building Name',
-                            value: '',
-                            type: TextInputType.text,
-                            onSubmit: (value) {
-                              setState(() {
-                                buildingname = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'House Number',
-                            value: '',
-                            type: TextInputType.text,
-                            onSubmit: (value) {
-                              setState(() {
-                                houseno = value;
-                              });
-                            },
-                          ),
-                          TextOakar(label: error, issuccessful: successful),
-                          SubmitButton(
-                            label: "Submit",
-                            onButtonPressed: () async {
-                              setState(() {
-                                isLoading =
-                                    LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Colors.blue,
-                                  size: 100,
-                                );
-                              });
+                            list: const ['Male', 'Female'],
+                            value: gender),
+                        MyTextInput(
+                          title: 'City',
+                          value: '',
+                          type: TextInputType.text,
+                          onSubmit: (value) {
+                            setState(() {
+                              city = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'Address',
+                          value: '',
+                          type: TextInputType.text,
+                          onSubmit: (value) {
+                            setState(() {
+                              address = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'Nearest Landmark',
+                          value: '',
+                          type: TextInputType.text,
+                          onSubmit: (value) {
+                            setState(() {
+                              landmark = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'Building Name',
+                          value: '',
+                          type: TextInputType.text,
+                          onSubmit: (value) {
+                            setState(() {
+                              buildingname = value;
+                            });
+                          },
+                        ),
+                        MyTextInput(
+                          title: 'House Number',
+                          value: '',
+                          type: TextInputType.text,
+                          onSubmit: (value) {
+                            setState(() {
+                              houseno = value;
+                            });
+                          },
+                        ),
+                        TextOakar(label: error, issuccessful: successful),
+                        SubmitButton(
+                          label: "Submit",
+                          onButtonPressed: () async {
+                            setState(() {
+                              isLoading =
+                                  LoadingAnimationWidget.staggeredDotsWave(
+                                color: Colors.blue,
+                                size: 100,
+                              );
+                            });
 
-                              String formattedPhone = phone.startsWith("0")
-                                  ? "254${phone.substring(1)}"
-                                  : phone;
+                            String formattedPhone = phone.startsWith("0")
+                                ? "254${phone.substring(1)}"
+                                : phone;
 
-                              var res = await register(
-                                  name,
-                                  formattedPhone,
-                                  email,
-                                  password,
-                                  gender,
-                                  city,
-                                  address,
-                                  landmark,
-                                  buildingname,
-                                  houseno,
-                                  lat,
-                                  long);
-                              setState(() {
-                                isLoading = null;
-                                if (res.error == null) {
-                                  successful = true;
-
-                                  error = res.success;
-                                } else {
-                                  successful = true;
-
-                                  error = res.error;
-                                }
-                              });
-
+                            var res = await register(
+                                name,
+                                formattedPhone,
+                                email,
+                                password,
+                                gender,
+                                city,
+                                address,
+                                landmark,
+                                buildingname,
+                                houseno,
+                                lat,
+                                long);
+                            setState(() {
+                              isLoading = null;
                               if (res.error == null) {
-                                Timer(const Duration(seconds: 2), () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => const Login()));
-                                });
+                                successful = true;
+
+                                error = res.success;
+                              } else {
+                                successful = true;
+
+                                error = res.error;
                               }
-                            },
-                          ),
-                          const NavigationButton(
-                              label: "Login", object: Login()),
-                          const TextOakar(
-                              label: "Powered by \n Oakar Services Ltd.")
-                        ])))))),
-            Center(child: isLoading),
-          ]),
-        ),
+                            });
+
+                            if (res.error == null) {
+                              Timer(const Duration(seconds: 2), () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (_) => const Login()));
+                              });
+                            }
+                          },
+                        ),
+                        const NavigationButton(label: "Login", object: Login()),
+                        const TextOakar(
+                            label: "Powered by \n Oakar Services Ltd.")
+                      ])))))),
+          Center(child: isLoading),
+        ]),
       ),
     );
   }

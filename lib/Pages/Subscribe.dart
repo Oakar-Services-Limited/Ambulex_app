@@ -364,7 +364,7 @@ class _SubscribeState extends State<Subscribe> {
                             color: Colors.blue)),
                     SizedBox(height: 10),
                     Text(
-                        'Amount Paid: Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                        'Subscription Amount: Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
                         style: GoogleFonts.lato(
                             fontSize: 20, color: Colors.black54)),
                     SizedBox(height: 10),
@@ -406,7 +406,7 @@ class _SubscribeState extends State<Subscribe> {
                               borderRadius: BorderRadius.circular(10)),
                           child: ListTile(
                             title: Text(
-                                'Payment Amount: \$${payments![index]['amountPaid']}',
+                                'Payment Amount: Ksh${payments![index]['amountPaid']}',
                                 style: GoogleFonts.lato(color: Colors.black)),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

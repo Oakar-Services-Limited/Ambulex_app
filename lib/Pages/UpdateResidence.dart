@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'package:ambulex_users/Components/Map.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
+import 'package:ambulex_users/Pages/Home.dart';
 import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,6 +16,7 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class UpdateResidence extends StatefulWidget {
   const UpdateResidence({super.key});
@@ -108,7 +110,7 @@ class _UpdateResidenceState extends State<UpdateResidence> {
   }
 
   Future<bool> getToken() async {
-    var token = await storage.read(key: "erjwt");
+    var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
 
     if (decoded != null) {
@@ -140,7 +142,13 @@ class _UpdateResidenceState extends State<UpdateResidence> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text("Settings")),
+        appBar: AppBar(
+          title: Text(
+            "Settings",
+            style: GoogleFonts.lato(fontSize: 24),
+          ),
+          backgroundColor: Colors.blue,
+        ),
         drawer: const Drawer(child: MyDrawer()),
         body: Stack(children: [
           SingleChildScrollView(
@@ -248,11 +256,14 @@ class _UpdateResidenceState extends State<UpdateResidence> {
                 if (res.error == null) {
                   Timer(const Duration(seconds: 2), () {
                     Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const Login()));
+                        MaterialPageRoute(builder: (_) => const Home()));
                   });
                 }
               },
             ),
+            const SizedBox(
+              height: 12,
+            )
           ])),
           Center(child: isLoading),
         ]));

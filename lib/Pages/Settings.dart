@@ -14,6 +14,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/SubmitButton.dart';
 import '../Components/Utils.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Settings extends StatefulWidget {
   const Settings({super.key});
@@ -58,214 +59,212 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        key: _scaffoldKey,
-        appBar: AppBar(
-          title: Row(
-            children: [
-              const Flexible(
-                flex: 1,
-                fit: FlexFit.tight,
-                child: Text(
-                  "My Account",
-                  style: TextStyle(color: Colors.white),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                      context, MaterialPageRoute(builder: (_) => const Home()));
-                },
-                child: const Icon(Icons.arrow_back),
-              )
-            ],
-          ),
-          backgroundColor: const Color.fromRGBO(0, 96, 177, 1),
-          iconTheme: const IconThemeData(color: Colors.white),
-        ),
-        drawer: const MyDrawer(),
-        body: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-          decoration: const BoxDecoration(
-              //     gradient: LinearGradient(
-              //   colors: [
-              //     Color.fromRGBO(0, 96, 177, 1),
-              //     Color.fromRGBO(0, 96, 177, 1)
-              //   ],
-              //   begin: Alignment.topCenter,
-              //   end: Alignment.bottomCenter,
-              // )
-              ),
-          child: Stack(children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 10, 16, 10),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "User Details",
-                          style: TextStyle(
-                              fontSize: 24,
-                              color: Colors.orange,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Name: ${userDetails != null ? userDetails["Name"] : ""}",
-                            style: const TextStyle(
-                                color: Colors.blue, fontSize: 16),
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Phone: ${userDetails != null ? userDetails["Phone"] : ""}",
-                            style: const TextStyle(
-                                color: Colors.blue, fontSize: 16),
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Email: ${userDetails != null ? userDetails["Email"] : ""}",
-                            style: const TextStyle(
-                                color: Colors.blue, fontSize: 16),
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Building Name: ${userDetails != null ? userDetails["BuildingName"] : ""}",
-                            style: const TextStyle(
-                                color: Colors.blue, fontSize: 16),
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "Address: ${userDetails != null ? userDetails["Address"] : ""}",
-                            style: const TextStyle(
-                                color: Colors.blue, fontSize: 16),
-                          )),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                      child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "City: ${userDetails != null ? userDetails["City"] : ""}",
-                            style: const TextStyle(
-                                color: Colors.blue, fontSize: 16),
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Change Password",
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.orange,
-                          ),
-                        ),
-                      ),
-                    ),
-                    MyTextInput(
-                      title: "Current Password",
-                      value: "",
-                      onSubmit: (v) {
-                        setState(() {
-                          oldPass = v;
-                        });
-                      },
-                      type: TextInputType.visiblePassword,
-                    ),
-                    MyTextInput(
-                      title: "New Password",
-                      value: "",
-                      onSubmit: (v) {
-                        setState(() {
-                          nePass = v;
-                        });
-                      },
-                      type: TextInputType.visiblePassword,
-                    ),
-                    MyTextInput(
-                      title: "Confirm Password",
-                      value: "",
-                      onSubmit: (v) {
-                        setState(() {
-                          cPass = v;
-                        });
-                      },
-                      type: TextInputType.visiblePassword,
-                    ),
-                    TextOakar(label: error, issuccessful: successful),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    SubmitButton(
-                      label: "Submit",
-                      onButtonPressed: () async {
-                        setState(() {
-                          isLoading = LoadingAnimationWidget.staggeredDotsWave(
-                            color: Colors.blue,
-                            size: 100,
-                          );
-                        });
-                        var res = await changePass(
-                            oldPass, nePass, cPass, userDetails["UserID"]);
-                        setState(() {
-                          isLoading = null;
-                          if (res.error == null) {
-                            successful = true;
-                            error = res.success;
-                          } else {
-                            successful = false;
-                            error = res.error;
-                          }
-                        });
-                        if (res.error == null) {
-                          await storage.write(key: 'jwt', value: "");
-                          Timer(const Duration(seconds: 1), () {
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (_) => const Login()));
-                          });
-                        }
-                      },
-                    ),
-                  ],
-                ),
+      key: _scaffoldKey,
+      appBar: AppBar(
+        title: Row(
+          children: [
+            const Flexible(
+              flex: 1,
+              fit: FlexFit.tight,
+              child: Text(
+                "My Account",
+                style: TextStyle(color: Colors.white),
               ),
             ),
-            Center(child: isLoading),
-          ]),
-        ));
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (_) => const Home()));
+              },
+              child: const Icon(Icons.arrow_back),
+            )
+          ],
+        ),
+        backgroundColor: const Color.fromRGBO(0, 96, 177, 1),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      drawer: const MyDrawer(),
+      body: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade100, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Stack(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 10, 16, 10),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "User Details",
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Name: ${userDetails != null ? userDetails["Name"] : ""}",
+                          style: const TextStyle(
+                              color: Colors.blue, fontSize: 16),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Phone: ${userDetails != null ? userDetails["Phone"] : ""}",
+                          style: const TextStyle(
+                              color: Colors.blue, fontSize: 16),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Email: ${userDetails != null ? userDetails["Email"] : ""}",
+                          style: const TextStyle(
+                              color: Colors.blue, fontSize: 16),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Building Name: ${userDetails != null ? userDetails["BuildingName"] : ""}",
+                          style: const TextStyle(
+                              color: Colors.blue, fontSize: 16),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Address: ${userDetails != null ? userDetails["Address"] : ""}",
+                          style: const TextStyle(
+                              color: Colors.blue, fontSize: 16),
+                        )),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "City: ${userDetails != null ? userDetails["City"] : ""}",
+                          style: const TextStyle(
+                              color: Colors.blue, fontSize: 16),
+                        )),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Change Password",
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange,
+                        ),
+                      ),
+                    ),
+                  ),
+                  MyTextInput(
+                    title: "Current Password",
+                    value: "",
+                    onSubmit: (v) {
+                      setState(() {
+                        oldPass = v;
+                      });
+                    },
+                    type: TextInputType.visiblePassword,
+                  ),
+                  MyTextInput(
+                    title: "New Password",
+                    value: "",
+                    onSubmit: (v) {
+                      setState(() {
+                        nePass = v;
+                      });
+                    },
+                    type: TextInputType.visiblePassword,
+                  ),
+                  MyTextInput(
+                    title: "Confirm Password",
+                    value: "",
+                    onSubmit: (v) {
+                      setState(() {
+                        cPass = v;
+                      });
+                    },
+                    type: TextInputType.visiblePassword,
+                  ),
+                  TextOakar(label: error, issuccessful: successful),
+                  const SizedBox(
+                    height: 16,
+                  ),
+                  SubmitButton(
+                    label: "Submit",
+                    onButtonPressed: () async {
+                      setState(() {
+                        isLoading = LoadingAnimationWidget.staggeredDotsWave(
+                          color: Colors.blue,
+                          size: 100,
+                        );
+                      });
+                      var res = await changePass(
+                          oldPass, nePass, cPass, userDetails["UserID"]);
+                      setState(() {
+                        isLoading = null;
+                        if (res.error == null) {
+                          successful = true;
+                          error = res.success;
+                        } else {
+                          successful = false;
+                          error = res.error;
+                        }
+                      });
+                      if (res.error == null) {
+                        await storage.write(key: 'jwt', value: "");
+                        Timer(const Duration(seconds: 1), () {
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const Login()));
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Center(child: isLoading),
+        ]),
+      ),
+    );
   }
 }
 
