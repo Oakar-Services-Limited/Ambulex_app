@@ -30,20 +30,17 @@ class _ForgetPasswordDialogState extends State<ForgotPasswordDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(2.0),
+        borderRadius: BorderRadius.circular(15.0),
       ),
       child: Container(
-        decoration: const BoxDecoration(
-            //     gradient: LinearGradient(
-            //   colors: [
-            //     Color.fromRGBO(3, 48, 110, 1),
-            //     Color.fromRGBO(0, 96, 177, 1)
-            //   ],
-            //   begin: Alignment.topCenter,
-            //   end: Alignment.bottomCenter,
-            // )
-            ),
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
+        padding: const EdgeInsets.all(24.0),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.teal.shade100, Colors.white],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -51,7 +48,7 @@ class _ForgetPasswordDialogState extends State<ForgotPasswordDialog> {
             children: [
               const Center(
                 child: Text(
-                  "Change Password",
+                  "Reset Password",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 24,
@@ -59,14 +56,14 @@ class _ForgetPasswordDialogState extends State<ForgotPasswordDialog> {
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 24,
-              ),
+              const SizedBox(height: 24),
               const Center(
                 child: TextSmall(
-                  label: "Enter Email",
+                  label:
+                      "Enter your email address to receive a password reset link.",
                 ),
               ),
+              const SizedBox(height: 16),
               MyTextInput(
                 value: '',
                 type: TextInputType.emailAddress,
@@ -75,7 +72,7 @@ class _ForgetPasswordDialogState extends State<ForgotPasswordDialog> {
                     email = value;
                   });
                 },
-                title: 'Enter Email',
+                title: 'Email',
               ),
               Center(
                 child: isLoading ?? const SizedBox(),
@@ -84,14 +81,14 @@ class _ForgetPasswordDialogState extends State<ForgotPasswordDialog> {
                 label: error,
               ),
               Align(
-                alignment: Alignment.bottomCenter,
+                alignment: Alignment.center,
                 child: SubmitButton(
-                  label: "Submit",
+                  label: "Send Reset Link",
                   onButtonPressed: () async {
                     setState(() {
                       isLoading = LoadingAnimationWidget.horizontalRotatingDots(
                         color: const Color.fromARGB(248, 186, 12, 47),
-                        size: 100,
+                        size: 25,
                       );
                     });
                     var res = await recoverPassword(email);
@@ -109,9 +106,7 @@ class _ForgetPasswordDialogState extends State<ForgotPasswordDialog> {
                   },
                 ),
               ),
-              const SizedBox(
-                height: 24,
-              ),
+              const SizedBox(height: 24),
             ],
           ),
         ),
@@ -125,7 +120,7 @@ Future<Message> recoverPassword(String email) async {
     return Message(
       token: null,
       success: null,
-      error: "Please Enter Your Email",
+      error: "Please enter a valid email address.",
     );
   }
 

@@ -6,6 +6,7 @@ import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:ambulex_users/Pages/UpdateResidence.dart';
 import 'package:ambulex_users/Pages/News.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MyDrawer extends StatelessWidget {
@@ -33,7 +34,8 @@ class MyDrawer extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset('assets/images/logo.png', height: 80), // Adjust height as needed
+                  Image.asset('assets/images/logo.png',
+                      height: 80), // Adjust height as needed
                   const SizedBox(height: 10),
                   Text(
                     'Welcome!',
@@ -98,7 +100,7 @@ class MyDrawer extends StatelessWidget {
             icon: Icons.subscriptions,
             onTap: () {
               Navigator.push(
-                  context, MaterialPageRoute(builder: (_) =>  Subscribe()));
+                  context, MaterialPageRoute(builder: (_) => Subscribe()));
             },
           ),
           _createDrawerItem(
@@ -106,8 +108,8 @@ class MyDrawer extends StatelessWidget {
             title: 'Logout',
             icon: Icons.logout,
             onTap: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              prefs.setString("jwt", "");
+              const store = FlutterSecureStorage();
+              store.deleteAll();
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const Login()));
             },
@@ -118,7 +120,9 @@ class MyDrawer extends StatelessWidget {
   }
 
   Widget _createDrawerItem(BuildContext context,
-      {required String title, required IconData icon, required VoidCallback onTap}) {
+      {required String title,
+      required IconData icon,
+      required VoidCallback onTap}) {
     return ListTile(
       leading: Icon(icon, color: Colors.white), // Add icon to the list item
       title: Text(

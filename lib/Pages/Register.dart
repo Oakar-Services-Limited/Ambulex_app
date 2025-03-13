@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Components/Utils.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
 
 class Register extends StatefulWidget {
   const Register({super.key});
@@ -60,16 +61,12 @@ class _RegisterState extends State<Register> {
       });
 
       LocationSettings locationSettings = const LocationSettings(
-        accuracy: LocationAccuracy.high, //accuracy of the location data
-        distanceFilter: 10, //minimum distance (measured in meters) a
-        //device must move horizontally before an update event is generated;
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 10,
       );
 
       Geolocator.getPositionStream(locationSettings: locationSettings)
           .listen((Position position) {
-        //Output: 80.24599079
-        //Output: 29.6593457
-
         setState(() {
           long = position.longitude;
           lat = position.latitude;
@@ -83,8 +80,30 @@ class _RegisterState extends State<Register> {
     return MaterialApp(
       title: "Register",
       home: Scaffold(
-          resizeToAvoidBottomInset: true,
-          body: Stack(children: <Widget>[
+        appBar: AppBar(
+          title: Text(
+            "Register",
+            style: GoogleFonts.lato(fontSize: 24),
+          ),
+          backgroundColor: Colors.blue,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => Login()));
+            },
+          ),
+        ),
+        resizeToAvoidBottomInset: true,
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue.shade100, Colors.white],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+          child: Stack(children: <Widget>[
             Center(
                 child: Container(
                     constraints: const BoxConstraints.tightForFinite(),
@@ -96,8 +115,6 @@ class _RegisterState extends State<Register> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: <Widget>[
-                          Image.asset('assets/images/logo.png'),
-                          const TextLarge(label: "Register"),
                           Padding(
                               padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
                               child: SizedBox(
@@ -264,7 +281,9 @@ class _RegisterState extends State<Register> {
                               label: "Powered by \n Oakar Services Ltd.")
                         ])))))),
             Center(child: isLoading),
-          ])),
+          ]),
+        ),
+      ),
     );
   }
 }

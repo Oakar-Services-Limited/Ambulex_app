@@ -23,7 +23,7 @@ class _SubscribeState extends State<Subscribe> {
   final TextEditingController _amountController = TextEditingController();
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
-  final double subscriptionAmount = 200.0; // Constant subscription amount
+  final double subscriptionAmount = 1.0; // Constant subscription amount
   Timer? _timer; // Declare a Timer variable
 
   @override
@@ -202,8 +202,8 @@ class _SubscribeState extends State<Subscribe> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text('Phone Number: $phoneNumber'),
-                Text('Amount: \$${subscriptionAmount.toString()}'),
+                Text('Phone Number: +$phoneNumber'),
+                Text('Amount: Ksh${subscriptionAmount.toString()}'),
                 SizedBox(height: 10),
                 Text('Please ensure you have enough money in your M-Pesa.'),
               ],
@@ -393,7 +393,7 @@ class _SubscribeState extends State<Subscribe> {
                       itemBuilder: (context, index) {
                         // Parse the payment date
                         DateTime paymentDate =
-                            DateTime.parse(payments![index]['paymentDate']);
+                            DateTime.parse(payments![index]['createdAt']);
                         String formattedDate =
                             "${paymentDate.toLocal()}".split(' ')[0]; // Date
                         String formattedTime = "${paymentDate.toLocal()}"

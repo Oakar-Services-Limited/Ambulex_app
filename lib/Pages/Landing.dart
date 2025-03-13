@@ -80,9 +80,9 @@ class _LandingState extends State<Landing> {
       );
     });
     await Future.delayed(const Duration(seconds: 2));
-    String? token = prefs.getString("jwt");
+    prefs.getString("jwt");
     try {
-      var token = await storage.read(key: "erjwt");
+      var token = await storage.read(key: "jwt");
       var decoded = parseJwt(token.toString());
 
       if (decoded == null) {
