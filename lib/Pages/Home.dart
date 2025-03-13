@@ -111,13 +111,17 @@ class _HomeState extends State<Home> {
         title: "Home",
         home: Scaffold(
             appBar: AppBar(
-              title: Text("Home", style: GoogleFonts.lato(fontSize: 24)),
-              backgroundColor: Colors.teal,
+              title: Text("Home",
+                  style: GoogleFonts.lato(
+                    fontSize: 24,
+                  )),
+              backgroundColor: Colors.blue,
             ),
             drawer: const Drawer(child: MyDrawer()),
             floatingActionButton: FloatingActionButton(
                 elevation: 10.0,
-                backgroundColor: Colors.teal,
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
                 onPressed: () {
                   _launchUrl();
                 },
@@ -126,7 +130,7 @@ class _HomeState extends State<Home> {
               padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.teal.shade100, Colors.white],
+                  colors: [Colors.blue.shade100, Colors.white],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
@@ -156,7 +160,7 @@ class _HomeState extends State<Home> {
                           setState(() {
                             isLoading =
                                 LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.teal,
+                              color: Colors.blue,
                               size: 100,
                             );
                           });
@@ -193,7 +197,7 @@ class _HomeState extends State<Home> {
                           setState(() {
                             isLoading =
                                 LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.teal,
+                              color: Colors.blue,
                               size: 100,
                             );
                           });

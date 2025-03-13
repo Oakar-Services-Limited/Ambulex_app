@@ -23,7 +23,7 @@ class _SubscribeState extends State<Subscribe> {
   final TextEditingController _amountController = TextEditingController();
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
-  final double subscriptionAmount = 1.0; // Constant subscription amount
+  final double subscriptionAmount = 200.0; // Constant subscription amount
   Timer? _timer; // Declare a Timer variable
 
   @override
@@ -175,7 +175,7 @@ class _SubscribeState extends State<Subscribe> {
       _showSnackbar('Subscription created successfully!', isSuccess: true);
       print('Subscription created successfully: ${response.body}');
       await fetchSubscriptionInfo();
-      await fetchPayments(); // Refresh payment history after creating a subscription
+      await fetchPayments();
     } else {
       _showSnackbar('Failed to create subscription: ${response.statusCode}');
       print('Failed to create subscription: ${response.statusCode}');
@@ -299,8 +299,13 @@ class _SubscribeState extends State<Subscribe> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Subscribe', style: GoogleFonts.lato(fontSize: 24)),
-        backgroundColor: Colors.teal,
+        title: Text(
+          'Subscribe',
+          style: GoogleFonts.lato(
+            fontSize: 24,
+          ),
+        ),
+        backgroundColor: Colors.blue,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -313,7 +318,7 @@ class _SubscribeState extends State<Subscribe> {
         padding: EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.teal.shade100, Colors.white],
+            colors: [Colors.blue.shade100, Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
@@ -331,10 +336,10 @@ class _SubscribeState extends State<Subscribe> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: createSubscription,
-              child:
-                  Text('Subscribe Now', style: GoogleFonts.lato(fontSize: 18)),
+              child: Text('Subscribe Now',
+                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: Colors.blue,
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),
@@ -356,15 +361,15 @@ class _SubscribeState extends State<Subscribe> {
                         style: GoogleFonts.lato(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: Colors.teal)),
+                            color: Colors.blue)),
                     SizedBox(height: 10),
                     Text(
-                        'Amount Paid: \$${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                        'Amount Paid: Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
                         style: GoogleFonts.lato(
                             fontSize: 20, color: Colors.black54)),
                     SizedBox(height: 10),
                     Text(
-                        'Current Balance: \$${subscriptionInfo?['balance'] ?? '0.00'}',
+                        'Time Span: ${subscriptionInfo?['paymentDate'] ?? '0.00'} -> ${subscriptionInfo?['endDate'] ?? '0.00'}',
                         style: GoogleFonts.lato(
                             fontSize: 20, color: Colors.black54)),
                   ],
@@ -376,7 +381,7 @@ class _SubscribeState extends State<Subscribe> {
                 style: GoogleFonts.lato(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.teal)),
+                    color: Colors.blue)),
             Expanded(
               child: payments == null || payments!.isEmpty
                   ? Center(
@@ -423,10 +428,10 @@ class _SubscribeState extends State<Subscribe> {
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _showPaymentDialog,
-              child:
-                  Text('Make Payment', style: GoogleFonts.lato(fontSize: 18)),
+              child: Text('Make Payment',
+                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
+                backgroundColor: Colors.blue,
                 padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(30)),

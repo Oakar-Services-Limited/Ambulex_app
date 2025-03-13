@@ -1,12 +1,12 @@
 import 'package:ambulex_users/Pages/About.dart';
 import 'package:ambulex_users/Pages/Home.dart';
+import 'package:ambulex_users/Pages/Login.dart';
 import 'package:ambulex_users/Pages/Settings.dart';
 import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:ambulex_users/Pages/UpdateResidence.dart';
-import 'package:ambulex_users/main.dart';
+import 'package:ambulex_users/Pages/News.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../Pages/News.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -17,98 +17,121 @@ class MyDrawer extends StatelessWidget {
         color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold);
 
     return Container(
-        decoration: const BoxDecoration(
-            gradient: LinearGradient(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
             Colors.blue,
-            Colors.lightBlue,
+            Colors.blueAccent,
           ],
-        )),
-        child: ListView(
-          // Important: Remove any padding from the ListView.
-          padding: const EdgeInsets.all(0),
-          children: [
-            DrawerHeader(
-                decoration: const BoxDecoration(color: Colors.white),
-                child: Center(child: Image.asset('assets/images/logo.png'))),
-            ListTile(
-              title: const Text(
-                'Home',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold),
+        ),
+      ),
+      child: ListView(
+        padding: const EdgeInsets.all(0),
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.transparent),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/images/logo.png', height: 80),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Welcome!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
               ),
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const Home()));
-              },
             ),
-            ListTile(
-              title: Text(
-                'Update Residence',
-                style: style,
-              ),
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const UpdateResidence()));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'About',
-                style: style,
-              ),
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const About()));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'News',
-                style: style,
-              ),
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const News()));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Settings',
-                style: style,
-              ),
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const Settings()));
-              },
-            ),
-              ListTile(
-              title: Text(
-                'Subscriptions',
-                style: style,
-              ),
-              onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) =>  Subscribe()));
-              },
-            ),
-            ListTile(
-              title: Text(
-                'Logout',
-                style: style,
-              ),
-              onTap: () async {
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                prefs.setString("jwt", "");
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => const MyApp()));
-              },
-            ),
-          ],
-        ));
+          ),
+          _createDrawerItem(
+            context,
+            title: 'Home',
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const Home()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'Update Residence',
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const UpdateResidence()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'About',
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const About()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'News',
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const News()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'Settings',
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const Settings()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'Subscriptions',
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => Subscribe()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'Logout',
+            onTap: () async {
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              prefs.setString("jwt", "");
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const Login()));
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _createDrawerItem(BuildContext context,
+      {required String title, required VoidCallback onTap}) {
+    return ListTile(
+      title: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      tileColor: Colors.blue.shade300,
+      hoverColor: Colors.blue.shade400,
+      selectedColor: Colors.blue.shade500,
+    );
   }
 }

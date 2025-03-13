@@ -217,9 +217,14 @@ class _RegisterState extends State<Register> {
                                   size: 100,
                                 );
                               });
+
+                              String formattedPhone = phone.startsWith("0")
+                                  ? "254${phone.substring(1)}"
+                                  : phone;
+
                               var res = await register(
                                   name,
-                                  phone,
+                                  formattedPhone,
                                   email,
                                   password,
                                   gender,
@@ -284,7 +289,7 @@ Future<Message> register(
       error: "Please enter your name!",
     );
   }
-  if (phone.length != 10) {
+  if (phone.length != 12) {
     return Message(
       token: null,
       success: null,

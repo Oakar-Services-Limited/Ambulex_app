@@ -82,7 +82,7 @@ class _LoginState extends State<Login> {
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.teal.shade100, Colors.white],
+              colors: [Colors.blue.shade100, Colors.white],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -134,7 +134,7 @@ class _LoginState extends State<Login> {
                               setState(() {
                                 isLoading =
                                     LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Colors.teal,
+                                  color: Colors.blue,
                                   size: 100,
                                 );
                               });
@@ -150,6 +150,8 @@ class _LoginState extends State<Login> {
                                 if (res.error == null) {
                                   successful = true;
                                   error = res.success;
+
+                                  checkSubscriptionStatus();
                                 } else {
                                   successful = false;
                                   error = res.error;
@@ -163,24 +165,19 @@ class _LoginState extends State<Login> {
                                 messaging.getToken().then((token) async {
                                   await sendTokenToBackend(token!);
                                 });
-                                Timer(const Duration(seconds: 2), () {
-                                  Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => Subscribe()));
-                                });
                               } else {}
                             },
-                            child: Text(
-                              "Login",
-                              style: GoogleFonts.lato(fontSize: 18),
-                            ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.teal,
+                              backgroundColor: Colors.blue,
                               padding: EdgeInsets.symmetric(
                                   horizontal: 30, vertical: 15),
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30)),
+                            ),
+                            child: Text(
+                              "Login",
+                              style: GoogleFonts.lato(
+                                  fontSize: 18, color: Colors.white),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -195,7 +192,7 @@ class _LoginState extends State<Login> {
                                           builder: (_) => const Register()));
                                 },
                                 style: TextButton.styleFrom(
-                                  backgroundColor: Colors.teal,
+                                  backgroundColor: Colors.blue,
                                 ),
                                 child: const Text(
                                   "Register",
@@ -207,7 +204,7 @@ class _LoginState extends State<Login> {
                                   resetPassword();
                                 },
                                 style: TextButton.styleFrom(
-                                  backgroundColor: Colors.teal,
+                                  backgroundColor: Colors.blue,
                                 ),
                                 child: const Text(
                                   "Reset Password",
@@ -230,6 +227,47 @@ class _LoginState extends State<Login> {
       ),
     );
   }
+
+  Future<void> checkSubscriptionStatus() async {
+    var token = await storage.read(key: "jwt");
+    var decoded = parseJwt(token.toString());
+    var userid;
+
+    if (decoded != null) {
+      setState(() {
+        phone = decoded["Phone"];
+        userid = decoded["UserID"]!;
+      });
+    }
+
+    print("Checking subscription status for user ID: $userid");
+    final response = await http.get(
+      Uri.parse('${getUrl()}subscriptions/user/$userid'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    print("Response status code: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+      var data = json.decode(response.body);
+      print("Response data here: $data");
+      if (data['data'] != null && data['data'].isNotEmpty) {
+        print("User is subscribed.");
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Home()));
+      } else {
+        print("User is not subscribed.");
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Subscribe()));
+      }
+    } else {
+      print('Failed to check subscription status: ${response.statusCode}');
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => Subscribe()));
+    }
+  }
 }
 
 Future<Message> login(String phone, String password) async {
@@ -240,7 +278,13 @@ Future<Message> login(String phone, String password) async {
   //     error: "Invalid phone number!",
   //   );
   // }
-
+  if (phone.length != 12) {
+    return Message(
+      token: null,
+      success: null,
+      error: "Invalid phone number!",
+    );
+  }
   print("Phone: $phone");
   if (password.length < 5) {
     return Message(
