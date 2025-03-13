@@ -19,11 +19,12 @@ class _SubscribeState extends State<Subscribe> {
   Map<String, dynamic>? subscriptionInfo;
   List<dynamic>? payments;
   bool isLoading = false;
+  bool paymentMade = false; // Track if payment has been made
 
   final TextEditingController _amountController = TextEditingController();
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
-  final double subscriptionAmount = 1.0; // Constant subscription amount
+  final double subscriptionAmount = 200.0; // Constant subscription amount
   Timer? _timer; // Declare a Timer variable
 
   @override
@@ -35,7 +36,7 @@ class _SubscribeState extends State<Subscribe> {
 
   void _startPaymentUpdateTimer() {
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      fetchPayments(); // Fetch payments every 30 seconds
+      fetchPayments(); // Fetch payments every 10 seconds
     });
   }
 
@@ -176,6 +177,9 @@ class _SubscribeState extends State<Subscribe> {
       print('Subscription created successfully: ${response.body}');
       await fetchSubscriptionInfo();
       await fetchPayments();
+      setState(() {
+        paymentMade = true; // Set paymentMade to true after successful payment
+      });
     } else {
       _showSnackbar('Failed to create subscription: ${response.statusCode}');
       print('Failed to create subscription: ${response.statusCode}');
@@ -226,6 +230,10 @@ class _SubscribeState extends State<Subscribe> {
                         'Payment initiated successfully! Receipt: ${paymentResponse['mpesaReceiptNumber']}',
                         isSuccess: true);
                     await fetchPayments(); // Refresh payment history after payment initiation
+                    setState(() {
+                      paymentMade =
+                          true; // Set paymentMade to true after successful payment
+                    });
                   } else {
                     // Handle failure or cancellation
                     String message =
@@ -338,6 +346,8 @@ class _SubscribeState extends State<Subscribe> {
                     borderRadius: BorderRadius.circular(30)),
               ),
             ),
+            // Change button to "Go to Home" if payment has been made
+
             SizedBox(height: 20),
             if (isLoading) Center(child: loadingAnimationWidget()),
             Card(
@@ -419,17 +429,35 @@ class _SubscribeState extends State<Subscribe> {
                     ),
             ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _showPaymentDialog,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
+            if (payments == null ||
+                payments!.isEmpty) // Show "Make Payment" if no payments
+              ElevatedButton(
+                onPressed: _showPaymentDialog,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+                child: Text('Make Payment',
+                    style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
               ),
-              child: Text('Make Payment',
-                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
-            ),
+            if (payments != null &&
+                payments!.isNotEmpty) // Show "Go to Home" if there are payments
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushReplacement(
+                      context, MaterialPageRoute(builder: (_) => Home()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
+                ),
+                child: Text('Go to Home',
+                    style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
+              ),
           ],
         ),
       ),
