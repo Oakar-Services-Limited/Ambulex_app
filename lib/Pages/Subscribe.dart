@@ -328,11 +328,11 @@ class _SubscribeState extends State<Subscribe> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 20),
-            Text('Welcome to Subscription',
+            Text('Welcome to Ambulex',
                 style: GoogleFonts.lato(
                     fontSize: 28, fontWeight: FontWeight.bold)),
             SizedBox(height: 10),
-            Text('Manage your subscriptions easily and efficiently.',
+            Text('View subscription information and payment',
                 style: GoogleFonts.lato(fontSize: 16)),
             SizedBox(height: 20),
             ElevatedButton(

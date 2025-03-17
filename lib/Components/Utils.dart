@@ -5,7 +5,7 @@ String getUrl() {
   // return "http://192.168.1.136:3003/api/";
   // return "http://20.20.20.239:3003/api/";
   // return "https://api-dashboard.ambulexsolutions.org/api/";
-  return "http://161.97.169.110:3733/api/";
+  return "https://api-ambulexsolutions.dat.co.ke/";
 }
 
 Map<String, dynamic> parseJwt(String token) {
