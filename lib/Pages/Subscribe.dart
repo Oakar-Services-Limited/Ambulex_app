@@ -175,6 +175,7 @@ class _SubscribeState extends State<Subscribe> {
     if (response.statusCode == 201) {
       _showSnackbar('Subscription created successfully!', isSuccess: true);
       print('Subscription created successfully: ${response.body}');
+      _showPaymentDialog();
       await fetchSubscriptionInfo();
       await fetchPayments();
       setState(() {
