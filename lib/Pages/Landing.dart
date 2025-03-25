@@ -306,6 +306,7 @@ class _LandingState extends State<Landing> {
                     ),
                   ),
                 ),
+                if (isLoading != null) Center(child: isLoading),
                 if (!permission)
                   Padding(
                     padding: const EdgeInsets.only(top: 24),
@@ -329,11 +330,6 @@ class _LandingState extends State<Landing> {
               ],
             ),
           ),
-          if (isLoading != null)
-            Container(
-              color: Colors.white.withOpacity(0.8),
-              child: Center(child: isLoading),
-            ),
         ],
       ),
     );

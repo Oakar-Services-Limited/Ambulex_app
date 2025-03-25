@@ -4,7 +4,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../Components/Utils.dart';
-import '../Components/MyTextInput.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'dart:async'; // Add this import
 import 'package:google_fonts/google_fonts.dart'; // Add Google Fonts for better typography
@@ -307,162 +306,303 @@ class _SubscribeState extends State<Subscribe> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Subscribe',
-          style: GoogleFonts.lato(
-            fontSize: 24,
-          ),
-        ),
-        backgroundColor: Colors.blue,
-      ),
       body: Container(
-        padding: EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade100, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: RefreshIndicator(
+                  onRefresh: () async {
+                    await fetchSubscriptionInfo();
+                    await fetchPayments();
+                  },
+                  child: SingleChildScrollView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildSubscriptionCard(),
+                        const SizedBox(height: 24),
+                        _buildPaymentsSection(),
+                        if (isLoading) Center(child: loadingAnimationWidget()),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.shade200,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Home()),
+              );
+            },
+            icon: Icon(Icons.arrow_back, color: Colors.blue.shade700),
+          ),
+          Text(
+            'Subscription',
+            style: GoogleFonts.poppins(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade700,
+            ),
+          ),
+          const Spacer(),
+          if (!paymentMade)
+            ElevatedButton.icon(
+              onPressed: createSubscription,
+              icon: const Icon(Icons.add, color: Colors.white),
+              label: Text(
+                'Subscribe',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionCard() {
+    final bool isActive = subscriptionInfo?['status'] == 'active';
+
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
+            colors: isActive
+                ? [Colors.blue.shade400, Colors.blue.shade700]
+                : [Colors.grey.shade400, Colors.grey.shade700],
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 20),
-            Text('Welcome to Ambulex',
-                style: GoogleFonts.lato(
-                    fontSize: 28, fontWeight: FontWeight.bold)),
-            SizedBox(height: 10),
-            Text('View subscription information and payment',
-                style: GoogleFonts.lato(fontSize: 16)),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: createSubscription,
-              child: Text('Subscribe Now',
-                  style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-              ),
-            ),
-            // Change button to "Go to Home" if payment has been made
-
-            SizedBox(height: 20),
-            if (isLoading) Center(child: loadingAnimationWidget()),
-            Card(
-              elevation: 8,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15)),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Column(
+            Row(
+              children: [
+                Icon(
+                  isActive ? Icons.verified : Icons.warning_rounded,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                const SizedBox(width: 12),
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                        'Subscription Status: ${subscriptionInfo?['status'] ?? 'No Subscription'}',
-                        style: GoogleFonts.lato(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue)),
-                    SizedBox(height: 10),
+                      'Subscription Status',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
                     Text(
-                        'Subscription Amount: Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
-                        style: GoogleFonts.lato(
-                            fontSize: 20, color: Colors.black54)),
-                    SizedBox(height: 10),
-                    Text(
-                        'Time Span: ${subscriptionInfo?['paymentDate'] ?? '0.00'} -> ${subscriptionInfo?['endDate'] ?? '0.00'}',
-                        style: GoogleFonts.lato(
-                            fontSize: 20, color: Colors.black54)),
+                      subscriptionInfo?['status']?.toUpperCase() ??
+                          'NO SUBSCRIPTION',
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
-              ),
+              ],
             ),
-            SizedBox(height: 20),
-            Text('Payments:',
-                style: GoogleFonts.lato(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue)),
-            Expanded(
-              child: payments == null || payments!.isEmpty
-                  ? Center(
-                      child: Text('No payments found',
-                          style: GoogleFonts.lato(
-                              color: Colors.black54, fontSize: 18)))
-                  : ListView.builder(
-                      itemCount: payments!.length,
-                      itemBuilder: (context, index) {
-                        // Parse the payment date
-                        DateTime paymentDate =
-                            DateTime.parse(payments![index]['createdAt']);
-                        String formattedDate =
-                            "${paymentDate.toLocal()}".split(' ')[0]; // Date
-                        String formattedTime = "${paymentDate.toLocal()}"
-                            .split(' ')[1]
-                            .split('.')[0]; // Time
-
-                        return Card(
-                          margin: EdgeInsets.symmetric(vertical: 8.0),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                          child: ListTile(
-                            title: Text(
-                                'Payment Amount: Ksh${payments![index]['amountPaid']}',
-                                style: GoogleFonts.lato(color: Colors.black)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Date: $formattedDate',
-                                    style: TextStyle(color: Colors.grey)),
-                                Text('Time: $formattedTime',
-                                    style: TextStyle(color: Colors.grey)),
-                                Text(
-                                    'M-Pesa Reference: ${payments![index]['mpesaReceiptNumber']}',
-                                    style: TextStyle(color: Colors.grey)),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+            const Divider(color: Colors.white24, height: 32),
+            _buildSubscriptionDetail(
+              'Amount Paid',
+              'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+              Icons.payment,
             ),
-            SizedBox(height: 20),
-            if (payments == null ||
-                payments!.isEmpty) // Show "Make Payment" if no payments
-              ElevatedButton(
-                onPressed: _showPaymentDialog,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                ),
-                child: Text('Make Payment',
-                    style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
-              ),
-            if (payments != null &&
-                payments!.isNotEmpty) // Show "Go to Home" if there are payments
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                      context, MaterialPageRoute(builder: (_) => Home()));
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30)),
-                ),
-                child: Text('Go to Home',
-                    style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
-              ),
+            const SizedBox(height: 16),
+            _buildSubscriptionDetail(
+              'Valid Until',
+              _formatDate(subscriptionInfo?['endDate']),
+              Icons.event,
+            ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildSubscriptionDetail(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white70, size: 20),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: GoogleFonts.poppins(
+                color: Colors.white70,
+                fontSize: 12,
+              ),
+            ),
+            Text(
+              value,
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentsSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Payment History',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue.shade700,
+          ),
+        ),
+        const SizedBox(height: 16),
+        if (payments == null || payments!.isEmpty)
+          Center(
+            child: Column(
+              children: [
+                Icon(Icons.receipt_long, size: 48, color: Colors.grey.shade400),
+                const SizedBox(height: 8),
+                Text(
+                  'No payments found',
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade600,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: _showPaymentDialog,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: Text(
+                    'Make Payment',
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          )
+        else
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: payments!.length,
+            itemBuilder: (context, index) {
+              final payment = payments![index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue.shade50,
+                    child: Icon(Icons.receipt, color: Colors.blue.shade700),
+                  ),
+                  title: Text(
+                    'Ksh${payment['amountPaid']}',
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _formatDateTime(payment['createdAt']),
+                        style: GoogleFonts.poppins(fontSize: 12),
+                      ),
+                      Text(
+                        'Ref: ${payment['mpesaReceiptNumber']}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return 'N/A';
+    try {
+      final date = DateTime.parse(dateStr);
+      return '${date.day}/${date.month}/${date.year}';
+    } catch (e) {
+      return 'N/A';
+    }
+  }
+
+  String _formatDateTime(String dateStr) {
+    final date = DateTime.parse(dateStr);
+    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
   }
 
   Widget loadingAnimationWidget() {

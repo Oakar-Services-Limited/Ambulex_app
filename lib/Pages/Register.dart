@@ -42,6 +42,7 @@ class _RegisterState extends State<Register> {
   String location = '';
   bool successful = false;
   var isLoading = null;
+  bool _showMap = false;
 
   @override
   void initState() {
@@ -78,207 +79,364 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          "Register",
-          style: GoogleFonts.lato(fontSize: 24),
-        ),
-        backgroundColor: Colors.blue,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => Login()));
-          },
-        ),
-      ),
-      resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade100, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
           ),
         ),
-        child: Stack(children: <Widget>[
-          Center(
-              child: Container(
-                  constraints: const BoxConstraints.tightForFinite(),
-                  child: SingleChildScrollView(
-                      child: Form(
-                          child: Center(
-                              child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: <Widget>[
-                        Padding(
-                            padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                            child: SizedBox(
-                              height: 250,
-                              child: MyMap(
-                                lat: lat,
-                                lon: long,
-                              ),
-                            )),
-                        MyTextInput(
-                          title: 'Full Name',
-                          value: '',
-                          type: TextInputType.text,
-                          onSubmit: (value) {
-                            setState(() {
-                              name = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'Phone Number',
-                          value: '',
-                          type: TextInputType.phone,
-                          onSubmit: (value) {
-                            setState(() {
-                              phone = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'Email',
-                          value: '',
-                          type: TextInputType.emailAddress,
-                          onSubmit: (value) {
-                            setState(() {
-                              email = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'Password',
-                          value: '',
-                          type: TextInputType.visiblePassword,
-                          onSubmit: (value) {
-                            setState(() {
-                              password = value;
-                            });
-                          },
-                        ),
-                        MySelectInput(
-                            label: 'Gender',
-                            onSubmit: (value) {
-                              setState(() {
-                                gender = value;
-                              });
-                            },
-                            list: const ['Male', 'Female'],
-                            value: gender),
-                        MyTextInput(
-                          title: 'City',
-                          value: '',
-                          type: TextInputType.text,
-                          onSubmit: (value) {
-                            setState(() {
-                              city = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'Address',
-                          value: '',
-                          type: TextInputType.text,
-                          onSubmit: (value) {
-                            setState(() {
-                              address = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'Nearest Landmark',
-                          value: '',
-                          type: TextInputType.text,
-                          onSubmit: (value) {
-                            setState(() {
-                              landmark = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'Building Name',
-                          value: '',
-                          type: TextInputType.text,
-                          onSubmit: (value) {
-                            setState(() {
-                              buildingname = value;
-                            });
-                          },
-                        ),
-                        MyTextInput(
-                          title: 'House Number',
-                          value: '',
-                          type: TextInputType.text,
-                          onSubmit: (value) {
-                            setState(() {
-                              houseno = value;
-                            });
-                          },
-                        ),
-                        TextOakar(label: error, issuccessful: successful),
-                        SubmitButton(
-                          label: "Submit",
-                          onButtonPressed: () async {
-                            setState(() {
-                              isLoading =
-                                  LoadingAnimationWidget.staggeredDotsWave(
-                                color: Colors.blue,
-                                size: 100,
-                              );
-                            });
-
-                            String formattedPhone = phone.startsWith("0")
-                                ? "254${phone.substring(1)}"
-                                : phone;
-
-                            var res = await register(
-                                name,
-                                formattedPhone,
-                                email,
-                                password,
-                                gender,
-                                city,
-                                address,
-                                landmark,
-                                buildingname,
-                                houseno,
-                                lat,
-                                long);
-                            setState(() {
-                              isLoading = null;
-                              if (res.error == null) {
-                                successful = true;
-
-                                error = res.success;
-                              } else {
-                                successful = true;
-
-                                error = res.error;
-                              }
-                            });
-
-                            if (res.error == null) {
-                              Timer(const Duration(seconds: 2), () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) => const Login()));
-                              });
-                            }
-                          },
-                        ),
-                        const NavigationButton(label: "Login", object: Login()),
-                        const TextOakar(
-                            label: "Powered by \n Oakar Services Ltd.")
-                      ])))))),
-          Center(child: isLoading),
-        ]),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      _buildHeader(),
+                      _buildLocationSection(),
+                      if (error.isNotEmpty) _buildErrorMessage(),
+                      _buildSectionHeader(
+                          "Personal Information", Icons.person_outline),
+                      MyTextInput(
+                        title: 'Full Name',
+                        value: '',
+                        type: TextInputType.text,
+                        onSubmit: (value) => setState(() => name = value),
+                        prefixIcon: Icons.person,
+                      ),
+                      MyTextInput(
+                        title: 'Phone Number',
+                        value: '',
+                        type: TextInputType.phone,
+                        onSubmit: (value) => setState(() => phone = value),
+                        prefixIcon: Icons.phone,
+                      ),
+                      MyTextInput(
+                        title: 'Email',
+                        value: '',
+                        type: TextInputType.emailAddress,
+                        onSubmit: (value) => setState(() => email = value),
+                        prefixIcon: Icons.email,
+                      ),
+                      MySelectInput(
+                        label: 'Gender',
+                        onSubmit: (value) => setState(() => gender = value),
+                        list: const ['Male', 'Female'],
+                        value: gender,
+                      ),
+                      _buildSectionHeader("Account Security", Icons.security),
+                      MyTextInput(
+                        title: 'Password',
+                        value: '',
+                        type: TextInputType.visiblePassword,
+                        onSubmit: (value) => setState(() => password = value),
+                        prefixIcon: Icons.lock_outline,
+                        isPassword: true,
+                      ),
+                      _buildSectionHeader("Address Details", Icons.location_on),
+                      MyTextInput(
+                        title: 'City',
+                        value: '',
+                        type: TextInputType.text,
+                        onSubmit: (value) => setState(() => city = value),
+                        prefixIcon: Icons.location_city,
+                      ),
+                      MyTextInput(
+                        title: 'Address',
+                        value: '',
+                        type: TextInputType.text,
+                        onSubmit: (value) => setState(() => address = value),
+                        prefixIcon: Icons.home,
+                      ),
+                      MyTextInput(
+                        title: 'Nearest Landmark',
+                        value: '',
+                        type: TextInputType.text,
+                        onSubmit: (value) => setState(() => landmark = value),
+                        prefixIcon: Icons.place,
+                      ),
+                      MyTextInput(
+                        title: 'Building Name',
+                        value: '',
+                        type: TextInputType.text,
+                        onSubmit: (value) =>
+                            setState(() => buildingname = value),
+                        prefixIcon: Icons.apartment,
+                      ),
+                      MyTextInput(
+                        title: 'House Number',
+                        value: '',
+                        type: TextInputType.text,
+                        onSubmit: (value) => setState(() => houseno = value),
+                        prefixIcon: Icons.home_work,
+                      ),
+                      const SizedBox(height: 32),
+                      _buildSubmitSection(),
+                      _buildFooter(),
+                    ],
+                  ),
+                ),
+              ),
+              if (isLoading != null)
+                Container(
+                  color: Colors.white.withOpacity(0.8),
+                  child: Center(child: isLoading),
+                ),
+            ],
+          ),
+        ),
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const Login()),
+          ),
+        ),
+        Text(
+          "Create Account",
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue.shade700,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationSection() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.blue.shade100),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.location_on, color: Colors.blue.shade700),
+              const SizedBox(width: 8),
+              Text(
+                "Location Access",
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue.shade700,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            "We collect your location data to help emergency responders reach you quickly during emergencies.",
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (location.isNotEmpty)
+            Text(
+              location,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _showMap = !_showMap;
+                  });
+                },
+                icon: Icon(
+                  _showMap ? Icons.visibility_off : Icons.visibility,
+                  size: 20,
+                ),
+                label: Text(
+                  _showMap ? "Hide Map" : "View Map",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_showMap) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: MyMap(lat: lat, lon: long),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorMessage() {
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: successful ? Colors.green.shade50 : Colors.red.shade50,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        error,
+        style: TextStyle(
+          color: successful ? Colors.green : Colors.red,
+          fontSize: 14,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title, IconData icon) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 24, 4, 8),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.blue.shade700, size: 20),
+          const SizedBox(width: 8),
+          Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.blue.shade700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitSection() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: ElevatedButton(
+        onPressed: () async {
+          setState(() {
+            isLoading = LoadingAnimationWidget.staggeredDotsWave(
+              color: Colors.blue,
+              size: 100,
+            );
+          });
+
+          String formattedPhone =
+              phone.startsWith("0") ? "254${phone.substring(1)}" : phone;
+
+          var res = await register(
+              name,
+              formattedPhone,
+              email,
+              password,
+              gender,
+              city,
+              address,
+              landmark,
+              buildingname,
+              houseno,
+              lat,
+              long);
+          setState(() {
+            isLoading = null;
+            if (res.error == null) {
+              successful = true;
+
+              error = res.success;
+            } else {
+              successful = true;
+
+              error = res.error;
+            }
+          });
+
+          if (res.error == null) {
+            Timer(const Duration(seconds: 2), () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const Login()));
+            });
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.blue,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          elevation: 2,
+        ),
+        child: Text(
+          "Create Account",
+          style: GoogleFonts.poppins(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Already have an account? ",
+              style: GoogleFonts.poppins(
+                color: Colors.grey[600],
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const Login()),
+              ),
+              child: Text(
+                "Sign In",
+                style: GoogleFonts.poppins(
+                  color: Colors.blue.shade700,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        const TextOakar(label: "Powered by \n Oakar Services Ltd."),
+        const SizedBox(height: 24),
+      ],
     );
   }
 }
