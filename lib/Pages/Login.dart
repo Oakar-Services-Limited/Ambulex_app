@@ -75,153 +75,196 @@ class _LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Login",
-      home: Scaffold(
-        resizeToAvoidBottomInset: true,
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.blue.shade100, Colors.white],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+    return Scaffold(
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
           ),
-          child: Stack(children: <Widget>[
-            Center(
-              child: Container(
-                constraints: const BoxConstraints.tightForFinite(),
-                child: SingleChildScrollView(
-                  child: Form(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Image.asset('assets/images/logo.png'),
-                          Text(
-                            "Login",
-                            style: GoogleFonts.lato(
-                                fontSize: 32, fontWeight: FontWeight.bold),
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
+                    Image.asset(
+                      'assets/images/logo.png',
+                      height: 100,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      "Welcome Back",
+                      style: GoogleFonts.poppins(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade700,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Sign in to continue",
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        color: Colors.grey[600],
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (error.isNotEmpty)
+                      Container(
+                        margin: const EdgeInsets.only(top: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: successful
+                              ? Colors.green.shade50
+                              : Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          error,
+                          style: TextStyle(
+                            color: successful ? Colors.green : Colors.red,
+                            fontSize: 14,
                           ),
-                          Text(
-                            error,
-                            style: TextStyle(
-                                color: successful ? Colors.green : Colors.red),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    const SizedBox(height: 32),
+                    MyTextInput(
+                      title: 'Phone Number',
+                      value: '',
+                      type: TextInputType.phone,
+                      onSubmit: (value) => setState(() => phone = value),
+                      prefixIcon: Icons.phone,
+                    ),
+                    MyTextInput(
+                      title: 'Password',
+                      value: '',
+                      type: TextInputType.visiblePassword,
+                      onSubmit: (value) => setState(() => password = value),
+                      prefixIcon: Icons.lock_outline,
+                      isPassword: true,
+                    ),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: resetPassword,
+                        child: Text(
+                          "Forgot Password?",
+                          style: GoogleFonts.poppins(
+                            fontSize: 14,
+                            color: Colors.blue.shade700,
+                            fontWeight: FontWeight.w500,
                           ),
-                          MyTextInput(
-                            title: 'Phone Number',
-                            value: '',
-                            type: TextInputType.phone,
-                            onSubmit: (value) {
-                              setState(() {
-                                phone = value;
-                              });
-                            },
-                          ),
-                          MyTextInput(
-                            title: 'Password',
-                            value: '',
-                            type: TextInputType.visiblePassword,
-                            onSubmit: (value) {
-                              setState(() {
-                                password = value;
-                              });
-                            },
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              setState(() {
-                                isLoading =
-                                    LoadingAnimationWidget.staggeredDotsWave(
-                                  color: Colors.blue,
-                                  size: 100,
-                                );
-                              });
-
-                              String formattedPhone = phone.startsWith("0")
-                                  ? "254${phone.substring(1)}"
-                                  : phone;
-
-                              var res = await login(formattedPhone, password);
-
-                              setState(() {
-                                isLoading = null;
-                                if (res.error == null) {
-                                  successful = true;
-                                  error = res.success;
-
-                                  // Store the token and check subscription status
-                                  storage.write(key: 'jwt', value: res.token);
-                                  print('Token stored: ${res.token}');
-                                  messaging = FirebaseMessaging.instance;
-                                  messaging.getToken().then((token) async {
-                                    await sendTokenToBackend(token!);
-                                  });
-
-                                  checkSubscriptionStatus();
-                                } else {
-                                  successful = false;
-                                  error = res.error;
-                                }
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.blue,
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 30, vertical: 15),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30)),
-                            ),
-                            child: Text(
-                              "Login",
-                              style: GoogleFonts.lato(
-                                  fontSize: 18, color: Colors.white),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => const Register()));
-                                },
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                ),
-                                child: const Text(
-                                  "Register",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                              TextButton(
-                                onPressed: () {
-                                  resetPassword();
-                                },
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Colors.blue,
-                                ),
-                                child: const Text(
-                                  "Reset Password",
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const TextOakar(label: "Powered by \n Oakar Services")
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          setState(() {
+                            isLoading =
+                                LoadingAnimationWidget.staggeredDotsWave(
+                              color: Colors.blue,
+                              size: 100,
+                            );
+                          });
+
+                          String formattedPhone = phone.startsWith("0")
+                              ? "254${phone.substring(1)}"
+                              : phone;
+
+                          var res = await login(formattedPhone, password);
+
+                          setState(() {
+                            isLoading = null;
+                            if (res.error == null) {
+                              successful = true;
+                              error = res.success;
+
+                              // Store the token and check subscription status
+                              storage.write(key: 'jwt', value: res.token);
+                              print('Token stored: ${res.token}');
+                              messaging = FirebaseMessaging.instance;
+                              messaging.getToken().then((token) async {
+                                await sendTokenToBackend(token!);
+                              });
+
+                              checkSubscriptionStatus();
+                            } else {
+                              successful = false;
+                              error = res.error;
+                            }
+                          });
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 2,
+                        ),
+                        child: Text(
+                          "Sign In",
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Don't have an account? ",
+                          style: GoogleFonts.poppins(
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const Register()),
+                          ),
+                          child: Text(
+                            "Sign Up",
+                            style: GoogleFonts.poppins(
+                              color: Colors.blue.shade700,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const TextOakar(label: "Powered by \n Oakar Services"),
+                  ],
                 ),
               ),
-            ),
-            Center(child: isLoading),
-          ]),
+              if (isLoading != null)
+                Container(
+                  color: Colors.white.withOpacity(0.8),
+                  child: Center(child: isLoading),
+                ),
+            ],
+          ),
         ),
       ),
     );
@@ -267,8 +310,6 @@ class _LoginState extends State<Login> {
           context, MaterialPageRoute(builder: (_) => Subscribe()));
     }
   }
-
-
 }
 
 Future<Message> login(String phone, String password) async {
