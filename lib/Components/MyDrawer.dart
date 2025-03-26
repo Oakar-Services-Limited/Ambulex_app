@@ -5,9 +5,11 @@ import 'package:ambulex_users/Pages/Settings.dart';
 import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:ambulex_users/Pages/UpdateResidence.dart';
 import 'package:ambulex_users/Pages/News.dart';
+import 'package:ambulex_users/Pages/Reports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
@@ -60,8 +62,37 @@ class MyDrawer extends StatelessWidget {
           ),
           _createDrawerItem(
             context,
-            title: 'Update Residence',
-            icon: Icons.house,
+            title: 'Subscription',
+            icon: Icons.subscriptions,
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => Subscribe()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'My Reports',
+            icon: Icons.history,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const Reports()),
+              );
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'News',
+            icon: Icons.article,
+            onTap: () {
+              Navigator.push(
+                  context, MaterialPageRoute(builder: (_) => const News()));
+            },
+          ),
+          _createDrawerItem(
+            context,
+            title: 'My Details',
+            icon: Icons.person,
             onTap: () {
               Navigator.push(context,
                   MaterialPageRoute(builder: (_) => const UpdateResidence()));
@@ -78,29 +109,11 @@ class MyDrawer extends StatelessWidget {
           ),
           _createDrawerItem(
             context,
-            title: 'News',
-            icon: Icons.article,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const News()));
-            },
-          ),
-          _createDrawerItem(
-            context,
             title: 'Settings',
             icon: Icons.settings,
             onTap: () {
               Navigator.push(
                   context, MaterialPageRoute(builder: (_) => const Settings()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'Subscriptions',
-            icon: Icons.subscriptions,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => Subscribe()));
             },
           ),
           _createDrawerItem(
@@ -134,7 +147,7 @@ class MyDrawer extends StatelessWidget {
         ),
       ),
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 2),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
