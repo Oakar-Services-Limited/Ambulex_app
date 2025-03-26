@@ -108,82 +108,98 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   Future<Map<String, dynamic>?> getSubscriptionInfo() async {
-    print('Subscription User ID: $userid');
-    final response =
-        await http.get(Uri.parse('${getUrl()}subscriptions/user/$userid'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      print('Failed to load subscription info: ${response.statusCode}');
+    try {
+      print('Subscription User ID: $userid');
+      final response =
+          await http.get(Uri.parse('${getUrl()}subscriptions/user/$userid'));
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('Failed to load subscription info: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching subscription info: $e');
       return null;
     }
   }
 
   Future<List<dynamic>?> getPayments() async {
-    final response =
-        await http.get(Uri.parse('${getUrl()}payments/user/$userid'));
-    print('Fetching payments for user ID: $userid'); // Log the user ID
-    print('Response status: ${response.statusCode}'); // Log the response status
-    print('Response body: ${response.body}'); // Log the response body
-    if (response.statusCode == 200) {
-      return json.decode(response.body)['data']; // Access the 'data' field
-    } else {
-      print('Failed to load payments: ${response.statusCode}');
+    try {
+      final response =
+          await http.get(Uri.parse('${getUrl()}payments/user/$userid'));
+      print('Fetching payments for user ID: $userid'); // Log the user ID
+      print(
+          'Response status: ${response.statusCode}'); // Log the response status
+      print('Response body: ${response.body}'); // Log the response body
+      if (response.statusCode == 200) {
+        return json.decode(response.body)['data']; // Access the 'data' field
+      } else {
+        print('Failed to load payments: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Error fetching payments: $e');
       return null;
     }
   }
 
   Future<void> createSubscription() async {
-    setState(() {
-      isLoading = true;
-    });
+    try {
+      setState(() {
+        isLoading = true;
+      });
 
-    final paymentDate = DateTime.now().toIso8601String();
-    final startDate = DateTime.now().toIso8601String();
-    final endDate = DateTime.now().add(Duration(days: 365)).toIso8601String();
-    final status = 'active';
+      final paymentDate = DateTime.now().toIso8601String();
+      final startDate = DateTime.now().toIso8601String();
+      final endDate = DateTime.now().add(Duration(days: 365)).toIso8601String();
+      final status = 'active';
 
-    final requestUrl = '${getUrl()}subscriptions';
-    print('Request URL: $requestUrl');
-    print('Request Body: ${json.encode({
+      final requestUrl = '${getUrl()}subscriptions';
+      print('Request URL: $requestUrl');
+      print('Request Body: ${json.encode({
+            'userId': userid,
+            'amountPaid': subscriptionAmount,
+            'paymentDate': paymentDate,
+            'startDate': startDate,
+            'endDate': endDate,
+            'status': status,
+          })}');
+
+      final response = await http.post(
+        Uri.parse(requestUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
           'userId': userid,
           'amountPaid': subscriptionAmount,
           'paymentDate': paymentDate,
           'startDate': startDate,
           'endDate': endDate,
           'status': status,
-        })}');
+        }),
+      );
 
-    final response = await http.post(
-      Uri.parse(requestUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'userId': userid,
-        'amountPaid': subscriptionAmount,
-        'paymentDate': paymentDate,
-        'startDate': startDate,
-        'endDate': endDate,
-        'status': status,
-      }),
-    );
-
-    setState(() {
-      isLoading = false;
-    });
-
-    if (response.statusCode == 201) {
-      _showSnackbar('Subscription created successfully!', isSuccess: true);
-      print('Subscription created successfully: ${response.body}');
-      _showPaymentDialog();
-      await fetchSubscriptionInfo();
-      await fetchPayments();
       setState(() {
-        paymentMade = true; // Set paymentMade to true after successful payment
+        isLoading = false;
       });
-    } else {
-      _showSnackbar('Failed to create subscription: ${response.statusCode}');
-      print('Failed to create subscription: ${response.statusCode}');
-      print('Response body: ${response.body}');
+
+      if (response.statusCode == 201) {
+        _showSnackbar('Subscription created successfully!', isSuccess: true);
+        print('Subscription created successfully: ${response.body}');
+        _showPaymentDialog();
+        await fetchSubscriptionInfo();
+        await fetchPayments();
+        setState(() {
+          paymentMade =
+              true; // Set paymentMade to true after successful payment
+        });
+      } else {
+        _showSnackbar('Failed to create subscription: ${response.statusCode}');
+        print('Failed to create subscription: ${response.statusCode}');
+        print('Response body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error creating subscription: $e');
     }
   }
 
@@ -306,6 +322,27 @@ class _SubscribeState extends State<Subscribe> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          "Subscription",
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => const Home()));
+            },
+          ),
+        ],
+        backgroundColor: Colors.blue,
+        elevation: 0,
+      ),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -317,7 +354,6 @@ class _SubscribeState extends State<Subscribe> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(),
               Expanded(
                 child: RefreshIndicator(
                   onRefresh: () async {

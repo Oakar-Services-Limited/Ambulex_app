@@ -139,6 +139,7 @@ class _LoginState extends State<Login> {
                           textAlign: TextAlign.center,
                         ),
                       ),
+                    if (isLoading != null) Center(child: isLoading),
                     const SizedBox(height: 32),
                     MyTextInput(
                       title: 'Phone Number',
@@ -202,8 +203,10 @@ class _LoginState extends State<Login> {
                               messaging.getToken().then((token) async {
                                 await sendTokenToBackend(token!);
                               });
-
-                              checkSubscriptionStatus();
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => const Home()));
                             } else {
                               successful = false;
                               error = res.error;
@@ -258,11 +261,6 @@ class _LoginState extends State<Login> {
                   ],
                 ),
               ),
-              if (isLoading != null)
-                Container(
-                  color: Colors.white.withOpacity(0.8),
-                  child: Center(child: isLoading),
-                ),
             ],
           ),
         ),
@@ -313,45 +311,47 @@ class _LoginState extends State<Login> {
 }
 
 Future<Message> login(String phone, String password) async {
-  // if (phone.length != 10) {
-  //   return Message(
-  //     token: null,
-  //     success: null,
-  //     error: "Invalid phone number!",
-  //   );
-  // }
-  if (phone.length != 12) {
-    return Message(
-      token: null,
-      success: null,
-      error: "Invalid phone number!",
-    );
-  }
-  print("Phone: $phone");
-  if (password.length < 5) {
-    return Message(
-      token: null,
-      success: null,
-      error: "Password is too short!",
-    );
-  }
+  try {
+    if (phone.length != 12) {
+      return Message(
+        token: null,
+        success: null,
+        error: "Invalid phone number!",
+      );
+    }
+    print("Phone: $phone");
+    if (password.length < 5) {
+      return Message(
+        token: null,
+        success: null,
+        error: "Password is too short!",
+      );
+    }
 
-  final response = await http.post(
-    Uri.parse("${getUrl()}users/login"),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
-  );
+    final response = await http.post(
+      Uri.parse("${getUrl()}users/login"),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
+    );
 
-  if (response.statusCode == 200 || response.statusCode == 203) {
-    // If the server did return a 200 OK response,
-    // then parse the JSON.
-    return Message.fromJson(jsonDecode(response.body));
-  } else {
-    print("response error: ${response.statusCode}, ${response.body}");
-    // If the server did not return a 200 OK response,
-    // then throw an exception.
+    if (response.statusCode == 200 || response.statusCode == 203) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      return Message.fromJson(jsonDecode(response.body));
+    } else {
+      print("response error: ${response.statusCode}, ${response.body}");
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      return Message(
+        token: null,
+        success: null,
+        error: "Connection to server failed!",
+      );
+    }
+  } catch (e) {
+    print("login error: $e");
     return Message(
       token: null,
       success: null,

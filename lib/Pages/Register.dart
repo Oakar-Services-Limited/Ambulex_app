@@ -454,52 +454,60 @@ Future<Message> register(
     String houseno,
     double lat,
     double lon) async {
-  if (name == '') {
-    return Message(
-      token: null,
-      success: null,
-      error: "Please enter your name!",
-    );
-  }
-  if (phone.length != 12) {
-    return Message(
-      token: null,
-      success: null,
-      error: "Invalid phone number!",
-    );
-  }
-  if (password.length < 5) {
-    return Message(
-      token: null,
-      success: null,
-      error: "Password is too short!",
-    );
-  }
+  try {
+    if (name == '') {
+      return Message(
+        token: null,
+        success: null,
+        error: "Please enter your name!",
+      );
+    }
+    if (phone.length != 12) {
+      return Message(
+        token: null,
+        success: null,
+        error: "Invalid phone number!",
+      );
+    }
+    if (password.length < 5) {
+      return Message(
+        token: null,
+        success: null,
+        error: "Password is too short!",
+      );
+    }
 
-  final response = await http.post(
-    Uri.parse('${getUrl()}users/register'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, dynamic>{
-      'Name': name,
-      'Phone': phone,
-      'Email': email,
-      'Password': password,
-      'Gender': gender,
-      'City': city,
-      'Address': address,
-      'Landmark': landmark,
-      'BuildingName': buildingname,
-      'HouseNumber': houseno,
-      'Latitude': lat,
-      'Longitude': lon
-    }),
-  );
+    final response = await http.post(
+      Uri.parse('${getUrl()}users/register'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'Name': name,
+        'Phone': phone,
+        'Email': email,
+        'Password': password,
+        'Gender': gender,
+        'City': city,
+        'Address': address,
+        'Landmark': landmark,
+        'BuildingName': buildingname,
+        'HouseNumber': houseno,
+        'Latitude': lat,
+        'Longitude': lon
+      }),
+    );
 
-  if (response.statusCode == 200 || response.statusCode == 203) {
-    return Message.fromJson(jsonDecode(response.body));
-  } else {
+    if (response.statusCode == 200 || response.statusCode == 203) {
+      return Message.fromJson(jsonDecode(response.body));
+    } else {
+      return Message(
+        token: null,
+        success: null,
+        error: "Connection to server failed!",
+      );
+    }
+  } catch (e) {
     return Message(
       token: null,
       success: null,

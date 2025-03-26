@@ -61,27 +61,25 @@ class _SettingsState extends State<Settings> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-        title: Row(
-          children: [
-            const Flexible(
-              flex: 1,
-              fit: FlexFit.tight,
-              child: Text(
-                "My Account",
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
-            GestureDetector(
-              onTap: () {
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (_) => const Home()));
-              },
-              child: const Icon(Icons.arrow_back),
-            )
-          ],
+        foregroundColor: Colors.white,
+        title: Text(
+          "My Account",
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        backgroundColor: const Color.fromRGBO(0, 96, 177, 1),
-        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => const Home()));
+            },
+          ),
+        ],
+        backgroundColor: Colors.blue,
+        elevation: 0,
       ),
       drawer: const MyDrawer(),
       body: Container(
@@ -96,173 +94,232 @@ class _SettingsState extends State<Settings> {
         ),
         child: Stack(children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 24),
+            padding: const EdgeInsets.fromLTRB(0, 16, 0, 24),
             child: SingleChildScrollView(
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 10, 16, 10),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "User Details",
-                        style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.orange,
-                            fontWeight: FontWeight.bold),
+                  Card(
+                    elevation: 4,
+                    color: Colors.blue.shade50,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.person, color: Colors.blue, size: 28),
+                              const SizedBox(width: 8),
+                              Text(
+                                "User Details",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const Divider(height: 20),
+                          _buildDetailRow(
+                            Icons.badge,
+                            "Name",
+                            userDetails != null ? userDetails["Name"] : "",
+                          ),
+                          _buildDetailRow(
+                            Icons.phone,
+                            "Phone",
+                            userDetails != null ? userDetails["Phone"] : "",
+                          ),
+                          _buildDetailRow(
+                            Icons.email,
+                            "Email",
+                            userDetails != null ? userDetails["Email"] : "",
+                          ),
+                          _buildDetailRow(
+                            Icons.business,
+                            "Building Name",
+                            userDetails != null
+                                ? userDetails["BuildingName"]
+                                : "",
+                          ),
+                          _buildDetailRow(
+                            Icons.location_on,
+                            "Address",
+                            userDetails != null ? userDetails["Address"] : "",
+                          ),
+                          _buildDetailRow(
+                            Icons.location_city,
+                            "City",
+                            userDetails != null ? userDetails["City"] : "",
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Name: ${userDetails != null ? userDetails["Name"] : ""}",
-                          style: const TextStyle(
-                              color: Colors.blue, fontSize: 16),
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Phone: ${userDetails != null ? userDetails["Phone"] : ""}",
-                          style: const TextStyle(
-                              color: Colors.blue, fontSize: 16),
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Email: ${userDetails != null ? userDetails["Email"] : ""}",
-                          style: const TextStyle(
-                              color: Colors.blue, fontSize: 16),
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Building Name: ${userDetails != null ? userDetails["BuildingName"] : ""}",
-                          style: const TextStyle(
-                              color: Colors.blue, fontSize: 16),
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Address: ${userDetails != null ? userDetails["Address"] : ""}",
-                          style: const TextStyle(
-                              color: Colors.blue, fontSize: 16),
-                        )),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0, 0, 16, 10),
-                    child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "City: ${userDetails != null ? userDetails["City"] : ""}",
-                          style: const TextStyle(
-                              color: Colors.blue, fontSize: 16),
-                        )),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(0, 0, 16, 0),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Change Password",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
-                        ),
+                  const SizedBox(height: 20),
+                  Card(
+                    elevation: 4,
+                    color: Colors.blue.shade50,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.lock,
+                                      color: Colors.orange, size: 28),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    "Change Password",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.orange,
+                                    ),
+                                  ),
+                                ],
+                              )),
+                          const Divider(height: 20),
+                          MyTextInput(
+                            title: "Current Password",
+                            value: "",
+                            onSubmit: (v) => setState(() => oldPass = v),
+                            type: TextInputType.visiblePassword,
+                          ),
+                          MyTextInput(
+                            title: "New Password",
+                            value: "",
+                            onSubmit: (v) => setState(() => nePass = v),
+                            type: TextInputType.visiblePassword,
+                          ),
+                          MyTextInput(
+                            title: "Confirm Password",
+                            value: "",
+                            onSubmit: (v) => setState(() => cPass = v),
+                            type: TextInputType.visiblePassword,
+                          ),
+                          if (error.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: TextOakar(
+                                label: error,
+                                issuccessful: successful,
+                              ),
+                            ),
+                          const SizedBox(height: 16),
+                          Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    setState(() {
+                                      isLoading = LoadingAnimationWidget
+                                          .staggeredDotsWave(
+                                        color: Colors.blue,
+                                        size: 100,
+                                      );
+                                    });
+                                    var res = await changePass(
+                                      oldPass,
+                                      nePass,
+                                      cPass,
+                                      userDetails["UserID"],
+                                    );
+                                    setState(() {
+                                      isLoading = null;
+                                      successful = res.error == null;
+                                      error = res.error ?? res.success;
+                                    });
+                                    if (res.error == null) {
+                                      await storage.write(
+                                          key: 'jwt', value: "");
+                                      Timer(const Duration(seconds: 1), () {
+                                        Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (_) => const Login()),
+                                        );
+                                      });
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.blue,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Update Password",
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              )),
+                        ],
                       ),
                     ),
-                  ),
-                  MyTextInput(
-                    title: "Current Password",
-                    value: "",
-                    onSubmit: (v) {
-                      setState(() {
-                        oldPass = v;
-                      });
-                    },
-                    type: TextInputType.visiblePassword,
-                  ),
-                  MyTextInput(
-                    title: "New Password",
-                    value: "",
-                    onSubmit: (v) {
-                      setState(() {
-                        nePass = v;
-                      });
-                    },
-                    type: TextInputType.visiblePassword,
-                  ),
-                  MyTextInput(
-                    title: "Confirm Password",
-                    value: "",
-                    onSubmit: (v) {
-                      setState(() {
-                        cPass = v;
-                      });
-                    },
-                    type: TextInputType.visiblePassword,
-                  ),
-                  TextOakar(label: error, issuccessful: successful),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  SubmitButton(
-                    label: "Submit",
-                    onButtonPressed: () async {
-                      setState(() {
-                        isLoading = LoadingAnimationWidget.staggeredDotsWave(
-                          color: Colors.blue,
-                          size: 100,
-                        );
-                      });
-                      var res = await changePass(
-                          oldPass, nePass, cPass, userDetails["UserID"]);
-                      setState(() {
-                        isLoading = null;
-                        if (res.error == null) {
-                          successful = true;
-                          error = res.success;
-                        } else {
-                          successful = false;
-                          error = res.error;
-                        }
-                      });
-                      if (res.error == null) {
-                        await storage.write(key: 'jwt', value: "");
-                        Timer(const Duration(seconds: 1), () {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (_) => const Login()));
-                        });
-                      }
-                    },
                   ),
                 ],
               ),
             ),
           ),
-          Center(child: isLoading),
+          if (isLoading != null)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: Center(child: isLoading),
+            ),
         ]),
+      ),
+    );
+  }
+
+  Widget _buildDetailRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Colors.grey[600]),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  value.isEmpty ? "Not provided" : value,
+                  style: GoogleFonts.poppins(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
