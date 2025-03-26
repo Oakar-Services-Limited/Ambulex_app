@@ -308,29 +308,36 @@ class _HomeState extends State<Home> {
                       icon: Icons.handshake_sharp,
                       color1: Colors.orange,
                       onButtonPressed: () async {
-                        setState(() {
-                          isLoading = LoadingAnimationWidget.staggeredDotsWave(
-                            color: Colors.blue,
-                            size: 100,
-                          );
-                        });
-                        var res = await report(
-                          id,
-                          context,
-                          phone,
-                          "GBV",
-                          long,
-                          lat,
-                          category,
-                        );
-                        setState(() {
-                          isLoading = null;
-                        });
-
-                        if (res.error == null) {
-                          _showSuccessDialog("Gender Based Violence");
+                        if (subscriptionInfo?['status'] != 'active') {
+                          _showSubscriptionDialog();
                         } else {
-                          _showSnackbar(res.error);
+                          _showEmergencyConfirmation("GBV", () async {
+                            setState(() {
+                              isLoading =
+                                  LoadingAnimationWidget.staggeredDotsWave(
+                                color: Colors.blue,
+                                size: 100,
+                              );
+                            });
+                            var res = await report(
+                              id,
+                              context,
+                              phone,
+                              "GBV",
+                              long,
+                              lat,
+                              category,
+                            );
+                            setState(() {
+                              isLoading = null;
+                            });
+
+                            if (res.error == null) {
+                              _showSuccessDialog("Gender Based Violence");
+                            } else {
+                              _showSnackbar(res.error);
+                            }
+                          });
                         }
                       },
                     ),
@@ -342,22 +349,36 @@ class _HomeState extends State<Home> {
                       icon: Icons.medical_services,
                       color1: Colors.red,
                       onButtonPressed: () async {
-                        setState(() {
-                          isLoading = LoadingAnimationWidget.staggeredDotsWave(
-                            color: Colors.blue,
-                            size: 100,
-                          );
-                        });
-                        var res = await report(
-                            id, context, phone, "ME", long, lat, category);
-                        setState(() {
-                          isLoading = null;
-                        });
-
-                        if (res.error == null) {
-                          _showSuccessDialog("Medical Emergency");
+                        if (subscriptionInfo?['status'] != 'active') {
+                          _showSubscriptionDialog();
                         } else {
-                          _showSnackbar(res.error);
+                          _showEmergencyConfirmation("ME", () async {
+                            setState(() {
+                              isLoading =
+                                  LoadingAnimationWidget.staggeredDotsWave(
+                                color: Colors.blue,
+                                size: 100,
+                              );
+                            });
+                            var res = await report(
+                              id,
+                              context,
+                              phone,
+                              "ME",
+                              long,
+                              lat,
+                              category,
+                            );
+                            setState(() {
+                              isLoading = null;
+                            });
+
+                            if (res.error == null) {
+                              _showSuccessDialog("Medical Emergency");
+                            } else {
+                              _showSnackbar(res.error);
+                            }
+                          });
                         }
                       },
                     ),
@@ -506,6 +527,94 @@ class _HomeState extends State<Home> {
     );
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
+
+  void _showSubscriptionDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Subscription Required',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+          content: Text(
+            'You need an active subscription to use this service.',
+            style: GoogleFonts.poppins(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => Subscribe()),
+                );
+              },
+              child: Text(
+                'Subscribe Now',
+                style: GoogleFonts.poppins(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showEmergencyConfirmation(String type, Function onConfirm) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            type == "GBV"
+                ? 'Report Gender Based Violence?'
+                : 'Report Medical Emergency?',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: type == "GBV" ? Colors.orange : Colors.red,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to report this emergency? Emergency services will be dispatched to your location.',
+            style: GoogleFonts.poppins(),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onConfirm();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: type == "GBV" ? Colors.orange : Colors.red,
+              ),
+              child: Text(
+                'Confirm',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 Future<void> _launchUrl() async {
@@ -522,6 +631,7 @@ Future<Message> report(String userid, var context, String phone, String type,
   print("Lat: $lat");
   print("Category: $category");
   print("Userid: $userid");
+
   if (phone == '') {
     Navigator.pushReplacement(
         context, MaterialPageRoute(builder: (_) => const Login()));
@@ -535,6 +645,20 @@ Future<Message> report(String userid, var context, String phone, String type,
     );
   }
 
+  // Get geocoded address
+  String geocodedAddress = '';
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      geocodedAddress =
+          '${place.street}, ${place.subLocality}, ${place.locality}';
+    }
+  } catch (e) {
+    print('Error getting geocoded address: $e');
+    geocodedAddress = 'Unable to fetch address';
+  }
+
   final response = await http.post(
     Uri.parse('${getUrl()}reports/create'),
     headers: <String, String>{
@@ -546,7 +670,8 @@ Future<Message> report(String userid, var context, String phone, String type,
       'Latitude': lat,
       'Longitude': lon,
       'Status': 'Received',
-      'UserID': userid
+      'UserID': userid,
+      'GeocodedAddress': geocodedAddress, // Add the geocoded address
     }),
   );
 
