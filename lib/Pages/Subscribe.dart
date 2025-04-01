@@ -35,13 +35,18 @@ class _SubscribeState extends State<Subscribe> {
 
   void _startPaymentUpdateTimer() {
     _timer = Timer.periodic(Duration(seconds: 10), (timer) {
-      fetchPayments(); // Fetch payments every 10 seconds
+      if (mounted) {
+        // Only fetch if widget is still mounted
+        fetchPayments();
+      } else {
+        _timer?.cancel(); // Cancel timer if widget is not mounted
+      }
     });
   }
 
   @override
   void dispose() {
-    _timer?.cancel(); // Cancel the timer when the widget is disposed
+    _timer?.cancel(); // Ensure timer is cancelled when widget is disposed
     super.dispose();
   }
 
@@ -215,63 +220,152 @@ class _SubscribeState extends State<Subscribe> {
   void _showPaymentDialog() {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Payment'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Phone Number: +$phoneNumber'),
-                Text('Amount: Ksh${subscriptionAmount.toString()}'),
-                SizedBox(height: 10),
-                Text('Please ensure you have enough money in your M-Pesa.'),
-              ],
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Payment Confirmation',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
             ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'You will receive an M-Pesa prompt on:',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '+$phoneNumber',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Amount: KES ${subscriptionAmount.toStringAsFixed(2)}',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Please enter your M-Pesa PIN when prompted.',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(
-              onPressed: () async {
-                _showSnackbar('Initiating payment...');
-
-                final paymentResponse = await initiatePayment(
-                    phoneNumber, subscriptionAmount.toString());
-
-                if (paymentResponse != null) {
-                  print('Payment Response: $paymentResponse');
-                  // Check for success
-                  if (paymentResponse['success'] == true) {
-                    // Show success message if payment is successful
-                    _showSnackbar(
-                        'Payment initiated successfully! Receipt: ${paymentResponse['mpesaReceiptNumber']}',
-                        isSuccess: true);
-                    await fetchPayments(); // Refresh payment history after payment initiation
-                    setState(() {
-                      paymentMade =
-                          true; // Set paymentMade to true after successful payment
-                    });
-                  } else {
-                    // Handle failure or cancellation
-                    String message =
-                        paymentResponse['message'] ?? 'Transaction failed';
-                    _showSnackbar(message);
-                  }
-
-                  await fetchPayments();
-                } else {
-                  _showSnackbar('Failed to initiate payment');
-                }
-
-                Navigator.of(context).pop();
+              onPressed: () {
+                Navigator.pop(context);
+                _showSnackbar('Payment cancelled');
               },
-              child: Text('Pay'),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
             ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                _initiateSTKPush();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Proceed',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _initiateSTKPush() async {
+    _showSnackbar('Processing Payment...');
+    final paymentResponse =
+        await initiatePayment(phoneNumber, subscriptionAmount.toString());
+
+    if (paymentResponse != null) {
+      _showPaymentConfirmationDialog();
+    } else {
+      _showSnackbar('Failed to initiate payment');
+    }
+  }
+
+  void _showPaymentConfirmationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Confirm Payment',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.mobile_friendly,
+                size: 48,
+                color: Colors.blue,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Have you completed the payment on your phone?',
+                style: GoogleFonts.poppins(fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
-                _showSnackbar('User cancelled prompt');
+                Navigator.of(context).pop(); // Close only the dialog
+                _showSnackbar('Payment cancelled');
               },
-              child: Text('Cancel'),
+              child: Text(
+                'No, Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(context).pop(); // Close only the dialog
+                await fetchPayments();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Yes, Completed',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
             ),
           ],
         );
@@ -292,21 +386,19 @@ class _SubscribeState extends State<Subscribe> {
     // Log the request body
     print('Request Body: ${json.encode({
           'phoneNumber': phoneNumber,
-          'amount': double.tryParse(amount),
+          'amount': subscriptionAmount,
           'userId': userid, // Ensure userid is correctly set
         })}');
 
-    final response = await http
-        .post(
-          Uri.parse(requestUrl),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'phoneNumber': phoneNumber,
-            'amount': double.tryParse(amount),
-            'userId': userid, // Include userId in the request body
-          }),
-        )
-        .timeout(const Duration(seconds: 120));
+    final response = await http.post(
+      Uri.parse(requestUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'phoneNumber': phoneNumber,
+        'amount': subscriptionAmount,
+        'userId': userid, // Include userId in the request body
+      }),
+    );
 
     if (response.statusCode == 200) {
       final responseData = json.decode(response.body);
@@ -342,6 +434,20 @@ class _SubscribeState extends State<Subscribe> {
         ],
         backgroundColor: Colors.blue,
         elevation: 0,
+      ),
+      floatingActionButton: ElevatedButton(
+        onPressed: _showPaymentDialog,
+        style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+            elevation: 5),
+        child: Text(
+          'Make Payment',
+          style: GoogleFonts.poppins(color: Colors.white),
+        ),
       ),
       body: Container(
         decoration: BoxDecoration(
