@@ -241,13 +241,26 @@ class _SubscribeState extends State<Subscribe> {
                 style: GoogleFonts.poppins(fontSize: 14),
               ),
               const SizedBox(height: 8),
-              Text(
-                '+$phoneNumber',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                ),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '+$phoneNumber',
+                      style: GoogleFonts.poppins(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.edit, color: Colors.blue),
+                    onPressed: () {
+                      Navigator.pop(context); // Close current dialog
+                      _showPhoneNumberEditDialog();
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 16),
               Text(
@@ -288,6 +301,116 @@ class _SubscribeState extends State<Subscribe> {
               ),
               child: Text(
                 'Proceed',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showPhoneNumberEditDialog() {
+    final TextEditingController phoneController =
+        TextEditingController(text: phoneNumber);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text(
+            'Edit Phone Number',
+            style: GoogleFonts.poppins(
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Enter the phone number that will receive the M-Pesa prompt:',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: phoneController,
+                keyboardType: TextInputType.phone,
+                maxLength: 12,
+                decoration: InputDecoration(
+                  hintText: 'e.g., 254700000000',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: Icon(Icons.phone, color: Colors.blue),
+                  counterText: '',
+                  prefixText: '',
+                ),
+                onChanged: (value) {
+                  // Remove any non-digit characters
+                  String digitsOnly = value.replaceAll(RegExp(r'[^0-9]'), '');
+
+                  // If user tries to remove 254, add it back
+                  if (!digitsOnly.startsWith('254')) {
+                    digitsOnly = '254${digitsOnly.replaceAll('254', '')}';
+                  }
+
+                  // Update the text field with the formatted number
+                  if (value != digitsOnly) {
+                    phoneController.value = TextEditingValue(
+                      text: digitsOnly,
+                      selection:
+                          TextSelection.collapsed(offset: digitsOnly.length),
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Number must start with 254 and be 12 digits long',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _showPaymentDialog(); // Show payment dialog again
+              },
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final newPhone = phoneController.text.trim();
+                // Validate phone number format
+                if (newPhone.length == 12 && newPhone.startsWith('254')) {
+                  setState(() {
+                    phoneNumber = newPhone;
+                  });
+                  Navigator.pop(context);
+                  _showPaymentDialog(); // Show payment dialog with new number
+                } else {
+                  _showSnackbar(
+                      'Please enter a valid phone number (12 digits starting with 254)');
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                'Save',
                 style: GoogleFonts.poppins(color: Colors.white),
               ),
             ),
