@@ -3,6 +3,7 @@ import 'package:ambulex_users/Components/NavigationButton.dart';
 import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Home.dart';
+import 'package:ambulex_users/Pages/Settings.dart';
 import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -19,6 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Components/Utils.dart';
+import 'package:ambulex_users/Components/ChangePasswordDialog.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -184,17 +186,76 @@ class _LoginState extends State<Login> {
                             );
                           });
 
-                          String formattedPhone = phone.startsWith("0")
-                              ? "254${phone.substring(1)}"
-                              : phone;
+                          try {
+                            String formattedPhone = phone.startsWith("0")
+                                ? "254${phone.substring(1)}"
+                                : phone;
 
-                          var res = await login(formattedPhone, password);
+                            var res = await login(formattedPhone, password);
 
-                          setState(() {
-                            isLoading = null;
-                            if (res.error == null) {
-                              successful = true;
-                              error = res.success;
+                            if (res.error == "system_password") {
+                              setState(() {
+                                isLoading = null;
+                              });
+
+                              // Handle system password case
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Please change your system-generated password to a personal one',
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                  duration: const Duration(seconds: 3),
+                                  behavior: SnackBarBehavior.floating,
+                                  margin: const EdgeInsets.all(16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                              );
+
+                              // Show change password dialog
+                              if (res.token != null) {
+                                var decoded = parseJwt(res.token);
+                                if (decoded != null &&
+                                    decoded["UserID"] != null) {
+                                  final result = await _handleSystemPassword(
+                                      decoded["UserID"]);
+                                  setState(() {
+                                    if (result) {
+                                      successful = true;
+                                      error =
+                                          "Password changed successfully. Please login with your new password.";
+                                    } else {
+                                      successful = false;
+                                      error =
+                                          "You must change your system-generated password to continue.";
+                                    }
+                                  });
+                                } else {
+                                  setState(() {
+                                    successful = false;
+                                    error =
+                                        "Failed to get user information. Please try again.";
+                                  });
+                                }
+                              } else {
+                                setState(() {
+                                  successful = false;
+                                  error =
+                                      "Failed to get user information. Please try again.";
+                                });
+                              }
+                            } else if (res.error == null) {
+                              setState(() {
+                                isLoading = null;
+                                successful = true;
+                                error = res.success;
+                              });
 
                               // Store the token and check subscription status
                               storage.write(key: 'jwt', value: res.token);
@@ -208,10 +269,19 @@ class _LoginState extends State<Login> {
                                   MaterialPageRoute(
                                       builder: (_) => const Home()));
                             } else {
-                              successful = false;
-                              error = res.error;
+                              setState(() {
+                                isLoading = null;
+                                successful = false;
+                                error = res.error;
+                              });
                             }
-                          });
+                          } catch (e) {
+                            setState(() {
+                              isLoading = null;
+                              successful = false;
+                              error = "An error occurred. Please try again.";
+                            });
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
@@ -308,6 +378,18 @@ class _LoginState extends State<Login> {
           context, MaterialPageRoute(builder: (_) => Subscribe()));
     }
   }
+
+  Future<bool> _handleSystemPassword(String userId) async {
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return ChangePasswordDialog(userId: userId);
+      },
+    );
+
+    return result ?? false;
+  }
 }
 
 Future<Message> login(String phone, String password) async {
@@ -328,6 +410,34 @@ Future<Message> login(String phone, String password) async {
       );
     }
 
+    // Check if password starts with "Sys"
+    if (password.startsWith("Sys")) {
+      // First try to login to get the user ID
+      final loginResponse = await http.post(
+        Uri.parse("${getUrl()}users/login"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body:
+            jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
+      );
+
+      if (loginResponse.statusCode == 200) {
+        var data = jsonDecode(loginResponse.body);
+        return Message(
+          token: data['token'],
+          success: null,
+          error: "system_password",
+        );
+      } else {
+        return Message(
+          token: null,
+          success: null,
+          error: "Invalid credentials",
+        );
+      }
+    }
+
     final response = await http.post(
       Uri.parse("${getUrl()}users/login"),
       headers: <String, String>{
@@ -337,13 +447,9 @@ Future<Message> login(String phone, String password) async {
     );
 
     if (response.statusCode == 200 || response.statusCode == 203) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
       return Message.fromJson(jsonDecode(response.body));
     } else {
       print("response error: ${response.statusCode}, ${response.body}");
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
       return Message(
         token: null,
         success: null,

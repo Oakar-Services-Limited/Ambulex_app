@@ -53,6 +53,7 @@ class _SettingsState extends State<Settings> {
       setState(() {
         userDetails = decoded;
       });
+      print("userDetails: ${userDetails}");
     }
   }
 
