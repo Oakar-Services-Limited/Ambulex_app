@@ -1,0 +1,2 @@
+C:/Users/Dmuteti/Desktop/DevProjects/Ambulex/Ambulex_app/android/app/.cxx/Debug/1lk505r4/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Dmuteti/Desktop/DevProjects/Ambulex/Ambulex_app/android/app/.cxx/Debug/1lk505r4/armeabi-v7a/CMakeFiles/rebuild_cache.dir

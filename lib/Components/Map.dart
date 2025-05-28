@@ -84,7 +84,14 @@ class _MyMapState extends State<MyMap> {
       key: _scaffoldKey,
       body: Stack(
         children: [
-          WebViewWidget(controller: controller),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            clipBehavior: Clip.hardEdge,
+            child: WebViewWidget(controller: controller),
+          ),
           if (isLoading)
             Center(
               child: LoadingAnimationWidget.horizontalRotatingDots(

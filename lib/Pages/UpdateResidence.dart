@@ -17,6 +17,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:geocoding/geocoding.dart';
 
 class UpdateResidence extends StatefulWidget {
   const UpdateResidence({super.key});
@@ -37,7 +38,7 @@ class _UpdateResidenceState extends State<UpdateResidence> {
   late StreamSubscription<Position> positionStream;
   String email = '';
   String city = '';
-  String address = '';
+  String address = 'Fetching location...';
   String landmark = '';
   String buildingname = '';
   String houseno = '';
@@ -91,13 +92,29 @@ class _UpdateResidenceState extends State<UpdateResidence> {
     setState(() {
       long = position.longitude;
       lat = position.latitude;
-      location = 'Current location Lat: $lat Lon: $long';
     });
 
+    // Get address from coordinates
+    try {
+      List<Placemark> placemarks = await placemarkFromCoordinates(lat, long);
+      if (placemarks.isNotEmpty) {
+        Placemark place = placemarks[0];
+        setState(() {
+          address = '${place.street}, ${place.subLocality}, ${place.locality}';
+          location = 'Lat: $lat, Lon: $long';
+        });
+      }
+    } catch (e) {
+      print('Error getting address: $e');
+      setState(() {
+        address = 'Unable to fetch address';
+        location = 'Lat: $lat, Lon: $long';
+      });
+    }
+
     LocationSettings locationSettings = const LocationSettings(
-      accuracy: LocationAccuracy.high, //accuracy of the location data
-      distanceFilter: 10, //minimum distance (measured in meters) a
-      //device must move horizontally before an update event is generated;
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 10,
     );
 
     Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -142,131 +159,321 @@ class _UpdateResidenceState extends State<UpdateResidence> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(
-            "Settings",
-            style: GoogleFonts.lato(fontSize: 24),
+      appBar: AppBar(
+        foregroundColor: Colors.white,
+        title: Text(
+          "Update Residence",
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
           ),
-          backgroundColor: Colors.blue,
         ),
-        drawer: const Drawer(child: MyDrawer()),
-        body: Stack(children: [
-          SingleChildScrollView(
-              child: Column(children: <Widget>[
-            Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 0),
-                child: SizedBox(
-                  height: 250,
-                  child: MyMap(
-                    lat: lat,
-                    lon: long,
-                  ),
-                )),
-            Text(location),
-            TextOakar(label: error),
-            MyTextInput(
-              title: 'Email',
-              value: email1,
-              type: TextInputType.emailAddress,
-              onSubmit: (value) {
-                setState(() {
-                  email = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'City',
-              value: city1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  city = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Address',
-              value: address1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  address = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Nearest Landmark',
-              value: landmark1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  landmark = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'Building Name',
-              value: buildingname1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  buildingname = value;
-                });
-              },
-            ),
-            MyTextInput(
-              title: 'House Number',
-              value: houseno1,
-              type: TextInputType.text,
-              onSubmit: (value) {
-                setState(() {
-                  houseno = value;
-                });
-              },
-            ),
-            SubmitButton(
-              label: "Submit",
-              onButtonPressed: () async {
-                setState(() {
-                  isLoading = LoadingAnimationWidget.staggeredDotsWave(
-                    color: Colors.blue,
-                    size: 100,
-                  );
-                });
-                var res = await update(
-                  id,
-                  email == '' ? email1 : email,
-                  city == '' ? city1 : city,
-                  address == '' ? address1 : address,
-                  landmark == '' ? landmark1 : landmark,
-                  buildingname == '' ? buildingname1 : buildingname,
-                  houseno == '' ? houseno1 : houseno,
-                  lat == 0.0 ? lat1 : lat,
-                  long == 0.0 ? long1 : long,
-                );
-                setState(() {
-                  isLoading = null;
-                  if (res.error == null) {
-                    error = res.success;
-                  } else {
-                    error = res.error;
-                  }
-                });
+        backgroundColor: Colors.blue,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.home),
+            onPressed: () {
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (_) => const Home()));
+            },
+          ),
+        ],
+      ),
+      drawer: const Drawer(child: MyDrawer()),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade50, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildLocationCard(),
+                  const SizedBox(height: 20),
+                  _buildContactInfoCard(),
+                  const SizedBox(height: 20),
+                  _buildAddressCard(),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          isLoading = LoadingAnimationWidget.staggeredDotsWave(
+                            color: Colors.blue,
+                            size: 100,
+                          );
+                        });
+                        var res = await update(
+                          id,
+                          email == '' ? email1 : email,
+                          city == '' ? city1 : city,
+                          address == '' ? address1 : address,
+                          landmark == '' ? landmark1 : landmark,
+                          buildingname == '' ? buildingname1 : buildingname,
+                          houseno == '' ? houseno1 : houseno,
+                          lat == 0.0 ? lat1 : lat,
+                          long == 0.0 ? long1 : long,
+                          address1,
+                          city1,
+                        );
+                        setState(() {
+                          isLoading = null;
+                          error = res.error ?? res.success;
+                        });
 
-                if (res.error == null) {
-                  Timer(const Duration(seconds: 2), () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const Home()));
-                  });
-                }
-              },
+                        if (res.error == null) {
+                          Timer(const Duration(seconds: 2), () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const Home()));
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(
+                        "Update Details",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(
-              height: 12,
-            )
-          ])),
-          Center(child: isLoading),
-        ]));
+            if (isLoading != null)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Center(child: isLoading),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLocationCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.location_on, color: Colors.blue, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'Current Location',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 16),
+            Text(
+              address,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.grey[800],
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              location,
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      insetPadding: const EdgeInsets.all(16),
+                      child: Container(
+                        width: MediaQuery.of(context).size.width * 0.9,
+                        height: MediaQuery.of(context).size.height * 0.6,
+                        padding: const EdgeInsets.all(8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Location Map',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.close),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                              ],
+                            ),
+                            Expanded(
+                              child: MyMap(lat: lat, lon: long),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.map),
+              label: const Text('View on Map'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContactInfoCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(
+              children: [
+                Icon(Icons.contact_mail, color: Colors.blue, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'Contact Information',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 16),
+          MyTextInput(
+            title: 'Email',
+            value: email1,
+            type: TextInputType.emailAddress,
+            onSubmit: (value) => setState(() => email = value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAddressCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Row(
+              children: [
+                Icon(Icons.home, color: Colors.blue, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'Residence Details',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              'Detected Address',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+            child: Text(
+              address,
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                color: Colors.blue[800],
+              ),
+            ),
+          ),
+          MyTextInput(
+            title: 'City',
+            value: city1,
+            type: TextInputType.text,
+            onSubmit: (value) => setState(() => city = value),
+          ),
+          MyTextInput(
+            title: 'Address',
+            value: address1,
+            type: TextInputType.text,
+            onSubmit: (value) => setState(() => address = value),
+          ),
+          MyTextInput(
+            title: 'Nearest Landmark',
+            value: landmark1,
+            type: TextInputType.text,
+            onSubmit: (value) => setState(() => landmark = value),
+          ),
+          MyTextInput(
+            title: 'Building Name',
+            value: buildingname1,
+            type: TextInputType.text,
+            onSubmit: (value) => setState(() => buildingname = value),
+          ),
+          MyTextInput(
+            title: 'House Number',
+            value: houseno1,
+            type: TextInputType.text,
+            onSubmit: (value) => setState(() => houseno = value),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -279,7 +486,9 @@ Future<Message> update(
     String buildingname,
     String houseno,
     double lat,
-    double lon) async {
+    double lon,
+    String address1,
+    String city1) async {
   if (lat == 0.0 || lon == 0.0) {
     return Message(
       token: null,
@@ -287,6 +496,28 @@ Future<Message> update(
       error: "Location not acquired! Please turn on your location.",
     );
   }
+
+  // Get geocoded address before updating
+  try {
+    List<Placemark> placemarks = await placemarkFromCoordinates(lat, lon);
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      // Update address with geocoded information if not manually entered
+      if (address == address1) {
+        // If address hasn't been changed manually
+        address = '${place.street}, ${place.subLocality}, ${place.locality}';
+      }
+      // Update city if not manually entered
+      if (city == city1) {
+        // If city hasn't been changed manually
+        city = place.locality ?? city;
+      }
+    }
+  } catch (e) {
+    print('Error getting geocoded address: $e');
+    // Continue with update even if geocoding fails
+  }
+
   if (id == '' ||
       email == '' ||
       city == '' ||
@@ -314,7 +545,8 @@ Future<Message> update(
       'BuildingName': buildingname,
       'HouseNumber': houseno,
       'Latitude': lat,
-      'Longitude': lon
+      'Longitude': lon,
+      'GeocodedAddress': address, // Include the geocoded address
     }),
   );
 

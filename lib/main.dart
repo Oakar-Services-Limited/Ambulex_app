@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Ambulex ERT App',
+      title: 'Ambulex App',
       navigatorKey: navigatorKey,
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const Landing(), // Set LandingPage as the home

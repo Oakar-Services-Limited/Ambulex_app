@@ -7,13 +7,17 @@ class MyTextInput extends StatefulWidget {
   final String value;
   final TextInputType type;
   final Function(dynamic) onSubmit;
+  final IconData? prefixIcon;
+  final bool isPassword;
 
   const MyTextInput(
       {super.key,
       required this.title,
       required this.value,
       required this.type,
-      required this.onSubmit});
+      required this.onSubmit,
+      this.prefixIcon,
+      this.isPassword = false});
 
   @override
   State<StatefulWidget> createState() => _MyTextInputState();
@@ -42,14 +46,14 @@ class _MyTextInputState extends State<MyTextInput> {
   @override
   Widget build(BuildContext context) {
     return Theme(
-      data: Theme.of(context).copyWith(
-          hintColor: Colors.blue,
-          inputDecorationTheme: const InputDecorationTheme(
-              border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue)),
-              focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.red)))),
-      child: Padding(
+        data: Theme.of(context).copyWith(
+            hintColor: Colors.blue,
+            inputDecorationTheme: const InputDecorationTheme(
+                border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue)),
+                focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.red)))),
+        child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
           child: TextField(
               onChanged: (value) {
@@ -63,9 +67,7 @@ class _MyTextInputState extends State<MyTextInput> {
               controller: _controller,
               style: const TextStyle(color: Colors.blue),
               cursorColor: Colors.blue,
-              obscureText: widget.type == TextInputType.visiblePassword
-                  ? _obscureText
-                  : false,
+              obscureText: widget.isPassword ? _obscureText : false,
               enableSuggestions: true,
               autocorrect: false,
               decoration: InputDecoration(
@@ -96,7 +98,10 @@ class _MyTextInputState extends State<MyTextInput> {
                           },
                         )
                       : null,
-                  floatingLabelBehavior: FloatingLabelBehavior.auto))),
-    );
+                  floatingLabelBehavior: FloatingLabelBehavior.auto,
+                  prefixIcon: widget.prefixIcon != null
+                      ? Icon(widget.prefixIcon, color: Colors.blue)
+                      : null)),
+        ));
   }
 }
