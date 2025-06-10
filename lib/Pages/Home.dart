@@ -98,12 +98,25 @@ class _HomeState extends State<Home> {
           location =
               "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
         });
-        fetchSubscriptionInfo(id);
+        await fetchSubscriptionInfo(id);
+
+        // Check subscription status after fetching
+        if (subscriptionInfo == null ||
+            subscriptionInfo?['status'] != 'active') {
+          if (mounted) {
+            Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Subscribe()));
+          }
+        }
       } else {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const Login()));
       }
-    } catch (e) {}
+    } catch (e) {
+      print('Error in authenticateUser: $e');
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const Login()));
+    }
   }
 
   checkGps() async {

@@ -36,7 +36,7 @@ class _LandingState extends State<Landing> {
   Future<void> _checkLocationPermission() async {
     PermissionStatus status = await Permission.location.status;
     if (status.isGranted) {
-      authenticateUser();
+      await authenticateUser();
       setState(() {
         permission = true;
       });
@@ -50,7 +50,7 @@ class _LandingState extends State<Landing> {
   Future<void> requestLocationPermission() async {
     PermissionStatus status = await Permission.location.request();
     if (status == PermissionStatus.granted) {
-      authenticateUser();
+      await authenticateUser();
     } else {
       openAppSettings();
     }
@@ -73,40 +73,37 @@ class _LandingState extends State<Landing> {
   }
 
   Future<void> authenticateUser() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isLoading = LoadingAnimationWidget.staggeredDotsWave(
-        color: Colors.deepOrangeAccent,
-        size: 100,
-      );
-    });
-    await Future.delayed(const Duration(seconds: 2));
-    prefs.getString("jwt");
     try {
       var token = await storage.read(key: "jwt");
-      var decoded = parseJwt(token.toString());
-
-      if (decoded == null) {
+      if (token == null) {
         Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const Login()),
-        );
-      } else {
-        userid = decoded['UserID'];
-        name = decoded['Name'];
+            context, MaterialPageRoute(builder: (_) => const Login()));
+        return;
+      }
 
-        await storage.write(key: "userid", value: userid);
-
-        // Get the FCM token
-        messaging = FirebaseMessaging.instance;
-        messaging.getToken().then((token) async {
-          await sendTokenToBackend(token!, userid);
+      var decoded = parseJwt(token.toString());
+      if (decoded != null) {
+        setState(() {
+          userid = decoded["UserID"];
+          name = decoded["Name"];
         });
+
+        // Check subscription status
+        bool hasActiveSubscription = await checkSubscriptionStatus(userid);
+        if (!hasActiveSubscription) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => Subscribe()));
+          return;
+        }
 
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const Home()));
+      } else {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => const Login()));
       }
     } catch (e) {
+      print('Error in authenticateUser: $e');
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
     }

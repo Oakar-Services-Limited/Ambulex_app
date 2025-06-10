@@ -17,9 +17,13 @@ import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Components/Utils.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import Google Fonts
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Register extends StatefulWidget {
-  const Register({super.key});
+  final String? phoneNumber;
+
+  const Register({super.key, this.phoneNumber});
 
   @override
   State<StatefulWidget> createState() => _RegisterState();
@@ -43,11 +47,21 @@ class _RegisterState extends State<Register> {
   bool successful = false;
   var isLoading = null;
   bool _showMap = false;
+  final storage = const FlutterSecureStorage();
+  late FirebaseMessaging messaging;
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   @override
   void initState() {
     getLocation();
     super.initState();
+    if (widget.phoneNumber != null) {
+      phone = widget.phoneNumber!;
+      _phoneController.text = phone;
+    }
   }
 
   getLocation() async {

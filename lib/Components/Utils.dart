@@ -1,11 +1,12 @@
 // ignore_for_file: file_names
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 String getUrl() {
- //return "http://192.168.137.1:3003/api/";
+  // return "http://192.168.1.136:3003/";
   // return "http://20.20.20.239:3003/api/";
   // return "https://api-dashboard.ambulexsolutions.org/api/";
-    return "https://api-ambulexsolutions.dat.co.ke/";
+  return "https://api-ambulexsolutions.dat.co.ke/";
 }
 
 Map<String, dynamic> parseJwt(String token) {
@@ -13,7 +14,7 @@ Map<String, dynamic> parseJwt(String token) {
   if (parts.length != 3) {
     return <String, dynamic>{"error": "Invalid token"};
   }
- 
+
   final payload = _decodeBase64(parts[1]);
   final payloadMap = json.decode(payload);
   if (payloadMap is! Map<String, dynamic>) {
@@ -40,4 +41,27 @@ String _decodeBase64(String str) {
   }
 
   return utf8.decode(base64.decode(output));
+}
+
+Future<bool> checkSubscriptionStatus(String userId) async {
+  try {
+    final response = await http.get(
+      Uri.parse('${getUrl()}subscriptions/user/$userId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (data != null && data['data'] != null && data['data'].isNotEmpty) {
+        var subscription = data['data'][0];
+        return subscription['status'] == 'active';
+      }
+    }
+    return false;
+  } catch (e) {
+    print('Error checking subscription status: $e');
+    return false;
+  }
 }

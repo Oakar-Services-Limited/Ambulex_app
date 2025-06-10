@@ -31,7 +31,6 @@ class Login extends StatefulWidget {
 
 class _LoginState extends State<Login> {
   String userid = '';
-
   String phone = '';
   String password = '';
   String error = '';
@@ -40,6 +39,11 @@ class _LoginState extends State<Login> {
   final storage = const FlutterSecureStorage();
   late FirebaseMessaging messaging;
   final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // New state variables for the two-step process
+  bool isPhoneStep = true;
+  bool isExistingUser = false;
 
   void resetPassword() {
     showDialog(
@@ -70,9 +74,172 @@ class _LoginState extends State<Login> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  Future<bool> checkUserExists(String phone) async {
+    print("Phone: $phone");
+    try {
+      final response = await http.get(
+        Uri.parse("${getUrl()}users/phone/$phone"),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+      print("Response: ${response.body}");
+      print("Response: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        return data != null && data.length > 0;
+      } else if (response.statusCode == 203) {
+        // User not found
+        return false;
+      }
+      return false;
+    } catch (e) {
+      print("Error checking user existence: $e");
+      return false;
+    }
+  }
+
+  Future<void> handlePhoneSubmit() async {
+    if (phone.isEmpty) {
+      setState(() {
+        error = "Please enter your phone number";
+        successful = false;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.blue,
+        size: 100,
+      );
+    });
+
+    try {
+      String formattedPhone =
+          phone.startsWith("0") ? "254${phone.substring(1)}" : phone;
+
+      bool exists = await checkUserExists(formattedPhone);
+
+      setState(() {
+        isLoading = null;
+        if (exists) {
+          isPhoneStep = false;
+          isExistingUser = true;
+          error = "";
+        } else {
+          // Navigate to register page
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => Register(phoneNumber: formattedPhone),
+            ),
+          );
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = null;
+        error = "An error occurred. Please try again.";
+        successful = false;
+      });
+    }
+  }
+
+  Future<void> handlePasswordSubmit() async {
+    if (password.isEmpty) {
+      setState(() {
+        error = "Please enter your password";
+        successful = false;
+      });
+      return;
+    }
+
+    setState(() {
+      isLoading = LoadingAnimationWidget.staggeredDotsWave(
+        color: Colors.blue,
+        size: 100,
+      );
+    });
+
+    try {
+      String formattedPhone =
+          phone.startsWith("0") ? "254${phone.substring(1)}" : phone;
+
+      var res = await login(formattedPhone, password);
+
+      if (res.error == "system_password") {
+        setState(() {
+          isLoading = null;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Please change your system-generated password to a personal one',
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontSize: 14,
+              ),
+            ),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 3),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+        );
+
+        if (res.token != null) {
+          var decoded = parseJwt(res.token);
+          if (decoded != null && decoded["UserID"] != null) {
+            final result = await _handleSystemPassword(decoded["UserID"]);
+            setState(() {
+              if (result) {
+                successful = true;
+                error =
+                    "Password changed successfully. Please login with your new password.";
+              } else {
+                successful = false;
+                error =
+                    "You must change your system-generated password to continue.";
+              }
+            });
+          }
+        }
+      } else if (res.error == null) {
+        setState(() {
+          isLoading = null;
+          successful = true;
+          error = res.success;
+        });
+
+        storage.write(key: 'jwt', value: res.token);
+        messaging = FirebaseMessaging.instance;
+        messaging.getToken().then((token) async {
+          await sendTokenToBackend(token!);
+        });
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const Home()),
+        );
+      } else {
+        setState(() {
+          isLoading = null;
+          successful = false;
+          error = res.error;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = null;
+        successful = false;
+        error = "An error occurred. Please try again.";
+      });
+    }
   }
 
   @override
@@ -88,219 +255,122 @@ class _LoginState extends State<Login> {
           ),
         ),
         child: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 20),
-                    Image.asset(
-                      'assets/images/logo.png',
-                      height: 100,
+          child: Center(
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 100,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    isPhoneStep ? "Welcome Back" : "Enter Password",
+                    style: GoogleFonts.poppins(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade700,
                     ),
-                    const SizedBox(height: 24),
-                    Text(
-                      "Welcome Back",
-                      style: GoogleFonts.poppins(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade700,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    isPhoneStep
+                        ? "Enter your phone number to continue"
+                        : "Enter your password to sign in",
+                    style: GoogleFonts.poppins(
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  if (error.isNotEmpty)
+                    Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: successful
+                            ? Colors.green.shade50
+                            : Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      "Sign in to continue",
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        color: Colors.grey[600],
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (error.isNotEmpty)
-                      Container(
-                        margin: const EdgeInsets.only(top: 16),
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: successful
-                              ? Colors.green.shade50
-                              : Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(12),
+                      child: Text(
+                        error,
+                        style: TextStyle(
+                          color: successful ? Colors.green : Colors.red,
+                          fontSize: 14,
                         ),
-                        child: Text(
-                          error,
-                          style: TextStyle(
-                            color: successful ? Colors.green : Colors.red,
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    if (isLoading != null) Center(child: isLoading),
-                    const SizedBox(height: 32),
+                    ),
+                  if (isLoading != null) Center(child: isLoading),
+                  const SizedBox(height: 32),
+                  if (isPhoneStep)
                     MyTextInput(
                       title: 'Phone Number',
-                      value: '',
+                      value: phone,
                       type: TextInputType.phone,
                       onSubmit: (value) => setState(() => phone = value),
                       prefixIcon: Icons.phone,
-                    ),
-                    MyTextInput(
-                      title: 'Password',
-                      value: '',
-                      type: TextInputType.visiblePassword,
-                      onSubmit: (value) => setState(() => password = value),
-                      prefixIcon: Icons.lock_outline,
-                      isPassword: true,
-                    ),
-                    const SizedBox(height: 8),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: resetPassword,
-                        child: Text(
-                          "Forgot Password?",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            color: Colors.blue.shade700,
-                            fontWeight: FontWeight.w500,
+                    )
+                  else
+                    Column(
+                      children: [
+                        MyTextInput(
+                          title: 'Password',
+                          value: password,
+                          type: TextInputType.visiblePassword,
+                          onSubmit: (value) => setState(() => password = value),
+                          prefixIcon: Icons.lock_outline,
+                          isPassword: true,
+                        ),
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: resetPassword,
+                            child: Text(
+                              "Forgot Password?",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                color: Colors.blue.shade700,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
+                        ),
+                      ],
+                    ),
+                  const SizedBox(height: 24),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: ElevatedButton(
+                      onPressed: isPhoneStep
+                          ? handlePhoneSubmit
+                          : handlePasswordSubmit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Text(
+                        isPhoneStep ? "Continue" : "Sign In",
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          setState(() {
-                            isLoading =
-                                LoadingAnimationWidget.staggeredDotsWave(
-                              color: Colors.blue,
-                              size: 100,
-                            );
-                          });
-
-                          try {
-                            String formattedPhone = phone.startsWith("0")
-                                ? "254${phone.substring(1)}"
-                                : phone;
-
-                            var res = await login(formattedPhone, password);
-
-                            if (res.error == "system_password") {
-                              setState(() {
-                                isLoading = null;
-                              });
-
-                              // Handle system password case
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Please change your system-generated password to a personal one',
-                                    style: GoogleFonts.poppins(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  backgroundColor: Colors.orange,
-                                  duration: const Duration(seconds: 3),
-                                  behavior: SnackBarBehavior.floating,
-                                  margin: const EdgeInsets.all(16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                              );
-
-                              // Show change password dialog
-                              if (res.token != null) {
-                                var decoded = parseJwt(res.token);
-                                if (decoded != null &&
-                                    decoded["UserID"] != null) {
-                                  final result = await _handleSystemPassword(
-                                      decoded["UserID"]);
-                                  setState(() {
-                                    if (result) {
-                                      successful = true;
-                                      error =
-                                          "Password changed successfully. Please login with your new password.";
-                                    } else {
-                                      successful = false;
-                                      error =
-                                          "You must change your system-generated password to continue.";
-                                    }
-                                  });
-                                } else {
-                                  setState(() {
-                                    successful = false;
-                                    error =
-                                        "Failed to get user information. Please try again.";
-                                  });
-                                }
-                              } else {
-                                setState(() {
-                                  successful = false;
-                                  error =
-                                      "Failed to get user information. Please try again.";
-                                });
-                              }
-                            } else if (res.error == null) {
-                              setState(() {
-                                isLoading = null;
-                                successful = true;
-                                error = res.success;
-                              });
-
-                              // Store the token and check subscription status
-                              storage.write(key: 'jwt', value: res.token);
-                              print('Token stored: ${res.token}');
-                              messaging = FirebaseMessaging.instance;
-                              messaging.getToken().then((token) async {
-                                await sendTokenToBackend(token!);
-                              });
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (_) => const Home()));
-                            } else {
-                              setState(() {
-                                isLoading = null;
-                                successful = false;
-                                error = res.error;
-                              });
-                            }
-                          } catch (e) {
-                            setState(() {
-                              isLoading = null;
-                              successful = false;
-                              error = "An error occurred. Please try again.";
-                            });
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 2,
-                        ),
-                        child: Text(
-                          "Sign In",
-                          style: GoogleFonts.poppins(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+                  ),
+                  if (isPhoneStep) ...[
                     const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -326,57 +396,16 @@ class _LoginState extends State<Login> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const TextOakar(label: "Powered by \n Oakar Services"),
                   ],
-                ),
+                  const SizedBox(height: 16),
+                  const TextOakar(label: "Powered by \n Oakar Services"),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> checkSubscriptionStatus() async {
-    var token = await storage.read(key: "jwt");
-    var decoded = parseJwt(token.toString());
-    var userid;
-
-    if (decoded != null) {
-      setState(() {
-        phone = decoded["Phone"];
-        userid = decoded["UserID"]!;
-      });
-    }
-
-    print("Checking subscription status for user ID: $userid");
-    final response = await http.get(
-      Uri.parse('${getUrl()}payments/user/$userid'),
-      headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
-      },
-    );
-
-    print("Response status code: ${response.statusCode}");
-
-    if (response.statusCode == 200) {
-      var data = json.decode(response.body);
-      print("Response data here: $data");
-      if (data['data'] != null && data['data'].isNotEmpty) {
-        print("User is subscribed.");
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => Home()));
-      } else {
-        print("User is not subscribed.");
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => Subscribe()));
-      }
-    } else {
-      print('Failed to check subscription status: ${response.statusCode}');
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => Subscribe()));
-    }
   }
 
   Future<bool> _handleSystemPassword(String userId) async {
@@ -411,7 +440,7 @@ Future<Message> login(String phone, String password) async {
     }
 
     // Check if password starts with "Sys"
-    if (password.startsWith("Sys")) {
+    if (password.startsWith("SYS")) {
       // First try to login to get the user ID
       final loginResponse = await http.post(
         Uri.parse("${getUrl()}users/login"),
