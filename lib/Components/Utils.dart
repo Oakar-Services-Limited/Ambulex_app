@@ -4,8 +4,7 @@ import 'package:http/http.dart' as http;
 
 String getUrl() {
   // return "http://192.168.1.136:3003/";
-  // return "http://20.20.20.239:3003/api/";
-  // return "https://api-dashboard.ambulexsolutions.org/api/";
+
   return "https://api-ambulexsolutions.dat.co.ke/";
 }
 
