@@ -6,8 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 class MyMap extends StatefulWidget {
   final double lat;
   final double lon;
+  final String username;
 
-  const MyMap({Key? key, required this.lat, required this.lon})
+  const MyMap({Key? key, required this.lat, required this.lon, required this.username})
       : super(key: key);
 
   @override
@@ -71,15 +72,15 @@ class _MyMapState extends State<MyMap> {
                 markers: [
                   Marker(
                     point: currentLocation,
-                    width: 80,
-                    height: 80,
+                    width: 60,
+                    height: 60,
                     child: Column(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             color: Colors.blue,
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(25),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.3),
@@ -92,32 +93,32 @@ class _MyMapState extends State<MyMap> {
                           child: const Icon(
                             Icons.location_on,
                             color: Colors.white,
-                            size: 24,
+                            size: 20,
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.only(top: 4),
+                          margin: const EdgeInsets.only(top: 2),
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+                            horizontal: 6,
+                            vertical: 2,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(8),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: Colors.black.withOpacity(0.1),
                                 spreadRadius: 1,
-                                blurRadius: 3,
+                                blurRadius: 2,
                                 offset: const Offset(0, 1),
                               ),
                             ],
                           ),
                           child: Text(
-                            'You are here',
+                            'You',
                             style: GoogleFonts.poppins(
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w600,
                               color: Colors.blue,
                             ),
                           ),
@@ -129,13 +130,12 @@ class _MyMapState extends State<MyMap> {
               ),
             ],
           ),
-          // Location info panel
+          // Compact location info panel - top left only
           Positioned(
-            top: 16,
+            top: MediaQuery.of(context).padding.top + 16,
             left: 16,
-            right: 16,
             child: Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -148,42 +148,35 @@ class _MyMapState extends State<MyMap> {
                   ),
                 ],
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
+                  Icon(
+                    Icons.my_location,
+                    color: Colors.blue,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(
-                        Icons.location_on,
-                        color: Colors.blue,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
                       Text(
-                        'Current Location',
+                        'Location',
                         style: GoogleFonts.poppins(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
                           color: Colors.blue,
                         ),
                       ),
+                      Text(
+                        '${widget.lat.toStringAsFixed(4)}, ${widget.lon.toStringAsFixed(4)}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 8,
+                          color: Colors.grey[600],
+                        ),
+                      ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Latitude: ${widget.lat.toStringAsFixed(6)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                  Text(
-                    'Longitude: ${widget.lon.toStringAsFixed(6)}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      color: Colors.grey[600],
-                    ),
                   ),
                 ],
               ),
@@ -191,20 +184,19 @@ class _MyMapState extends State<MyMap> {
           ),
           // Map controls
           Positioned(
-            bottom: 16,
+            bottom: MediaQuery.of(context).padding.bottom + 16,
             right: 16,
             child: Column(
               children: [
-                FloatingActionButton.small(
+                _buildMapControl(
+                  icon: Icons.my_location,
                   onPressed: () {
                     mapController.move(currentLocation, 15.0);
                   },
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.blue,
-                  child: const Icon(Icons.my_location),
                 ),
                 const SizedBox(height: 8),
-                FloatingActionButton.small(
+                _buildMapControl(
+                  icon: Icons.add,
                   onPressed: () {
                     final currentZoom = mapController.camera.zoom;
                     mapController.move(
@@ -212,12 +204,10 @@ class _MyMapState extends State<MyMap> {
                       (currentZoom + 1).clamp(5.0, 18.0),
                     );
                   },
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.blue,
-                  child: const Icon(Icons.add),
                 ),
                 const SizedBox(height: 8),
-                FloatingActionButton.small(
+                _buildMapControl(
+                  icon: Icons.remove,
                   onPressed: () {
                     final currentZoom = mapController.camera.zoom;
                     mapController.move(
@@ -225,14 +215,47 @@ class _MyMapState extends State<MyMap> {
                       (currentZoom - 1).clamp(5.0, 18.0),
                     );
                   },
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.blue,
-                  child: const Icon(Icons.remove),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMapControl({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            width: 44,
+            height: 44,
+            child: Icon(
+              icon,
+              color: Colors.blue,
+              size: 20,
+            ),
+          ),
+        ),
       ),
     );
   }

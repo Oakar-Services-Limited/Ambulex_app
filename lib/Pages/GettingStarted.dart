@@ -34,6 +34,7 @@ class _GettingStartedState extends State<GettingStarted> {
   late Position position;
   double long = 0.0, lat = 0.0;
   late StreamSubscription<Position> positionStream;
+  String name = '';
   String email = '';
   String city = '';
   String address = '';
@@ -61,6 +62,7 @@ class _GettingStartedState extends State<GettingStarted> {
       if (decoded != null) {
         setState(() {
           id = decoded["UserID"]!;
+          name = decoded["Name"];
         });
       }
     } catch (e) {}
@@ -130,6 +132,7 @@ class _GettingStartedState extends State<GettingStarted> {
                                             child: MyMap(
                                               lat: lat,
                                               lon: long,
+                                              username: name,
                                             ),
                                           )),
                                       Text(location),

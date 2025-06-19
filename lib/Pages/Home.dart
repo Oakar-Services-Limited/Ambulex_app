@@ -36,6 +36,7 @@ class _HomeState extends State<Home> {
   String phone = '';
   String id = '';
   String category = '';
+  String name = '';
   bool servicestatus = false;
   bool haspermission = false;
   late LocationPermission permission;
@@ -95,6 +96,7 @@ class _HomeState extends State<Home> {
         setState(() {
           phone = decoded["Phone"];
           id = decoded["UserID"]!;
+          name = decoded["Name"];
           location =
               "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
         });
@@ -299,7 +301,7 @@ class _HomeState extends State<Home> {
                                               ],
                                             ),
                                             Expanded(
-                                              child: MyMap(lat: lat, lon: long),
+                                              child: MyMap(lat: lat, lon: long, username: phone),
                                             ),
                                           ],
                                         ),

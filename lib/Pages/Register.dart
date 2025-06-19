@@ -304,7 +304,7 @@ class _RegisterState extends State<Register> {
               height: 200,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: MyMap(lat: lat, lon: long),
+                child: MyMap(lat: lat, lon: long, username: name),
               ),
             ),
           ],

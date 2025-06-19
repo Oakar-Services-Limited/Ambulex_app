@@ -36,6 +36,7 @@ class _UpdateResidenceState extends State<UpdateResidence> {
   double long = 0.0, lat = 0.0;
   double long1 = 0.0, lat1 = 0.0;
   late StreamSubscription<Position> positionStream;
+  String name = '';
   String email = '';
   String city = '';
   String address = 'Fetching location...';
@@ -137,22 +138,26 @@ class _UpdateResidenceState extends State<UpdateResidence> {
         return false;
       } else {
         setState(() {
-          id = decoded["UserID"];
-          email1 = decoded["Email"];
-          city1 = decoded["City"];
-          address1 = decoded["Address"];
-          landmark1 = decoded["Landmark"];
-          buildingname1 = decoded["BuildingName"];
-          houseno1 = decoded["HouseNumber"];
-          lat = double.parse(decoded["Latitude"]);
-          long = double.parse(decoded["Longitude"]);
-          location =
-              "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+          id = decoded["UserID"] ?? '';
+          name = decoded["Name"] ?? '';
+          email1 = decoded["Email"] ?? '';
+          city1 = decoded["City"] ?? '';
+          address1 = decoded["Address"] ?? '';
+          landmark1 = decoded["Landmark"] ?? '';
+          buildingname1 = decoded["BuildingName"] ?? '';
+          houseno1 = decoded["HouseNumber"] ?? '';
+          lat = double.tryParse(decoded["Latitude"]?.toString() ?? '0') ?? 0.0;
+          long =
+              double.tryParse(decoded["Longitude"]?.toString() ?? '0') ?? 0.0;
+          location = decoded["Latitude"] != null && decoded["Longitude"] != null
+              ? "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}"
+              : "Location not set";
         });
         return true;
       }
-    } else
+    } else {
       Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+    }
     return false;
   }
 
@@ -342,7 +347,7 @@ class _UpdateResidenceState extends State<UpdateResidence> {
                               ],
                             ),
                             Expanded(
-                              child: MyMap(lat: lat, lon: long),
+                              child: MyMap(lat: lat, lon: long, username: name),
                             ),
                           ],
                         ),
@@ -505,7 +510,9 @@ Future<Message> update(
       // Update address with geocoded information if not manually entered
       if (address == address1) {
         // If address hasn't been changed manually
-        address = '${place.street}, ${place.subLocality}, ${place.locality}';
+        address = [place.street, place.subLocality, place.locality]
+            .where((element) => element != null && element.isNotEmpty)
+            .join(', ');
       }
       // Update city if not manually entered
       if (city == city1) {
@@ -518,13 +525,22 @@ Future<Message> update(
     // Continue with update even if geocoding fails
   }
 
-  if (id == '' ||
-      email == '' ||
-      city == '' ||
-      address == '' ||
-      landmark == '' ||
-      buildingname == '' ||
-      houseno == '') {
+  // Ensure all values are non-null before sending
+  final Map<String, dynamic> updateData = {
+    'Email': email.trim(),
+    'City': city.trim(),
+    'Address': address.trim(),
+    'Landmark': landmark.trim(),
+    'BuildingName': buildingname.trim(),
+    'HouseNumber': houseno.trim(),
+    'Latitude': lat,
+    'Longitude': lon,
+    'GeocodedAddress': address.trim(),
+  };
+
+  // Check if any required field is empty
+  if (updateData.values.any(
+      (value) => value == null || (value is String && value.trim().isEmpty))) {
     return Message(
       token: null,
       success: null,
@@ -532,44 +548,48 @@ Future<Message> update(
     );
   }
 
-  final response = await http.put(
-    Uri.parse('${getUrl()}users/$id'),
-    headers: <String, String>{
-      'Content-Type': 'application/json; charset=UTF-8',
-    },
-    body: jsonEncode(<String, dynamic>{
-      'Email': email,
-      'City': city,
-      'Address': address,
-      'Landmark': landmark,
-      'BuildingName': buildingname,
-      'HouseNumber': houseno,
-      'Latitude': lat,
-      'Longitude': lon,
-      'GeocodedAddress': address, // Include the geocoded address
-    }),
-  );
+  try {
+    final response = await http.put(
+      Uri.parse('${getUrl()}users/$id'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(updateData),
+    );
 
-  if (response.statusCode == 200 || response.statusCode == 203) {
-    return Message.fromJson(jsonDecode(response.body));
-  } else {
+    if (response.statusCode == 200 || response.statusCode == 203) {
+      final decodedResponse = jsonDecode(response.body);
+      return Message(
+        token: decodedResponse['token'],
+        success: decodedResponse['success'],
+        error: decodedResponse['error'],
+      );
+    } else {
+      return Message(
+        token: null,
+        success: null,
+        error: "Connection to server failed! Status: ${response.statusCode}",
+      );
+    }
+  } catch (e) {
+    print('Error during update: $e');
     return Message(
       token: null,
       success: null,
-      error: "Connection to server failed!",
+      error: "Connection error: ${e.toString()}",
     );
   }
 }
 
 class Message {
-  var token;
-  var success;
-  var error;
+  final dynamic token;
+  final dynamic success;
+  final dynamic error;
 
   Message({
-    required this.token,
-    required this.success,
-    required this.error,
+    this.token,
+    this.success,
+    this.error,
   });
 
   factory Message.fromJson(Map<String, dynamic> json) {
