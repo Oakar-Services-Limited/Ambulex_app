@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class MyMap extends StatefulWidget {
   final double lat;
@@ -14,174 +15,223 @@ class MyMap extends StatefulWidget {
 }
 
 class _MyMapState extends State<MyMap> {
-  late WebViewController controller;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  var isLoading = true;
+  late MapController mapController;
+  late LatLng currentLocation;
 
   @override
   void initState() {
     super.initState();
-    isLoading = true;
-
-    late final PlatformWebViewControllerCreationParams params;
-    params = const PlatformWebViewControllerCreationParams();
-    controller = WebViewController.fromPlatformCreationParams(params);
-
-    setupWebViewController();
-  }
-
-  void setupWebViewController() {
-    controller
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setBackgroundColor(const Color(0x00000000))
-      ..setNavigationDelegate(
-        NavigationDelegate(
-          onProgress: (int progress) {
-            // Handle progress updates
-          },
-          onPageStarted: (String url) {
-            // Handle page start
-          },
-          onPageFinished: (String url) {
-            if (mounted) {
-              setState(() {
-                isLoading = false;
-              });
-            }
-          },
-          onWebResourceError: (WebResourceError error) {
-            if (mounted) {
-              setState(() {
-                isLoading = false;
-              });
-            }
-            print('WebView error: ${error.description}');
-          },
-          onNavigationRequest: (NavigationRequest request) {
-            // Prevent external navigation
-            return NavigationDecision.prevent;
-          },
-        ),
-      )
-      ..loadHtmlString(_generateMapHTML());
-  }
-
-  String _generateMapHTML() {
-    return '''
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Map</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-        .map-container {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-        }
-        .location-info {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-            font-size: 12px;
-        }
-    </style>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBbEGhViFyDdJJcfl0Mgpv293jyNgTl364"></script>
-</head>
-<body>
-    <div class="map-container">
-        <div class="location-info">
-            <strong>Your Location:</strong><br>
-            Latitude: ${widget.lat.toStringAsFixed(6)}<br>
-            Longitude: ${widget.lon.toStringAsFixed(6)}
-        </div>
-        <div id="map"></div>
-    </div>
-    
-    <script>
-        function initMap() {
-            const location = { lat: ${widget.lat}, lng: ${widget.lon} };
-            
-            const map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: location,
-                mapTypeId: google.maps.MapTypeId.ROADMAP,
-                mapTypeControl: true,
-                streetViewControl: true,
-                fullscreenControl: true,
-                zoomControl: true
-            });
-            
-            const marker = new google.maps.Marker({
-                position: location,
-                map: map,
-                title: "Your Location",
-                animation: google.maps.Animation.DROP
-            });
-            
-            const infoWindow = new google.maps.InfoWindow({
-                content: '<div style="padding: 10px;"><h3>Your Location</h3><p>Latitude: ${widget.lat.toStringAsFixed(6)}</p><p>Longitude: ${widget.lon.toStringAsFixed(6)}</p></div>'
-            });
-            
-            marker.addListener("click", () => {
-                infoWindow.open(map, marker);
-            });
-            
-            // Auto-open info window
-            infoWindow.open(map, marker);
-        }
-        
-        // Initialize map when page loads
-        window.onload = initMap;
-    </script>
-</body>
-</html>
-    ''';
+    mapController = MapController();
+    currentLocation = LatLng(widget.lat, widget.lon);
   }
 
   @override
-  void didUpdateWidget(covariant MyMap oldWidget) {
+  void didUpdateWidget(MyMap oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.lat != widget.lat || oldWidget.lon != widget.lon) {
-      // Reload the map with new coordinates
-      controller.loadHtmlString(_generateMapHTML());
+      setState(() {
+        currentLocation = LatLng(widget.lat, widget.lon);
+      });
+      // Animate to new location
+      mapController.move(currentLocation, 15.0);
     }
+  }
+
+  @override
+  void dispose() {
+    mapController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey,
       body: Stack(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(16),
+          FlutterMap(
+            mapController: mapController,
+            options: MapOptions(
+              initialCenter: currentLocation,
+              initialZoom: 15.0,
+              minZoom: 5.0,
+              maxZoom: 18.0,
+              onTap: (tapPosition, point) {
+                // Handle map tap if needed
+              },
             ),
-            clipBehavior: Clip.hardEdge,
-            child: WebViewWidget(controller: controller),
+            children: [
+              // OpenStreetMap tiles
+              TileLayer(
+                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                userAgentPackageName: 'com.ambulex.users',
+                maxZoom: 19,
+              ),
+              // Current location marker
+              MarkerLayer(
+                markers: [
+                  Marker(
+                    point: currentLocation,
+                    width: 80,
+                    height: 80,
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.3),
+                                spreadRadius: 2,
+                                blurRadius: 5,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.location_on,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 1,
+                                blurRadius: 3,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'You are here',
+                            style: GoogleFonts.poppins(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          if (isLoading)
-            Center(
-              child: LoadingAnimationWidget.horizontalRotatingDots(
-                  color: Colors.blue, size: 100),
+          // Location info panel
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.location_on,
+                        color: Colors.blue,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Current Location',
+                        style: GoogleFonts.poppins(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Latitude: ${widget.lat.toStringAsFixed(6)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  Text(
+                    'Longitude: ${widget.lon.toStringAsFixed(6)}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
             ),
+          ),
+          // Map controls
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: Column(
+              children: [
+                FloatingActionButton.small(
+                  onPressed: () {
+                    mapController.move(currentLocation, 15.0);
+                  },
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.blue,
+                  child: const Icon(Icons.my_location),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  onPressed: () {
+                    final currentZoom = mapController.camera.zoom;
+                    mapController.move(
+                      mapController.camera.center,
+                      (currentZoom + 1).clamp(5.0, 18.0),
+                    );
+                  },
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.blue,
+                  child: const Icon(Icons.add),
+                ),
+                const SizedBox(height: 8),
+                FloatingActionButton.small(
+                  onPressed: () {
+                    final currentZoom = mapController.camera.zoom;
+                    mapController.move(
+                      mapController.camera.center,
+                      (currentZoom - 1).clamp(5.0, 18.0),
+                    );
+                  },
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.blue,
+                  child: const Icon(Icons.remove),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
