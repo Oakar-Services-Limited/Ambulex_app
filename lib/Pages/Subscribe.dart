@@ -20,7 +20,6 @@ class _SubscribeState extends State<Subscribe> {
   bool isLoading = false;
   bool paymentMade = false; // Track if payment has been made
 
-  final TextEditingController _amountController = TextEditingController();
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
   final double subscriptionAmount = 200.0; // Constant subscription amount
