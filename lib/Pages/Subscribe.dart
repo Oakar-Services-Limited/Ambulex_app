@@ -506,30 +506,43 @@ class _SubscribeState extends State<Subscribe> {
     final requestUrl =
         '${getUrl()}payments/initiate'; // Adjust the endpoint as necessary
 
-    // Log the request body
-    print('Request Body: ${json.encode({
+    try {
+      // Log the request body
+      print('Request Body: ${json.encode({
+            'phoneNumber': phoneNumber,
+            'amount': subscriptionAmount,
+            'userId': userid, // Ensure userid is correctly set
+          })}');
+
+      final response = await http.post(
+        Uri.parse(requestUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
           'phoneNumber': phoneNumber,
           'amount': subscriptionAmount,
-          'userId': userid, // Ensure userid is correctly set
-        })}');
+          'userId': userid, // Include userId in the request body
+        }),
+      );
 
-    final response = await http.post(
-      Uri.parse(requestUrl),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({
-        'phoneNumber': phoneNumber,
-        'amount': subscriptionAmount,
-        'userId': userid, // Include userId in the request body
-      }),
-    );
+      print('Response Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
 
-    if (response.statusCode == 200) {
-      final responseData = json.decode(response.body);
-      print('Payment initiated with ID: ${responseData['paymentId']}');
-      _showSnackbar('Payment initiated successfully!');
-      return responseData;
-    } else {
-      print('Failed to initiate payment: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        print('Payment initiated with ID: ${responseData['paymentId']}');
+        _showSnackbar('Payment initiated successfully!');
+        return responseData;
+      } else {
+        final errorBody = json.decode(response.body);
+        print('Failed to initiate payment: ${response.statusCode}');
+        print('Error details: $errorBody');
+        _showSnackbar(
+            'Payment failed: ${errorBody['message'] ?? 'Unknown error'}');
+        return null;
+      }
+    } catch (e) {
+      print('Exception during payment initiation: $e');
+      _showSnackbar('Payment failed: ${e.toString()}');
       return null;
     }
   }
