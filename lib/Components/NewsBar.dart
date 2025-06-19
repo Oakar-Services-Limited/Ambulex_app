@@ -39,10 +39,8 @@ class NewsBar extends StatelessWidget {
     if (publishedAt.isNotEmpty) {
       try {
         final date = DateTime.parse(publishedAt);
-        formattedDate = 'Published: ' +
-            DateFormat('d MMM yyyy').format(date) +
-            ' at ' +
-            DateFormat('hh:mm a').format(date);
+        formattedDate =
+            'Published: ${DateFormat('d MMM yyyy').format(date)} at ${DateFormat('hh:mm a').format(date)}';
       } catch (e) {
         formattedDate = '';
       }
@@ -54,7 +52,18 @@ class NewsBar extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => ReadNews(id: id)),
+            MaterialPageRoute(
+              builder: (_) => ReadNews(
+                id: id,
+                title: title,
+                image: image,
+                type: type,
+                description: description,
+                keywords: keywords,
+                link: link,
+                publishedAt: publishedAt,
+              ),
+            ),
           );
         },
         child: Card(
