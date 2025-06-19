@@ -27,20 +27,25 @@ class _MyTextInputState extends State<MyTextInput> {
   TextEditingController _controller = new TextEditingController();
   bool _obscureText = true;
 
-  @override
+    @override
   void initState() {
     super.initState();
+    _controller = TextEditingController(text: widget.value);
   }
 
   @override
   void didUpdateWidget(covariant MyTextInput oldWidget) {
     super.didUpdateWidget(oldWidget);
+
     if (widget.value != oldWidget.value) {
-      setState(() {
-        _controller.text =
-            widget.value != "null" ? widget.value.toString() : '';
-      });
+      _controller.text = widget.value;
     }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override

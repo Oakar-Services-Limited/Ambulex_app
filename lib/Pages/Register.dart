@@ -30,6 +30,8 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
   String error = '';
   String phone = '';
   String name = '';
@@ -93,6 +95,7 @@ class _RegisterState extends State<Register> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -105,8 +108,6 @@ class _RegisterState extends State<Register> {
           child: Stack(
             children: [
               SingleChildScrollView(
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Column(
@@ -119,24 +120,24 @@ class _RegisterState extends State<Register> {
                           "Personal Information", Icons.person_outline),
                       MyTextInput(
                         title: 'Full Name',
-                        value: '',
+                        value: name,
                         type: TextInputType.text,
                         onSubmit: (value) => setState(() => name = value),
-                        prefixIcon: Icons.person,
+                        // prefixIcon: Icons.person,
                       ),
                       MyTextInput(
                         title: 'Phone Number',
-                        value: '',
+                        value: phone,
                         type: TextInputType.phone,
                         onSubmit: (value) => setState(() => phone = value),
-                        prefixIcon: Icons.phone,
+                        // prefixIcon: Icons.phone,
                       ),
                       MyTextInput(
                         title: 'Email',
-                        value: '',
+                        value: email,
                         type: TextInputType.emailAddress,
                         onSubmit: (value) => setState(() => email = value),
-                        prefixIcon: Icons.email,
+                        //prefixIcon: Icons.email,
                       ),
                       MySelectInput(
                         label: 'Gender',
@@ -147,48 +148,48 @@ class _RegisterState extends State<Register> {
                       _buildSectionHeader("Account Security", Icons.security),
                       MyTextInput(
                         title: 'Password',
-                        value: '',
+                        value: password,
                         type: TextInputType.visiblePassword,
                         onSubmit: (value) => setState(() => password = value),
-                        prefixIcon: Icons.lock_outline,
-                        isPassword: true,
+                        //prefixIcon: Icons.lock_outline,
+                        //isPassword: true,
                       ),
                       _buildSectionHeader("Address Details", Icons.location_on),
                       MyTextInput(
                         title: 'City',
-                        value: '',
+                        value: city,
                         type: TextInputType.text,
                         onSubmit: (value) => setState(() => city = value),
-                        prefixIcon: Icons.location_city,
+                        //prefixIcon: Icons.location_city,
                       ),
                       MyTextInput(
                         title: 'Address',
-                        value: '',
+                        value: address,
                         type: TextInputType.text,
                         onSubmit: (value) => setState(() => address = value),
-                        prefixIcon: Icons.home,
+                        // prefixIcon: Icons.home,
                       ),
                       MyTextInput(
                         title: 'Nearest Landmark',
-                        value: '',
+                        value: landmark,
                         type: TextInputType.text,
                         onSubmit: (value) => setState(() => landmark = value),
-                        prefixIcon: Icons.place,
+                        //prefixIcon: Icons.place,
                       ),
                       MyTextInput(
                         title: 'Building Name',
-                        value: '',
+                        value: buildingname,
                         type: TextInputType.text,
                         onSubmit: (value) =>
                             setState(() => buildingname = value),
-                        prefixIcon: Icons.apartment,
+                        // prefixIcon: Icons.apartment,
                       ),
                       MyTextInput(
                         title: 'House Number',
-                        value: '',
+                        value: houseno,
                         type: TextInputType.text,
                         onSubmit: (value) => setState(() => houseno = value),
-                        prefixIcon: Icons.home_work,
+                        // prefixIcon: Icons.home_work,
                       ),
                       const SizedBox(height: 32),
                       _buildSubmitSection(),

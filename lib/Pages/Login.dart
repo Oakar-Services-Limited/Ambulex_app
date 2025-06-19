@@ -76,28 +76,31 @@ class _LoginState extends State<Login> {
 
   Future<bool> checkUserExists(String phone) async {
     print("Phone: $phone");
-    try {
-      final response = await http.get(
-        Uri.parse("${getUrl()}users/phone/$phone"),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-      );
-      print("Response: ${response.body}");
-      print("Response: ${response.statusCode}");
-
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        return data != null && data.length > 0;
-      } else if (response.statusCode == 203) {
-        // User not found
-        return false;
+    // Try all common formats
+    List<String> formats = [
+      phone,
+      phone.startsWith("254") ? "0${phone.substring(3)}" : phone,
+      phone.startsWith("254") ? "+$phone" : phone,
+      phone.startsWith("+") ? phone.substring(1) : phone,
+    ];
+    for (String p in formats.toSet()) {
+      print("Checking format: $p");
+      try {
+        final response = await http.get(
+          Uri.parse("${getUrl()}users/phone/$p"),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+        );
+        print("Response for $p: ${response.statusCode} - ${response.body}");
+        if (response.statusCode == 200) {
+          return true;
+        }
+      } catch (e) {
+        print("Error checking user existence for $p: $e");
       }
-      return false;
-    } catch (e) {
-      print("Error checking user existence: $e");
-      return false;
     }
+    return false;
   }
 
   Future<void> handlePhoneSubmit() async {
