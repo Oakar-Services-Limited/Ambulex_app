@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../Pages/ReadNews.dart';
 
@@ -39,109 +40,132 @@ class NewsBar extends StatelessWidget {
       try {
         final date = DateTime.parse(publishedAt);
         formattedDate = 'Published: ' +
-            DateFormat('M/d/yyyy').format(date) +
+            DateFormat('d MMM yyyy').format(date) +
             ' at ' +
-            DateFormat('hh:mm a').format(date) +
-            ' hrs';
+            DateFormat('hh:mm a').format(date);
       } catch (e) {
         formattedDate = '';
       }
     }
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
-      child: Card(
-        elevation: 4,
-        color: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(12),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => ReadNews(id: id)),
-            );
-          },
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => ReadNews(id: id)),
+          );
+        },
+        child: Card(
+          elevation: 8,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          margin: EdgeInsets.zero,
           child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Colors.blue.shade50, Colors.white],
+              ),
+            ),
             padding: const EdgeInsets.all(16),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: image.isNotEmpty
                       ? Image.network(
                           image,
-                          width: 100,
-                          height: 100,
+                          width: 80,
+                          height: 80,
                           fit: BoxFit.cover,
                         )
                       : Container(
-                          width: 100,
-                          height: 100,
+                          width: 80,
+                          height: 80,
                           color: Colors.grey[200],
                           child: const Icon(Icons.image,
-                              size: 48, color: Colors.grey),
+                              size: 40, color: Colors.grey),
                         ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 14),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Text(
-                        title,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.black,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      if (tagList.isNotEmpty)
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 4,
-                          children: tagList
-                              .map((tag) => Chip(
-                                    label: Text(tag,
-                                        style: const TextStyle(fontSize: 12)),
-                                    backgroundColor: Colors.grey[100],
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                  ))
-                              .toList(),
-                        ),
-                      const SizedBox(height: 8),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (type.isNotEmpty)
-                            Chip(
-                              label: Text(type,
-                                  style: const TextStyle(color: Colors.white)),
-                              backgroundColor: Colors.redAccent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(16),
-                              ),
+                          Text(
+                            title,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Colors.blue.shade700,
                             ),
-                          const SizedBox(width: 8),
-                          if (formattedDate.isNotEmpty)
-                            Row(
-                              children: [
-                                const Icon(Icons.calendar_today,
-                                    size: 14, color: Colors.grey),
-                                const SizedBox(width: 4),
-                                Text(
-                                  formattedDate,
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.grey),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 8),
+                          if (tagList.isNotEmpty)
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 4,
+                              children: tagList
+                                  .map((tag) => Chip(
+                                        label: Text(tag,
+                                            style: GoogleFonts.poppins(
+                                                fontSize: 11,
+                                                color: Colors.blue)),
+                                        backgroundColor: Colors.blue.shade50,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(16),
+                                        ),
+                                      ))
+                                  .toList(),
+                            ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_today,
+                                  size: 14, color: Colors.blueGrey),
+                              const SizedBox(width: 4),
+                              Text(
+                                formattedDate,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12,
+                                  color: Colors.blueGrey,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
+                      if (type.isNotEmpty)
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade100,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              type,
+                              style: GoogleFonts.poppins(
+                                color: Colors.blue.shade700,
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
                     ],
                   ),
                 ),

@@ -42,13 +42,15 @@ class _InfiniteNewsScrollPaginatorDemoState
 
       List<NewsItem> postList = responseList
           .map((data) => NewsItem(
-              data['ID'],
-              data['Title'],
-              data['Type'],
-              data['Description'],
-              data['Keywords'],
-              data['Link'],
-              data['Image']))
+                data['ID'],
+                data['Title'],
+                data['Type'],
+                data['Description'],
+                data['Keywords'],
+                data['Link'],
+                data['Image'],
+                data['created_at'] ?? '',
+              ))
           .toList();
 
       final isLastPage = postList.length < _numberOfPostsPerRequest;
@@ -73,13 +75,15 @@ class _InfiniteNewsScrollPaginatorDemoState
           itemBuilder: (context, item, index) => Padding(
             padding: const EdgeInsets.all(0),
             child: NewsBar(
-                id: item.id,
-                title: item.title,
-                type: item.type,
-                description: item.description,
-                keywords: item.keywords,
-                link: item.link,
-                image: item.image),
+              id: item.id,
+              title: item.title,
+              type: item.type,
+              description: item.description,
+              keywords: item.keywords,
+              link: item.link,
+              image: item.image,
+              publishedAt: item.publishedAt ?? '',
+            ),
           ),
         ),
       ),

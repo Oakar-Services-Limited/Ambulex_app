@@ -6,6 +6,7 @@ class NewsItem {
   final String keywords;
   final String link;
   final String image;
+  final String publishedAt;
   NewsItem(this.id, this.title, this.type, this.description, this.keywords,
-      this.link, this.image);
+      this.link, this.image, this.publishedAt);
 }
