@@ -92,29 +92,24 @@ class _HomeState extends State<Home> {
       var token = await storage.read(key: "jwt");
       var decoded = parseJwt(token.toString());
 
-      if (decoded != null) {
-        setState(() {
-          phone = decoded["Phone"];
-          id = decoded["UserID"]!;
-          name = decoded["Name"];
-          location =
-              "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
-        });
-        await fetchSubscriptionInfo(id);
+      setState(() {
+        phone = decoded["Phone"];
+        id = decoded["UserID"]!;
+        name = decoded["Name"];
+        location =
+            "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}";
+      });
+      await fetchSubscriptionInfo(id);
 
-        // Check subscription status after fetching
-        if (subscriptionInfo == null ||
-            subscriptionInfo?['status'] != 'active') {
-          if (mounted) {
-            Navigator.pushReplacement(
-                context, MaterialPageRoute(builder: (_) => Subscribe()));
-          }
+      // Check subscription status after fetching
+      if (subscriptionInfo == null ||
+          subscriptionInfo?['status'] != 'active') {
+        if (mounted) {
+          Navigator.pushReplacement(
+              context, MaterialPageRoute(builder: (_) => Subscribe()));
         }
-      } else {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Login()));
       }
-    } catch (e) {
+        } catch (e) {
       print('Error in authenticateUser: $e');
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));

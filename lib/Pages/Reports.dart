@@ -73,15 +73,21 @@ class _ReportsState extends State<Reports> {
         return;
       }
 
+      var phone;
+
       setState(() {
-        userId = decoded["Phone"];
+        phone = decoded["Phone"];
       });
+
+      print("phone: $phone");
 
       final response = await http.get(
         Uri.parse(
-            '${getUrl()}reports?Phone=$userId&limit=$pageSize&offset=${currentPage * pageSize}'),
+            '${getUrl()}reports?phone=$phone&limit=$pageSize&offset=${currentPage * pageSize}'),
         headers: {'Content-Type': 'application/json'},
       );
+
+      print("response: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
