@@ -55,6 +55,7 @@ class _RegisterState extends State<Register> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  String referralCode = '';
 
   @override
   void initState() {
@@ -153,6 +154,13 @@ class _RegisterState extends State<Register> {
                         onSubmit: (value) => setState(() => password = value),
                         //prefixIcon: Icons.lock_outline,
                         //isPassword: true,
+                      ),
+                      MyTextInput(
+                        title: 'Referral Code (optional)',
+                        value: referralCode,
+                        type: TextInputType.text,
+                        onSubmit: (value) =>
+                            setState(() => referralCode = value),
                       ),
                       _buildSectionHeader("Address Details", Icons.location_on),
                       MyTextInput(
@@ -379,7 +387,8 @@ class _RegisterState extends State<Register> {
               buildingname,
               houseno,
               lat,
-              long);
+              long,
+              referralCode);
           setState(() {
             isLoading = null;
             if (res.error == null) {
@@ -468,7 +477,8 @@ Future<Message> register(
     String buildingname,
     String houseno,
     double lat,
-    double lon) async {
+    double lon,
+    [String? referralCode]) async {
   try {
     if (name == '') {
       return Message(
@@ -509,7 +519,9 @@ Future<Message> register(
         'BuildingName': buildingname,
         'HouseNumber': houseno,
         'Latitude': lat,
-        'Longitude': lon
+        'Longitude': lon,
+        if (referralCode != null && referralCode.isNotEmpty)
+          'referralCode': referralCode,
       }),
     );
 

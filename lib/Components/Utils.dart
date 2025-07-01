@@ -1,6 +1,6 @@
 // ignore_for_file: file_names
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 
 String getUrl() {
   // return "http://192.168.1.136:3003/";
@@ -44,7 +44,7 @@ String _decodeBase64(String str) {
 
 Future<bool> checkSubscriptionStatus(String userId) async {
   try {
-    final response = await http.get(
+    final response = await get(
       Uri.parse('${getUrl()}subscriptions/user/$userId'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
