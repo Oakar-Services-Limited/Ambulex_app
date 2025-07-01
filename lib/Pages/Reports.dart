@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:ambulex_users/Components/Map.dart';
+import 'package:latlong2/latlong.dart';
 
 class Reports extends StatefulWidget {
   const Reports({super.key});
@@ -26,6 +28,7 @@ class _ReportsState extends State<Reports> {
   static const int pageSize = 10;
   bool hasMore = true;
   final ScrollController _scrollController = ScrollController();
+  static const String googleApiKey = 'AIzaSyBbEGhViFyDdJJcfl0Mgpv293jyNgTl364';
 
   @override
   void initState() {
@@ -148,6 +151,49 @@ class _ReportsState extends State<Reports> {
       default:
         return Icons.error_outline;
     }
+  }
+
+  // Helper to decode Google polyline
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> polyline = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+      polyline.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+    return polyline;
+  }
+
+  Future<List<LatLng>> _fetchRoute(LatLng start, LatLng end) async {
+    final url = Uri.parse(
+      'https://maps.googleapis.com/maps/api/directions/json?origin=${start.latitude},${start.longitude}&destination=${end.latitude},${end.longitude}&mode=driving&key=$googleApiKey',
+    );
+    final response = await http.get(url);
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+      if (data['routes'] != null && data['routes'].isNotEmpty) {
+        final points = data['routes'][0]['overview_polyline']['points'];
+        return _decodePolyline(points);
+      }
+    }
+    return [];
   }
 
   @override
@@ -356,9 +402,71 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-  void _showReportDetails(Map<String, dynamic> report) {
+  void _showReportDetails(Map<String, dynamic> report) async {
     String displayAddress = report['GeocodedAddress'] ??
         'Address: ${report['Address'] ?? 'Not available'}';
+    final double? lat = report['Latitude'] != null
+        ? double.tryParse(report['Latitude'].toString())
+        : null;
+    final double? lon = report['Longitude'] != null
+        ? double.tryParse(report['Longitude'].toString())
+        : null;
+    final String username =
+        report['User'] != null && report['User']['Name'] != null
+            ? report['User']['Name']
+            : 'You';
+
+    // ERTeam location for 'In Progress' status
+    final bool showERTeam =
+        report['Status']?.toString().toLowerCase() == 'in progress' &&
+            report['ERTeam'] != null &&
+            report['ERTeam']['Latitude'] != null &&
+            report['ERTeam']['Longitude'] != null;
+    final double? erLat = showERTeam
+        ? double.tryParse(report['ERTeam']['Latitude'].toString())
+        : null;
+    final double? erLon = showERTeam
+        ? double.tryParse(report['ERTeam']['Longitude'].toString())
+        : null;
+    final String erName = showERTeam && report['ERTeam']['Name'] != null
+        ? report['ERTeam']['Name']
+        : 'ERTeam';
+
+    // Prepare markers
+    final markers = <MapMarker>[];
+    if (lat != null && lon != null) {
+      markers
+          .add(MapMarker(lat: lat, lon: lon, label: 'You', color: Colors.blue));
+    }
+    if (showERTeam && erLat != null && erLon != null) {
+      markers.add(MapMarker(
+          lat: erLat, lon: erLon, label: erName, color: Colors.orange));
+    }
+
+    List<LatLng>? routePoints;
+    bool isLoadingRoute = false;
+    if (showERTeam &&
+        lat != null &&
+        lon != null &&
+        erLat != null &&
+        erLon != null) {
+      isLoadingRoute = true;
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: SizedBox(
+            height: 220,
+            child: Center(child: CircularProgressIndicator()),
+          ),
+        ),
+      );
+      routePoints = await _fetchRoute(LatLng(erLat, erLon), LatLng(lat, lon));
+      isLoadingRoute = false;
+      Navigator.of(context).pop(); // Remove loading dialog
+    }
 
     showDialog(
       context: context,
@@ -371,6 +479,21 @@ class _ReportsState extends State<Reports> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (markers.isNotEmpty)
+                  Container(
+                    height: 200,
+                    margin: const EdgeInsets.only(bottom: 16),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: MyMap(
+                        lat: markers[0].lat,
+                        lon: markers[0].lon,
+                        username: username,
+                        markers: markers,
+                        routePoints: routePoints,
+                      ),
+                    ),
+                  ),
                 Row(
                   children: [
                     Icon(

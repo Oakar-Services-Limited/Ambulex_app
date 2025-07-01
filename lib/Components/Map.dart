@@ -3,12 +3,40 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+class MapMarker {
+  final double lat;
+  final double lon;
+  final String label;
+  final Color color;
+  MapMarker(
+      {required this.lat,
+      required this.lon,
+      required this.label,
+      required this.color});
+}
+
 class MyMap extends StatefulWidget {
   final double lat;
   final double lon;
   final String username;
+  final List<MapMarker>? markers;
+  final List<LatLng>? routePoints;
 
-  const MyMap({Key? key, required this.lat, required this.lon, required this.username})
+  /// Usage:
+  /// MyMap(
+  ///   lat: ...,
+  ///   lon: ...,
+  ///   username: ...,
+  ///   markers: [...],
+  ///   routePoints: [LatLng(...), LatLng(...)],
+  /// )
+  const MyMap(
+      {Key? key,
+      required this.lat,
+      required this.lon,
+      required this.username,
+      this.markers,
+      this.routePoints})
       : super(key: key);
 
   @override
@@ -33,7 +61,6 @@ class _MyMapState extends State<MyMap> {
       setState(() {
         currentLocation = LatLng(widget.lat, widget.lon);
       });
-      // Animate to new location
       mapController.move(currentLocation, 15.0);
     }
   }
@@ -46,6 +73,14 @@ class _MyMapState extends State<MyMap> {
 
   @override
   Widget build(BuildContext context) {
+    final markers = widget.markers ??
+        [
+          MapMarker(
+              lat: widget.lat,
+              lon: widget.lon,
+              label: 'You',
+              color: Colors.blue),
+        ];
     return Scaffold(
       body: Stack(
         children: [
@@ -69,65 +104,80 @@ class _MyMapState extends State<MyMap> {
               ),
               // Current location marker
               MarkerLayer(
-                markers: [
-                  Marker(
-                    point: currentLocation,
-                    width: 60,
-                    height: 60,
-                    child: Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            borderRadius: BorderRadius.circular(25),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                spreadRadius: 2,
-                                blurRadius: 5,
-                                offset: const Offset(0, 2),
+                markers: markers
+                    .map((marker) => Marker(
+                          point: LatLng(marker.lat, marker.lon),
+                          width: 60,
+                          height: 60,
+                          child: Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: marker.color,
+                                  borderRadius: BorderRadius.circular(25),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.location_on,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      spreadRadius: 1,
+                                      blurRadius: 2,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                constraints: const BoxConstraints(
+                                  maxWidth: 48,
+                                ),
+                                child: Text(
+                                  marker.label,
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 8,
+                                    fontWeight: FontWeight.w600,
+                                    color: marker.color,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          child: const Icon(
-                            Icons.location_on,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 2),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                spreadRadius: 1,
-                                blurRadius: 2,
-                                offset: const Offset(0, 1),
-                              ),
-                            ],
-                          ),
-                          child: Text(
-                            'You',
-                            style: GoogleFonts.poppins(
-                              fontSize: 8,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                        ))
+                    .toList(),
               ),
+              if (widget.routePoints != null && widget.routePoints!.length > 1)
+                PolylineLayer(
+                  polylines: [
+                    Polyline(
+                      points: widget.routePoints!,
+                      color: Colors.orange,
+                      strokeWidth: 4,
+                    ),
+                  ],
+                ),
             ],
           ),
           // Compact location info panel - top left only
