@@ -22,7 +22,7 @@ class _SubscribeState extends State<Subscribe> {
 
   String userid = '';
   String phoneNumber = ''; // To store the user's phone number
-  final double subscriptionAmount = 1.0; // Constant subscription amount
+  final double subscriptionAmount = 200.0; // Constant subscription amount
   Timer? _timer; // Declare a Timer variable
 
   @override
