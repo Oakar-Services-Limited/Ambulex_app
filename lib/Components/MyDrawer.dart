@@ -74,170 +74,172 @@ class _MyDrawerState extends State<MyDrawer> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.blue, // Match the Subscribe page theme
-            Colors.blueAccent,
-          ],
+    return Drawer(
+      child: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue, // Match the Subscribe page theme
+              Colors.blueAccent,
+            ],
+          ),
         ),
-      ),
-      child: ListView(
-        padding: const EdgeInsets.all(0),
-        children: [
-          DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.transparent),
-            margin: EdgeInsets.zero,
-            padding: EdgeInsets.zero,
-            child: Center(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 6.0, horizontal: 2.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Flexible(
-                        child:
-                            Image.asset('assets/images/logo.png', height: 48)),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Welcome!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+        child: ListView(
+          padding: const EdgeInsets.all(0),
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Colors.transparent),
+              margin: EdgeInsets.zero,
+              padding: EdgeInsets.zero,
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 6.0, horizontal: 2.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                          child: Image.asset('assets/images/logo.png',
+                              height: 48)),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Welcome!',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 4),
-                    isLoadingReferral
-                        ? const CircularProgressIndicator(color: Colors.white)
-                        : referralCode != null
-                            ? Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const SizedBox(height: 2),
-                                  Text('Your Referral Code:',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 11)),
-                                  const SizedBox(height: 1),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.15),
-                                      borderRadius: BorderRadius.circular(8),
+                      const SizedBox(height: 4),
+                      isLoadingReferral
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : referralCode != null
+                              ? Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const SizedBox(height: 2),
+                                    Text('Your Referral Code:',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 11)),
+                                    const SizedBox(height: 1),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.15),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: SelectableText(referralCode!,
+                                          style: const TextStyle(
+                                              color: Colors.yellow,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              letterSpacing: 2)),
                                     ),
-                                    child: SelectableText(referralCode!,
-                                        style: const TextStyle(
-                                            color: Colors.yellow,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: 2)),
-                                  ),
-                                  Builder(
-                                    builder: (context) {
-                                      print(
-                                          'Debug: referralCode in UI = ${referralCode!}');
-                                      return SizedBox.shrink();
-                                    },
-                                  ),
-                                ],
-                              )
-                            : Container(),
-                  ],
+                                    Builder(
+                                      builder: (context) {
+                                        print(
+                                            'Debug: referralCode in UI = ${referralCode!}');
+                                        return SizedBox.shrink();
+                                      },
+                                    ),
+                                  ],
+                                )
+                              : Container(),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          _createDrawerItem(
-            context,
-            title: 'Home',
-            icon: Icons.home,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const Home()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'Subscription',
-            icon: Icons.subscriptions,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => Subscribe()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'My Reports',
-            icon: Icons.history,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const Reports()),
-              );
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'News',
-            icon: Icons.article,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const News()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'My Details',
-            icon: Icons.person,
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const UpdateResidence()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'About',
-            icon: Icons.info,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const About()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'Settings',
-            icon: Icons.settings,
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const Settings()));
-            },
-          ),
-          _createDrawerItem(
-            context,
-            title: 'Share App',
-            icon: Icons.share,
-            onTap: _shareApp,
-          ),
-          _createDrawerItem(
-            context,
-            title: 'Logout',
-            icon: Icons.logout,
-            onTap: () async {
-              const store = FlutterSecureStorage();
-              store.deleteAll();
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (_) => const Login()));
-            },
-          ),
-        ],
+            _createDrawerItem(
+              context,
+              title: 'Home',
+              icon: Icons.home,
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const Home()));
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'Subscription',
+              icon: Icons.subscriptions,
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => Subscribe()));
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'My Reports',
+              icon: Icons.history,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const Reports()),
+                );
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'News',
+              icon: Icons.article,
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const News()));
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'My Details',
+              icon: Icons.person,
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const UpdateResidence()));
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'About',
+              icon: Icons.info,
+              onTap: () {
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const About()));
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'Settings',
+              icon: Icons.settings,
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const Settings()));
+              },
+            ),
+            _createDrawerItem(
+              context,
+              title: 'Share App',
+              icon: Icons.share,
+              onTap: _shareApp,
+            ),
+            _createDrawerItem(
+              context,
+              title: 'Logout',
+              icon: Icons.logout,
+              onTap: () async {
+                const store = FlutterSecureStorage();
+                store.deleteAll();
+                Navigator.push(
+                    context, MaterialPageRoute(builder: (_) => const Login()));
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
