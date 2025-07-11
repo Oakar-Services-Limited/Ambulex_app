@@ -212,193 +212,308 @@ class _ReportsState extends State<Reports> {
         elevation: 0,
       ),
       drawer: const MyDrawer(),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blue.shade50, Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Column(
-          children: [
-            Expanded(
-              child: isLoading && reports.isEmpty
-                  ? Center(
-                      child: LoadingAnimationWidget.staggeredDotsWave(
-                        color: Colors.blue,
-                        size: 50,
-                      ),
-                    )
-                  : reports.isEmpty
-                      ? Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.history,
-                                size: 64,
-                                color: Colors.grey[400],
-                              ),
-                              const SizedBox(height: 16),
-                              Text(
-                                'No reports found',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 18,
-                                  color: Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: () {
-                            setState(() {
-                              currentPage = 0;
-                            });
-                            return _loadReports();
-                          },
-                          child: ListView.builder(
-                            padding: const EdgeInsets.all(16),
-                            itemCount: reports.length,
-                            itemBuilder: (context, index) {
-                              final report = reports[index];
-                              String displayAddress = report[
-                                      'GeocodedAddress'] ??
-                                  'Address: ${report['Address'] ?? 'Not available'}';
-
-                              return Card(
-                                elevation: 2,
-                                margin: const EdgeInsets.only(bottom: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(12),
-                                  onTap: () => _showReportDetails(report),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              _getTypeIcon(report['Type']),
-                                              color: _getStatusColor(
-                                                  report['Status']),
-                                              size: 24,
-                                            ),
-                                            const SizedBox(width: 8),
-                                            Text(
-                                              report['Type'] == 'GBV'
-                                                  ? 'Gender Based Violence'
-                                                  : 'Medical Emergency',
-                                              style: GoogleFonts.poppins(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                            const Spacer(),
-                                            Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: _getStatusColor(
-                                                        report['Status'])
-                                                    .withOpacity(0.1),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                border: Border.all(
-                                                  color: _getStatusColor(
-                                                      report['Status']),
-                                                ),
-                                              ),
-                                              child: Text(
-                                                report['Status'],
-                                                style: GoogleFonts.poppins(
-                                                  fontSize: 12,
-                                                  color: _getStatusColor(
-                                                      report['Status']),
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        const SizedBox(height: 12),
-                                        Text(
-                                          displayAddress,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 14,
-                                            color: Colors.grey[600],
-                                          ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          timeago.format(
-                                            DateTime.parse(report['createdAt']),
-                                          ),
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 12,
-                                            color: Colors.grey[500],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-            ),
-            if (reports.isNotEmpty)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 4,
-                      offset: const Offset(0, -2),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: currentPage > 0 ? _previousPage : null,
-                      color: currentPage > 0 ? Colors.blue : Colors.grey,
-                    ),
-                    Text(
-                      'Page ${currentPage + 1} of $totalPages',
-                      style: GoogleFonts.poppins(
-                        fontSize: 14,
-                        color: Colors.grey[700],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward),
-                      onPressed:
-                          currentPage < totalPages - 1 ? _nextPage : null,
-                      color: currentPage < totalPages - 1
-                          ? Colors.blue
-                          : Colors.grey,
-                    ),
-                  ],
+      body: isLoading
+          ? Center(
+              child: LoadingAnimationWidget.staggeredDotsWave(
+                color: Colors.blue,
+                size: 50,
+              ),
+            )
+          : Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.blue.shade50, Colors.white],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
-          ],
-        ),
-      ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: reports.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  size: 64,
+                                  color: Colors.grey[400],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No reports found',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 18,
+                                    color: Colors.grey[600],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () {
+                              setState(() {
+                                currentPage = 0;
+                              });
+                              return _loadReports();
+                            },
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: reports.length,
+                              itemBuilder: (context, index) {
+                                final report = reports[index];
+                                String displayAddress = report[
+                                        'GeocodedAddress'] ??
+                                    'Address: ${report['Address'] ?? 'Not available'}';
+
+                                return Card(
+                                  elevation: 2,
+                                  margin: const EdgeInsets.only(bottom: 16),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Stack(
+                                    children: [
+                                      InkWell(
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: () => _showReportDetails(report),
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(16),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Icon(
+                                                    _getTypeIcon(
+                                                        report['Type']),
+                                                    color: _getStatusColor(
+                                                        report['Status']),
+                                                    size: 24,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    report['Type'] == 'GBV'
+                                                        ? 'Gender Based Violence'
+                                                        : 'Medical Emergency',
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  const Spacer(),
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 4,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: _getStatusColor(
+                                                              report['Status'])
+                                                          .withOpacity(0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              12),
+                                                      border: Border.all(
+                                                        color: _getStatusColor(
+                                                            report['Status']),
+                                                      ),
+                                                    ),
+                                                    child: Text(
+                                                      report['Status'],
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        fontSize: 12,
+                                                        color: _getStatusColor(
+                                                            report['Status']),
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              const SizedBox(height: 12),
+                                              Text(
+                                                displayAddress,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 14,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                timeago.format(
+                                                  DateTime.parse(
+                                                      report['createdAt']),
+                                                ),
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  color: Colors.grey[500],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                      // Cancel Call button at top right
+                                      Positioned(
+                                        top: 8,
+                                        right: 8,
+                                        child: TextButton.icon(
+                                          style: TextButton.styleFrom(
+                                            backgroundColor: Colors.red.shade50,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8, vertical: 4),
+                                          ),
+                                          icon: const Icon(Icons.cancel,
+                                              color: Colors.red, size: 18),
+                                          label: const Text(
+                                            'Cancel Call',
+                                            style: TextStyle(
+                                                color: Colors.red,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12),
+                                          ),
+                                          onPressed: () async {
+                                            final confirm =
+                                                await showDialog<bool>(
+                                              context: context,
+                                              builder: (context) => AlertDialog(
+                                                title:
+                                                    const Text('Cancel Call'),
+                                                content: const Text(
+                                                    'Are you sure you want to cancel and delete this call? This action cannot be undone.'),
+                                                actions: [
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(false),
+                                                    child: const Text('No'),
+                                                  ),
+                                                  TextButton(
+                                                    onPressed: () =>
+                                                        Navigator.of(context)
+                                                            .pop(true),
+                                                    style: TextButton.styleFrom(
+                                                        foregroundColor:
+                                                            Colors.red),
+                                                    child: const Text(
+                                                        'Yes, Cancel'),
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                            if (confirm == true) {
+                                              try {
+                                                final response =
+                                                    await http.delete(
+                                                  Uri.parse(
+                                                      '${getUrl()}reports/${report['ID']}'),
+                                                  headers: {
+                                                    'Content-Type':
+                                                        'application/json'
+                                                  },
+                                                );
+                                                if (!mounted) return;
+                                                if (response.statusCode ==
+                                                    200) {
+                                                  setState(() {
+                                                    reports.removeAt(index);
+                                                    totalItems--;
+                                                  });
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'Call cancelled and deleted.'),
+                                                      backgroundColor:
+                                                          Colors.green,
+                                                    ),
+                                                  );
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'Failed to delete call.'),
+                                                      backgroundColor:
+                                                          Colors.red,
+                                                    ),
+                                                  );
+                                                }
+                                              } catch (e) {
+                                                if (!mounted) return;
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                        'Error deleting call.'),
+                                                    backgroundColor: Colors.red,
+                                                  ),
+                                                );
+                                              }
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                  ),
+                  if (reports.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.arrow_back),
+                            onPressed: currentPage > 0 ? _previousPage : null,
+                            color: currentPage > 0 ? Colors.blue : Colors.grey,
+                          ),
+                          Text(
+                            'Page ${currentPage + 1} of $totalPages',
+                            style: GoogleFonts.poppins(
+                              fontSize: 14,
+                              color: Colors.grey[700],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.arrow_forward),
+                            onPressed:
+                                currentPage < totalPages - 1 ? _nextPage : null,
+                            color: currentPage < totalPages - 1
+                                ? Colors.blue
+                                : Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
     );
   }
 
