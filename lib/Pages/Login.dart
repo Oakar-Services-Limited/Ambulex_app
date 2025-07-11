@@ -21,6 +21,7 @@ import 'package:http/http.dart' as http;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Components/Utils.dart';
 import 'package:ambulex_users/Components/ChangePasswordDialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -233,8 +234,19 @@ class _LoginState extends State<Login> {
         setState(() {
           isLoading = null;
           successful = false;
-          error = res.error;
+          // Only set error if not the version error
+          if (res.error !=
+              'You are using an old version of the app, update it on Play Store.') {
+            error = res.error;
+          } else {
+            error = '';
+          }
         });
+        if (res.error ==
+            'You are using an old version of the app, update it on Play Store.') {
+          _showUpgradeDialog();
+          return;
+        }
       }
     } catch (e) {
       setState(() {
@@ -422,6 +434,53 @@ class _LoginState extends State<Login> {
 
     return result ?? false;
   }
+
+  void _showUpgradeDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(
+            children: [
+              Icon(Icons.system_update, color: Color(0xff0288D1), size: 32),
+              SizedBox(width: 10),
+              Text("New Upgrades Detected",
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: const Text(
+            "Click below to upgrade your app before you continue.",
+            style: TextStyle(fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Color(0xff0288D1),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () async {
+                const url =
+                    "https://play.google.com/store/apps/details?id=ke.co.osl.ambulex_users&pcampaignid=web_share";
+                final uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                }
+              },
+              child: const Text(
+                "Upgrade Now",
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 Future<Message> login(String phone, String password) async {
@@ -450,8 +509,11 @@ Future<Message> login(String phone, String password) async {
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
-        body:
-            jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
+        body: jsonEncode(<String, String>{
+          'Phone': phone,
+          'Password': password,
+          // 'appVersion': '1.0.0'
+        }),
       );
 
       if (loginResponse.statusCode == 200) {
