@@ -7,6 +7,7 @@ import 'package:ambulex_users/Components/Utils.dart';
 import 'package:ambulex_users/Pages/GettingStarted.dart';
 import 'package:ambulex_users/Pages/Login.dart';
 import 'package:ambulex_users/Pages/Register.dart';
+import 'package:ambulex_users/Pages/Reports.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
@@ -102,14 +103,13 @@ class _HomeState extends State<Home> {
       await fetchSubscriptionInfo(id);
 
       // Check subscription status after fetching
-      if (subscriptionInfo == null ||
-          subscriptionInfo?['status'] != 'active') {
+      if (subscriptionInfo == null || subscriptionInfo?['status'] != 'active') {
         if (mounted) {
           Navigator.pushReplacement(
               context, MaterialPageRoute(builder: (_) => Subscribe()));
         }
       }
-        } catch (e) {
+    } catch (e) {
       print('Error in authenticateUser: $e');
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
@@ -296,7 +296,10 @@ class _HomeState extends State<Home> {
                                               ],
                                             ),
                                             Expanded(
-                                              child: MyMap(lat: lat, lon: long, username: phone),
+                                              child: MyMap(
+                                                  lat: lat,
+                                                  lon: long,
+                                                  username: phone),
                                             ),
                                           ],
                                         ),
@@ -514,17 +517,50 @@ class _HomeState extends State<Home> {
   }
 
   void _showSuccessDialog(String type) {
+    final isGBV = type.toLowerCase().contains('gender');
+    final icon = isGBV ? Icons.handshake : Icons.medical_services;
+    final color = isGBV ? Colors.orange : Colors.red;
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: Text(type),
-        content: const Text('Call for help received. Help is on the way!!'),
+        title: Row(
+          children: [
+            Icon(icon, color: color, size: 28),
+            const SizedBox(width: 10),
+            Text(
+              type,
+              style: GoogleFonts.poppins(
+                fontWeight: FontWeight.bold,
+                color: color,
+                fontSize: 20,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Call for help received. Help is on the way!!',
+          style: GoogleFonts.poppins(fontSize: 16),
+        ),
         actions: <Widget>[
           TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
+            style: TextButton.styleFrom(
+              backgroundColor: color,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () => Navigator.pushReplacement(
+                context, MaterialPageRoute(builder: (_) => Reports())),
+            child: Text(
+              'OK',
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }

@@ -133,7 +133,7 @@ class _ReportsState extends State<Reports> {
         return Colors.blue;
       case 'in progress':
         return Colors.orange;
-      case 'completed':
+      case 'resolved':
         return Colors.green;
       case 'cancelled':
         return Colors.red;
@@ -202,7 +202,7 @@ class _ReportsState extends State<Reports> {
       appBar: AppBar(
         foregroundColor: Colors.white,
         title: Text(
-          'My Reports',
+          'Tap to view a Report',
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -302,6 +302,33 @@ class _ReportsState extends State<Reports> {
                                                       fontSize: 16,
                                                       fontWeight:
                                                           FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  // Add status label here
+                                                  Container(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 4),
+                                                    decoration: BoxDecoration(
+                                                      color: _getStatusColor(
+                                                              report['Status'])
+                                                          .withOpacity(0.1),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
+                                                    ),
+                                                    child: Text(
+                                                      report['Status'],
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        fontSize: 12,
+                                                        color: _getStatusColor(
+                                                            report['Status']),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                      ),
                                                     ),
                                                   ),
                                                   const Spacer(),
@@ -487,7 +514,6 @@ class _ReportsState extends State<Reports> {
                                                             child:
                                                                 ElevatedButton(
                                                               onPressed: () =>
-                                                              
                                                                   Navigator.of(
                                                                           context)
                                                                       .pop(
@@ -683,123 +709,122 @@ class _ReportsState extends State<Reports> {
       context: context,
       useRootNavigator: true,
       builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            // Start fetching the route if needed and not already started
-            if (showERTeam &&
-                lat != null &&
-                lon != null &&
-                erLat != null &&
-                erLon != null &&
-                routePoints == null &&
-                !isLoadingRoute) {
-              isLoadingRoute = true;
-              _fetchRoute(LatLng(erLat, erLon), LatLng(lat, lon))
-                  .then((points) {
-                setState(() {
-                  routePoints = points;
-                  isLoadingRoute = false;
-                });
-              });
-            }
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: SingleChildScrollView(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (markers.isNotEmpty)
-                        Container(
-                          height: 200,
-                          margin: const EdgeInsets.only(bottom: 16),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: isLoadingRoute
-                                ? Center(child: CircularProgressIndicator())
-                                : MyMap(
-                                    lat: markers[0].lat,
-                                    lon: markers[0].lon,
-                                    username: username,
-                                    markers: markers,
-                                    routePoints: routePoints,
-                                  ),
-                          ),
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Container(
+            width: MediaQuery.of(context).size.width * 1,
+            height: MediaQuery.of(context).size.height * 1,
+            padding: const EdgeInsets.all(16),
+            child: StatefulBuilder(
+              builder: (context, setState) {
+                // Start fetching the route if needed and not already started
+                if (showERTeam &&
+                    lat != null &&
+                    lon != null &&
+                    erLat != null &&
+                    erLon != null &&
+                    routePoints == null &&
+                    !isLoadingRoute) {
+                  isLoadingRoute = true;
+                  _fetchRoute(LatLng(erLat, erLon), LatLng(lat, lon))
+                      .then((points) {
+                    setState(() {
+                      routePoints = points;
+                      isLoadingRoute = false;
+                    });
+                  });
+                }
+                return Column(
+                  children: [
+                    Expanded(
+                      child: (markers.isNotEmpty)
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: isLoadingRoute
+                                  ? Center(child: CircularProgressIndicator())
+                                  : MyMap(
+                                      lat: markers[0].lat,
+                                      lon: markers[0].lon,
+                                      username: username,
+                                      markers: markers,
+                                      routePoints: routePoints,
+                                    ),
+                            )
+                          : SizedBox.shrink(),
+                    ),
+                    const SizedBox(height: 16),
+                    // Details section below the map
+                    Row(
+                      children: [
+                        Icon(
+                          _getTypeIcon(report['Type']),
+                          color: _getStatusColor(report['Status']),
+                          size: 24,
                         ),
-                      Row(
-                        children: [
-                          Icon(
-                            _getTypeIcon(report['Type']),
-                            color: _getStatusColor(report['Status']),
-                            size: 24,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              'Emergency Report Details',
-                              style: GoogleFonts.poppins(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: _getStatusColor(report['Status']),
-                              ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Emergency Report Details',
+                            style: GoogleFonts.poppins(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: _getStatusColor(report['Status']),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              Navigator.of(dialogContext, rootNavigator: true)
-                                  .pop();
-                            },
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      _buildDetailSection(
-                        'Emergency Type',
-                        report['Type'] == 'GBV'
-                            ? 'Gender Based Violence'
-                            : 'Medical Emergency',
-                        Icons.emergency,
-                      ),
-                      _buildDetailSection(
-                        'Status',
-                        report['Status'],
-                        Icons.info_outline,
-                      ),
-                      _buildDetailSection(
-                        'Location',
-                        displayAddress,
-                        Icons.location_on,
-                      ),
-                      if (report['Latitude'] != null &&
-                          report['Longitude'] != null)
-                        _buildDetailSection(
-                          'Coordinates',
-                          'Lat: ${report['Latitude']}, Lon: ${report['Longitude']}',
-                          Icons.gps_fixed,
                         ),
-                      if (report['Action'] != null)
-                        _buildDetailSection(
-                          'Action Taken',
-                          report['Action'],
-                          Icons.medical_services,
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () {
+                            Navigator.of(dialogContext, rootNavigator: true)
+                                .pop();
+                          },
                         ),
-                      if (report['Description'] != null)
-                        _buildDetailSection(
-                          'Description',
-                          report['Description'],
-                          Icons.description,
-                        ),
-                      _buildTimelineSection(report),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
+                      ],
+                    ),
+                    const Divider(),
+                    _buildDetailSection(
+                      'Emergency Type',
+                      report['Type'] == 'GBV'
+                          ? 'Gender Based Violence'
+                          : 'Medical Emergency',
+                      Icons.emergency,
+                    ),
+                    _buildDetailSection(
+                      'Status',
+                      report['Status'],
+                      Icons.info_outline,
+                    ),
+                    _buildDetailSection(
+                      'Location',
+                      displayAddress,
+                      Icons.location_on,
+                    ),
+                    if (report['Latitude'] != null &&
+                        report['Longitude'] != null)
+                      _buildDetailSection(
+                        'Coordinates',
+                        'Lat: ${report['Latitude']}, Lon: ${report['Longitude']}',
+                        Icons.gps_fixed,
+                      ),
+                    if (report['Action'] != null)
+                      _buildDetailSection(
+                        'Action Taken',
+                        report['Action'],
+                        Icons.medical_services,
+                      ),
+                    if (report['Description'] != null)
+                      _buildDetailSection(
+                        'Description',
+                        report['Description'],
+                        Icons.description,
+                      ),
+                    _buildTimelineSection(report),
+                  ],
+                );
+              },
+            ),
+          ),
         );
       },
     );

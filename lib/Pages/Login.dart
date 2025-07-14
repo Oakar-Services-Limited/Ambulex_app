@@ -537,7 +537,11 @@ Future<Message> login(String phone, String password) async {
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
-      body: jsonEncode(<String, String>{'Phone': phone, 'Password': password}),
+      body: jsonEncode(<String, String>{
+        'Phone': phone,
+        'Password': password,
+        'appVersion': '1.0.0'
+      }),
     );
 
     if (response.statusCode == 200 || response.statusCode == 203) {
