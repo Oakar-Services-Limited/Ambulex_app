@@ -501,37 +501,6 @@ Future<Message> login(String phone, String password) async {
       );
     }
 
-    // Check if password starts with "Sys"
-    if (password.startsWith("SYS")) {
-      // First try to login to get the user ID
-      final loginResponse = await http.post(
-        Uri.parse("${getUrl()}users/login"),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'Phone': phone,
-          'Password': password,
-          'appVersion': '1.0.0'
-        }),
-      );
-
-      if (loginResponse.statusCode == 200) {
-        var data = jsonDecode(loginResponse.body);
-        return Message(
-          token: data['token'],
-          success: null,
-          error: "system_password",
-        );
-      } else {
-        return Message(
-          token: null,
-          success: null,
-          error: "Invalid credentials",
-        );
-      }
-    }
-
     final response = await http.post(
       Uri.parse("${getUrl()}users/login"),
       headers: <String, String>{
@@ -540,11 +509,21 @@ Future<Message> login(String phone, String password) async {
       body: jsonEncode(<String, String>{
         'Phone': phone,
         'Password': password,
-        'appVersion': '1.0.0'
+        'appVersion': '2.0.0'
       }),
     );
 
-    if (response.statusCode == 200 || response.statusCode == 203) {
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      if (password.startsWith("SYS")) {
+        return Message(
+          token: data['token'],
+          success: null,
+          error: "system_password",
+        );
+      }
+      return Message.fromJson(data);
+    } else if (response.statusCode == 203) {
       return Message.fromJson(jsonDecode(response.body));
     } else {
       print("response error: ${response.statusCode}, ${response.body}");
