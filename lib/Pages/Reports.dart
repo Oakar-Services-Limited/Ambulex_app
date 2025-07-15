@@ -285,6 +285,8 @@ class _ReportsState extends State<Reports> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
                                                 children: [
                                                   Icon(
                                                     _getTypeIcon(
@@ -294,45 +296,68 @@ class _ReportsState extends State<Reports> {
                                                     size: 24,
                                                   ),
                                                   const SizedBox(width: 8),
-                                                  Text(
-                                                    report['Type'] == 'GBV'
-                                                        ? 'Gender Based Violence'
-                                                        : 'Medical Emergency',
-                                                    style: GoogleFonts.poppins(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                                  Expanded(
+                                                    child: Row(
+                                                      children: [
+                                                        Flexible(
+                                                          child: Text(
+                                                            report['Type'] ==
+                                                                    'GBV'
+                                                                ? 'GBV'
+                                                                : 'ME',
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              fontSize: 15,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            width: 8),
+                                                        Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal: 8,
+                                                                  vertical: 4),
+                                                          decoration:
+                                                              BoxDecoration(
+                                                            color: _getStatusColor(
+                                                                    report[
+                                                                        'Status'])
+                                                                .withOpacity(
+                                                                    0.7),
+                                                            borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                        8),
+                                                          ),
+                                                          child: Text(
+                                                            report['Status'],
+                                                            style: GoogleFonts
+                                                                .poppins(
+                                                              fontSize: 12,
+                                                              color:
+                                                                  Colors.white,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .bold,
+                                                            ),
+                                                            maxLines: 1,
+                                                            overflow:
+                                                                TextOverflow
+                                                                    .ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 8),
-                                                  // Add status label here
-                                                  Container(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 8,
-                                                        vertical: 4),
-                                                    decoration: BoxDecoration(
-                                                      color: _getStatusColor(
-                                                              report['Status'])
-                                                          .withOpacity(0.1),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
-                                                    ),
-                                                    child: Text(
-                                                      report['Status'],
-                                                      style:
-                                                          GoogleFonts.poppins(
-                                                        fontSize: 12,
-                                                        color: _getStatusColor(
-                                                            report['Status']),
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const Spacer(),
-                                                
                                                   TextButton.icon(
                                                     style: TextButton.styleFrom(
                                                       backgroundColor:
@@ -346,7 +371,7 @@ class _ReportsState extends State<Reports> {
                                                       padding: const EdgeInsets
                                                           .symmetric(
                                                           horizontal: 8,
-                                                          vertical: 4),
+                                                          vertical: 0),
                                                     ),
                                                     icon: const Icon(
                                                         Icons.cancel,
@@ -705,132 +730,163 @@ class _ReportsState extends State<Reports> {
     List<LatLng>? routePoints;
     bool isLoadingRoute = false;
 
-    await showDialog(
-      context: context,
-      useRootNavigator: true,
-      builder: (dialogContext) {
-        return Dialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          child: Container(
-            width: MediaQuery.of(context).size.width * 1,
-            height: MediaQuery.of(context).size.height * 1,
-            padding: const EdgeInsets.all(16),
-            child: StatefulBuilder(
-              builder: (context, setState) {
-                // Start fetching the route if needed and not already started
-                if (showERTeam &&
-                    lat != null &&
-                    lon != null &&
-                    erLat != null &&
-                    erLon != null &&
-                    routePoints == null &&
-                    !isLoadingRoute) {
-                  isLoadingRoute = true;
-                  _fetchRoute(LatLng(erLat, erLon), LatLng(lat, lon))
-                      .then((points) {
-                    setState(() {
-                      routePoints = points;
-                      isLoadingRoute = false;
-                    });
-                  });
-                }
-                return Column(
-                  children: [
-                    Expanded(
-                      child: (markers.isNotEmpty)
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: isLoadingRoute
-                                  ? Center(child: CircularProgressIndicator())
-                                  : MyMap(
-                                      lat: markers[0].lat,
-                                      lon: markers[0].lon,
-                                      username: username,
-                                      markers: markers,
-                                      routePoints: routePoints,
-                                    ),
-                            )
-                          : SizedBox.shrink(),
-                    ),
-                    const SizedBox(height: 16),
-                    // Details section below the map
-                    Row(
-                      children: [
-                        Icon(
-                          _getTypeIcon(report['Type']),
-                          color: _getStatusColor(report['Status']),
-                          size: 24,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Emergency Report Details',
-                            style: GoogleFonts.poppins(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: _getStatusColor(report['Status']),
-                            ),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {
-                            Navigator.of(dialogContext, rootNavigator: true)
-                                .pop();
-                          },
-                        ),
-                      ],
-                    ),
-                    const Divider(),
-                    _buildDetailSection(
-                      'Emergency Type',
-                      report['Type'] == 'GBV'
-                          ? 'Gender Based Violence'
-                          : 'Medical Emergency',
-                      Icons.emergency,
-                    ),
-                    _buildDetailSection(
-                      'Status',
-                      report['Status'],
-                      Icons.info_outline,
-                    ),
-                    _buildDetailSection(
-                      'Location',
-                      displayAddress,
-                      Icons.location_on,
-                    ),
-                    if (report['Latitude'] != null &&
-                        report['Longitude'] != null)
-                      _buildDetailSection(
-                        'Coordinates',
-                        'Lat: ${report['Latitude']}, Lon: ${report['Longitude']}',
-                        Icons.gps_fixed,
-                      ),
-                    if (report['Action'] != null)
-                      _buildDetailSection(
-                        'Action Taken',
-                        report['Action'],
-                        Icons.medical_services,
-                      ),
-                    if (report['Description'] != null)
-                      _buildDetailSection(
-                        'Description',
-                        report['Description'],
-                        Icons.description,
-                      ),
-                    _buildTimelineSection(report),
-                  ],
-                );
-              },
-            ),
+    if (showERTeam &&
+        lat != null &&
+        lon != null &&
+        erLat != null &&
+        erLon != null) {
+      routePoints = await _fetchRoute(LatLng(erLat, erLon), LatLng(lat, lon));
+    }
+
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ReportDetailsPage(
+          report: report,
+          markers: markers,
+          routePoints: routePoints,
+          showERTeam: showERTeam,
+          displayAddress: displayAddress,
+          username: username,
+        ),
+      ),
+    );
+  }
+}
+
+class TimelineItem {
+  final String label;
+  final String time;
+  final IconData icon;
+
+  TimelineItem(this.label, this.time, this.icon);
+}
+
+class ReportDetailsPage extends StatelessWidget {
+  final Map<String, dynamic> report;
+  final List<MapMarker> markers;
+  final List<LatLng>? routePoints;
+  final bool showERTeam;
+  final String displayAddress;
+  final String username;
+
+  const ReportDetailsPage({
+    Key? key,
+    required this.report,
+    required this.markers,
+    required this.routePoints,
+    required this.showERTeam,
+    required this.displayAddress,
+    required this.username,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        foregroundColor: Colors.white,
+        title: Text(
+          'Report Details',
+          style: GoogleFonts.poppins(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
           ),
-        );
-      },
+        ),
+        backgroundColor: Colors.blue,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Expanded(
+              child: (markers.isNotEmpty)
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: routePoints == null && showERTeam
+                          ? Center(child: CircularProgressIndicator())
+                          : MyMap(
+                              lat: markers[0].lat,
+                              lon: markers[0].lon,
+                              username: username,
+                              markers: markers,
+                              routePoints: routePoints,
+                            ),
+                    )
+                  : SizedBox.shrink(),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Icon(
+                  report['Type'] == 'GBV'
+                      ? Icons.handshake
+                      : Icons.medical_services,
+                  color: Colors.blue,
+                  size: 24,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Emergency Report Details',
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(),
+            ReportDetailsPage._buildDetailSection(
+              'Emergency Type',
+              report['Type'] == 'GBV'
+                  ? 'Gender Based Violence'
+                  : 'Medical Emergency',
+              Icons.emergency,
+            ),
+            ReportDetailsPage._buildDetailSection(
+              'Status',
+              report['Status'],
+              Icons.info_outline,
+            ),
+            ReportDetailsPage._buildDetailSection(
+              'Location',
+              displayAddress,
+              Icons.location_on,
+            ),
+            if (report['Latitude'] != null && report['Longitude'] != null)
+              ReportDetailsPage._buildDetailSection(
+                'Coordinates',
+                'Lat: ${report['Latitude']}, Lon: ${report['Longitude']}',
+                Icons.gps_fixed,
+              ),
+            if (report['Action'] != null)
+              ReportDetailsPage._buildDetailSection(
+                'Action Taken',
+                report['Action'],
+                Icons.medical_services,
+              ),
+            if (report['Description'] != null)
+              ReportDetailsPage._buildDetailSection(
+                'Description',
+                report['Description'],
+                Icons.description,
+              ),
+            ReportDetailsPage._buildTimelineSection(report),
+          ],
+        ),
+      ),
     );
   }
 
-  Widget _buildDetailSection(String label, String value, IconData icon) {
+  static Widget _buildDetailSection(String label, String value, IconData icon) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -865,7 +921,7 @@ class _ReportsState extends State<Reports> {
     );
   }
 
-  Widget _buildTimelineSection(Map<String, dynamic> report) {
+  static Widget _buildTimelineSection(Map<String, dynamic> report) {
     final timelineItems = [
       if (report['createdAt'] != null)
         TimelineItem('Reported', report['createdAt'], Icons.report),
@@ -893,12 +949,14 @@ class _ReportsState extends State<Reports> {
           ),
         ),
         const SizedBox(height: 8),
-        ...timelineItems.map((item) => _buildTimelineItem(item)).toList(),
+        ...timelineItems
+            .map((item) => ReportDetailsPage._buildTimelineItem(item))
+            .toList(),
       ],
     );
   }
 
-  Widget _buildTimelineItem(TimelineItem item) {
+  static Widget _buildTimelineItem(TimelineItem item) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -920,12 +978,4 @@ class _ReportsState extends State<Reports> {
       ),
     );
   }
-}
-
-class TimelineItem {
-  final String label;
-  final String time;
-  final IconData icon;
-
-  TimelineItem(this.label, this.time, this.icon);
 }

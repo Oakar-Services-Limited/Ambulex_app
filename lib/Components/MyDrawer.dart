@@ -234,7 +234,7 @@ class _MyDrawerState extends State<MyDrawer> {
               onTap: () async {
                 const store = FlutterSecureStorage();
                 store.deleteAll();
-                Navigator.push(
+                Navigator.pushReplacement(
                     context, MaterialPageRoute(builder: (_) => const Login()));
               },
             ),

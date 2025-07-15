@@ -440,43 +440,78 @@ class _LoginState extends State<Login> {
       context: context,
       barrierDismissible: true,
       builder: (BuildContext context) {
-        return AlertDialog(
+        return Dialog(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            children: [
-              Icon(Icons.system_update, color: Color(0xff0288D1), size: 32),
-              SizedBox(width: 10),
-              Text("New Upgrades Detected",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-            ],
-          ),
-          content: const Text(
-            "Click below to upgrade your app before you continue.",
-            style: TextStyle(fontSize: 16),
-          ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Color(0xff0288D1),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              onPressed: () async {
-                const url =
-                    "https://play.google.com/store/apps/details?id=ke.co.osl.ambulex_users&pcampaignid=web_share";
-                final uri = Uri.parse(url);
-                if (await canLaunchUrl(uri)) {
-                  await launchUrl(uri);
-                }
-              },
-              child: const Text(
-                "Upgrade Now",
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+          insetPadding:
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 350),
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.system_update,
+                      color: Color(0xff0288D1), size: 32),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "New Upgrades Detected",
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    color: Colors.blue.shade700,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Click below to upgrade your app before you continue.",
+                  style: GoogleFonts.poppins(
+                    fontSize: 15,
+                    color: Colors.grey[700],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xff0288D1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: () async {
+                      const url =
+                          "https://play.google.com/store/apps/details?id=ke.co.osl.ambulex_users&pcampaignid=web_share";
+                      final uri = Uri.parse(url);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(uri);
+                      }
+                    },
+                    child: Text(
+                      "Upgrade Now",
+                      style: GoogleFonts.poppins(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
