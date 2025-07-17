@@ -358,259 +358,266 @@ class _ReportsState extends State<Reports> {
                                                       ],
                                                     ),
                                                   ),
-                                                  TextButton.icon(
-                                                    style: TextButton.styleFrom(
-                                                      backgroundColor:
-                                                          Colors.red.shade50,
-                                                      shape:
-                                                          RoundedRectangleBorder(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
+                                                  // Only show Cancel Call button if status is 'Received'
+                                                  if ((report['Status'] ?? '')
+                                                          .toString()
+                                                          .toLowerCase() ==
+                                                      'received')
+                                                    TextButton.icon(
+                                                      style:
+                                                          TextButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.red.shade50,
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 8,
+                                                                vertical: 0),
                                                       ),
-                                                      padding: const EdgeInsets
-                                                          .symmetric(
-                                                          horizontal: 8,
-                                                          vertical: 0),
-                                                    ),
-                                                    icon: const Icon(
-                                                        Icons.cancel,
-                                                        color: Colors.red,
-                                                        size: 18),
-                                                    label: const Text(
-                                                      'Cancel Call',
-                                                      style: TextStyle(
+                                                      icon: const Icon(
+                                                          Icons.cancel,
+                                                          color: Colors.red,
+                                                          size: 18),
+                                                      label: const Text(
+                                                        'Cancel Call',
+                                                        style: TextStyle(
                                                           color: Colors.red,
                                                           fontWeight:
                                                               FontWeight.bold,
-                                                          fontSize: 12),
-                                                    ),
-                                                    onPressed: () async {
-                                                      final confirm =
-                                                          await showDialog<
-                                                              bool>(
-                                                        context: context,
-                                                        builder: (context) =>
-                                                            Dialog(
-                                                          shape:
-                                                              RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius
-                                                                    .circular(
-                                                                        20),
-                                                          ),
-                                                          elevation: 0,
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .transparent,
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .all(24),
-                                                            decoration:
-                                                                BoxDecoration(
-                                                              color:
-                                                                  Colors.white,
-                                                              shape: BoxShape
-                                                                  .rectangle,
+                                                          fontSize: 12,
+                                                        ),
+                                                      ),
+                                                      onPressed: () async {
+                                                        final confirm =
+                                                            await showDialog<
+                                                                bool>(
+                                                          context: context,
+                                                          builder: (context) =>
+                                                              Dialog(
+                                                            shape:
+                                                                RoundedRectangleBorder(
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
                                                                           20),
-                                                              boxShadow: [
-                                                                BoxShadow(
-                                                                  color: Colors
-                                                                      .black26,
-                                                                  blurRadius:
-                                                                      10.0,
-                                                                  offset:
-                                                                      const Offset(
-                                                                          0.0,
-                                                                          10.0),
-                                                                ),
-                                                              ],
                                                             ),
-                                                            child: Column(
-                                                              mainAxisSize:
-                                                                  MainAxisSize
-                                                                      .min,
-                                                              children: [
-                                                                Container(
-                                                                  padding:
-                                                                      const EdgeInsets
-                                                                          .all(
+                                                            elevation: 0,
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            child: Container(
+                                                              padding:
+                                                                  const EdgeInsets
+                                                                      .all(24),
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                                shape: BoxShape
+                                                                    .rectangle,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            20),
+                                                                boxShadow: [
+                                                                  BoxShadow(
+                                                                    color: Colors
+                                                                        .black26,
+                                                                    blurRadius:
+                                                                        10.0,
+                                                                    offset:
+                                                                        const Offset(
+                                                                            0.0,
+                                                                            10.0),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              child: Column(
+                                                                mainAxisSize:
+                                                                    MainAxisSize
+                                                                        .min,
+                                                                children: [
+                                                                  Container(
+                                                                    padding:
+                                                                        const EdgeInsets
+                                                                            .all(
+                                                                            12),
+                                                                    decoration:
+                                                                        BoxDecoration(
+                                                                      color: Colors
+                                                                          .red
+                                                                          .shade50,
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                    ),
+                                                                    child:
+                                                                        const Icon(
+                                                                      Icons
+                                                                          .cancel,
+                                                                      size: 32,
+                                                                      color: Colors
+                                                                          .red,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                      height:
+                                                                          20),
+                                                                  Text(
+                                                                    'Cancel Call',
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                      fontSize:
+                                                                          22,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .bold,
+                                                                      color: Colors
+                                                                          .red,
+                                                                    ),
+                                                                  ),
+                                                                  const SizedBox(
+                                                                      height:
                                                                           12),
-                                                                  decoration:
-                                                                      BoxDecoration(
-                                                                    color: Colors
-                                                                        .red
-                                                                        .shade50,
-                                                                    shape: BoxShape
-                                                                        .circle,
+                                                                  Text(
+                                                                    'Are you sure you want to cancel and delete this call? This action cannot be undone.',
+                                                                    style: GoogleFonts
+                                                                        .poppins(
+                                                                      fontSize:
+                                                                          15,
+                                                                      color: Colors
+                                                                              .grey[
+                                                                          700],
+                                                                    ),
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
                                                                   ),
-                                                                  child:
-                                                                      const Icon(
-                                                                    Icons
-                                                                        .cancel,
-                                                                    size: 32,
-                                                                    color: Colors
-                                                                        .red,
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                    height: 20),
-                                                                Text(
-                                                                  'Cancel Call',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        22,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .red,
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                    height: 12),
-                                                                Text(
-                                                                  'Are you sure you want to cancel and delete this call? This action cannot be undone.',
-                                                                  style: GoogleFonts
-                                                                      .poppins(
-                                                                    fontSize:
-                                                                        15,
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        700],
-                                                                  ),
-                                                                  textAlign:
-                                                                      TextAlign
-                                                                          .center,
-                                                                ),
-                                                                const SizedBox(
-                                                                    height: 24),
-                                                                Row(
-                                                                  children: [
-                                                                    Expanded(
-                                                                      child:
-                                                                          TextButton(
-                                                                        onPressed:
-                                                                            () =>
-                                                                                Navigator.of(context).pop(false),
+                                                                  const SizedBox(
+                                                                      height:
+                                                                          24),
+                                                                  Row(
+                                                                    children: [
+                                                                      Expanded(
                                                                         child:
-                                                                            Text(
-                                                                          'No',
-                                                                          style:
-                                                                              GoogleFonts.poppins(
-                                                                            color:
-                                                                                Colors.grey[600],
-                                                                            fontSize:
-                                                                                16,
+                                                                            TextButton(
+                                                                          onPressed: () =>
+                                                                              Navigator.of(context).pop(false),
+                                                                          child:
+                                                                              Text(
+                                                                            'No',
+                                                                            style:
+                                                                                GoogleFonts.poppins(
+                                                                              color: Colors.grey[600],
+                                                                              fontSize: 16,
+                                                                            ),
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                    Expanded(
-                                                                      child:
-                                                                          ElevatedButton(
-                                                                        onPressed:
-                                                                            () =>
-                                                                                Navigator.of(context).pop(true),
-                                                                        style: ElevatedButton
-                                                                            .styleFrom(
-                                                                          backgroundColor:
-                                                                              Colors.red,
-                                                                          padding: const EdgeInsets
-                                                                              .symmetric(
-                                                                              vertical: 12),
-                                                                          shape:
-                                                                              RoundedRectangleBorder(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(12),
-                                                                          ),
-                                                                        ),
+                                                                      Expanded(
                                                                         child:
-                                                                            Text(
-                                                                          'Yes, Cancel',
+                                                                            ElevatedButton(
+                                                                          onPressed: () =>
+                                                                              Navigator.of(context).pop(true),
                                                                           style:
-                                                                              GoogleFonts.poppins(
-                                                                            fontSize:
-                                                                                16,
-                                                                            fontWeight:
-                                                                                FontWeight.w600,
-                                                                            color:
-                                                                                Colors.white,
+                                                                              ElevatedButton.styleFrom(
+                                                                            backgroundColor:
+                                                                                Colors.red,
+                                                                            padding:
+                                                                                const EdgeInsets.symmetric(vertical: 12),
+                                                                            shape:
+                                                                                RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(12),
+                                                                            ),
+                                                                          ),
+                                                                          child:
+                                                                              Text(
+                                                                            'Yes, Cancel',
+                                                                            style:
+                                                                                GoogleFonts.poppins(
+                                                                              fontSize: 16,
+                                                                              fontWeight: FontWeight.w600,
+                                                                              color: Colors.white,
+                                                                            ),
                                                                           ),
                                                                         ),
                                                                       ),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                              ],
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                      );
-                                                      if (confirm == true) {
-                                                        try {
-                                                          final response =
-                                                              await http.delete(
-                                                            Uri.parse(
-                                                                '${getUrl()}reports/${report['ID']}'),
-                                                            headers: {
-                                                              'Content-Type':
-                                                                  'application/json'
-                                                            },
-                                                          );
-                                                          if (!mounted) return;
-                                                          if (response
-                                                                  .statusCode ==
-                                                              200) {
-                                                            setState(() {
-                                                              reports.removeAt(
-                                                                  index);
-                                                              totalItems--;
-                                                            });
-                                                            ScaffoldMessenger
-                                                                    .of(context)
-                                                                .showSnackBar(
-                                                              const SnackBar(
-                                                                content: Text(
-                                                                    'Call cancelled and deleted.'),
-                                                                backgroundColor:
-                                                                    Colors
-                                                                        .green,
-                                                              ),
+                                                        );
+                                                        if (confirm == true) {
+                                                          try {
+                                                            final response =
+                                                                await http
+                                                                    .delete(
+                                                              Uri.parse(
+                                                                  '${getUrl()}reports/${report['ID']}'),
+                                                              headers: {
+                                                                'Content-Type':
+                                                                    'application/json'
+                                                              },
                                                             );
-                                                          } else {
+                                                            if (!mounted)
+                                                              return;
+                                                            if (response
+                                                                    .statusCode ==
+                                                                200) {
+                                                              setState(() {
+                                                                reports
+                                                                    .removeAt(
+                                                                        index);
+                                                                totalItems--;
+                                                              });
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                const SnackBar(
+                                                                  content: Text(
+                                                                      'Call cancelled and deleted.'),
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .green,
+                                                                ),
+                                                              );
+                                                            } else {
+                                                              ScaffoldMessenger
+                                                                      .of(context)
+                                                                  .showSnackBar(
+                                                                const SnackBar(
+                                                                  content: Text(
+                                                                      'Failed to delete call.'),
+                                                                  backgroundColor:
+                                                                      Colors
+                                                                          .red,
+                                                                ),
+                                                              );
+                                                            }
+                                                          } catch (e) {
+                                                            if (!mounted)
+                                                              return;
                                                             ScaffoldMessenger
                                                                     .of(context)
                                                                 .showSnackBar(
                                                               const SnackBar(
                                                                 content: Text(
-                                                                    'Failed to delete call.'),
+                                                                    'Error deleting call.'),
                                                                 backgroundColor:
                                                                     Colors.red,
                                                               ),
                                                             );
                                                           }
-                                                        } catch (e) {
-                                                          if (!mounted) return;
-                                                          ScaffoldMessenger.of(
-                                                                  context)
-                                                              .showSnackBar(
-                                                            const SnackBar(
-                                                              content: Text(
-                                                                  'Error deleting call.'),
-                                                              backgroundColor:
-                                                                  Colors.red,
-                                                            ),
-                                                          );
                                                         }
-                                                      }
-                                                    },
-                                                  ),
+                                                      },
+                                                    ),
                                                 ],
                                               ),
                                               const SizedBox(height: 12),
