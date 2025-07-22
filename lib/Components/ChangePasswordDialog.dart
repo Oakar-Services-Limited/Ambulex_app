@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:ambulex_users/Components/Utils.dart';
+import 'package:ambulex_users/Pages/Settings.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:http/http.dart' as http;
@@ -52,6 +53,17 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
       return;
     }
 
+    // Check if new password is different from system-generated password
+    if (_newPasswordController.text.startsWith("SYS") || 
+        _newPasswordController.text.startsWith("Sys") || 
+        _newPasswordController.text.startsWith("sys")) {
+      setState(() {
+        _message = 'New password cannot be a system-generated password';
+        _isSuccess = false;
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _message = '';
@@ -72,16 +84,18 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
       if (response.statusCode == 200) {
         setState(() {
           _isSuccess = true;
-          _message = data['success'] ?? 'Password changed successfully';
+          _message = data['success'] ?? 'Password changed successfully! You can now login with your new password.';
         });
-        Future.delayed(const Duration(seconds: 2), () {
+        Future.delayed(const Duration(seconds: 3), () {
           Navigator.pop(context, true); // Return true to indicate success
         });
       } else {
         setState(() {
           _isSuccess = false;
-          _message =
-              data['error'] ?? 'Failed to change password. Please try again.';
+          _message = data['error'] ?? 
+              (response.statusCode == 401 ? 'Current password is incorrect' :
+               response.statusCode == 400 ? 'Invalid password format' :
+               'Failed to change password. Please try again.');
         });
       }
     } catch (e) {
@@ -143,7 +157,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Please enter your current password and choose a new one',
+              'You are using a system-generated password. Please change it to a personal one for security.',
               style: GoogleFonts.poppins(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -248,12 +262,26 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                       ),
                     ),
                     child: _isLoading
-                        ? LoadingAnimationWidget.staggeredDotsWave(
-                            color: Colors.white,
-                            size: 20,
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              LoadingAnimationWidget.staggeredDotsWave(
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Changing...',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           )
                         : Text(
-                            'Change',
+                            'Change Password',
                             style: GoogleFonts.poppins(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -263,6 +291,27 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                  Navigator.pop(context, false);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const Settings()),
+                  );
+                },
+                child: Text(
+                  'Go to Settings',
+                  style: GoogleFonts.poppins(
+                    color: Colors.blue.shade700,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

@@ -1,17 +1,11 @@
 import 'package:ambulex_users/Components/ForgotPasswordDialog.dart';
-import 'package:ambulex_users/Components/NavigationButton.dart';
-import 'package:ambulex_users/Components/TextLarge.dart';
 import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Home.dart';
-import 'package:ambulex_users/Pages/Settings.dart';
-import 'package:ambulex_users/Pages/Subscribe.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
 import 'Register.dart';
 import 'dart:async';
@@ -550,7 +544,7 @@ Future<Message> login(String phone, String password) async {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (password.startsWith("SYS")) {
+      if (password.startsWith("Sys")) {
         return Message(
           token: data['token'],
           success: null,
