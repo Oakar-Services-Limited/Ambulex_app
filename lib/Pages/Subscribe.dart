@@ -546,6 +546,8 @@ class _SubscribeState extends State<Subscribe> {
     }
   }
 
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -623,58 +625,6 @@ class _SubscribeState extends State<Subscribe> {
     );
   }
 
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade200,
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => Home()),
-              );
-            },
-            icon: Icon(Icons.arrow_back, color: Colors.blue.shade700),
-          ),
-          Text(
-            'Subscription',
-            style: GoogleFonts.poppins(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue.shade700,
-            ),
-          ),
-          const Spacer(),
-          if (!paymentMade)
-            ElevatedButton.icon(
-              onPressed: createSubscription,
-              icon: const Icon(Icons.add, color: Colors.white),
-              label: Text(
-                'Subscribe',
-                style: GoogleFonts.poppins(color: Colors.white),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildSubscriptionCard() {
     final bool isActive = subscriptionInfo?['status'] == 'active';
