@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../Components/MyTextInput.dart';
 import 'Register.dart';
 import 'dart:async';
@@ -175,14 +174,15 @@ class _LoginState extends State<Login> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Please change your system-generated password to a personal one',
+              res.success ??
+                  'System Password detected, please change your password',
               style: GoogleFonts.poppins(
                 color: Colors.white,
                 fontSize: 14,
               ),
             ),
-            backgroundColor: Colors.orange,
-            duration: const Duration(seconds: 3),
+            backgroundColor: Colors.blue,
+            duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
             shape: RoundedRectangleBorder(
@@ -544,10 +544,12 @@ Future<Message> login(String phone, String password) async {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (password.startsWith("Sys")) {
+      if (password.startsWith("SYS") ||
+          password.startsWith("Sys") ||
+          password.startsWith("sys")) {
         return Message(
           token: data['token'],
-          success: null,
+          success: "System Password detected, please change your password",
           error: "system_password",
         );
       }
