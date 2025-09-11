@@ -544,9 +544,7 @@ Future<Message> login(String phone, String password) async {
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (password.startsWith("SYS") ||
-          password.startsWith("Sys") ||
-          password.startsWith("sys")) {
+      if (password == "123456") {
         return Message(
           token: data['token'],
           success: "System Password detected, please change your password",
