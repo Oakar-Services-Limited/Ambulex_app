@@ -48,6 +48,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
       );
 
       var data = jsonDecode(response.body);
+      print('forget password data: $data');
 
       if (response.statusCode == 200) {
         setState(() {
@@ -55,6 +56,8 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
           _message = data['success'] ??
               'Password reset instructions sent to your phone';
         });
+        print('forget password success');
+        print('forget password message: ${data['success']}');
         Future.delayed(const Duration(seconds: 2), () {
           Navigator.pop(context);
         });

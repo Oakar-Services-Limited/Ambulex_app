@@ -54,8 +54,8 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
     }
 
     // Check if new password is different from system-generated password
-    if (_newPasswordController.text.startsWith("SYS") || 
-        _newPasswordController.text.startsWith("Sys") || 
+    if (_newPasswordController.text.startsWith("SYS") ||
+        _newPasswordController.text.startsWith("Sys") ||
         _newPasswordController.text.startsWith("sys")) {
       setState(() {
         _message = 'New password cannot be a system-generated password';
@@ -71,7 +71,7 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
 
     try {
       final response = await http.put(
-        Uri.parse("${getUrl()}users/${widget.userId}"),
+        Uri.parse("${getUrl()}users/update/${widget.userId}"),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'Password': _oldPasswordController.text,
@@ -79,12 +79,18 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
         }),
       );
 
+      print('change password response: $response');
+      print('change password response status code: ${response.statusCode}');
+      print('change password response body: ${response.body}');
+
       var data = jsonDecode(response.body);
+      print('change password data: $data');
 
       if (response.statusCode == 200) {
         setState(() {
           _isSuccess = true;
-          _message = data['success'] ?? 'Password changed successfully! You can now login with your new password.';
+          _message = data['success'] ??
+              'Password changed successfully! You can now login with your new password.';
         });
         Future.delayed(const Duration(seconds: 3), () {
           Navigator.pop(context, true); // Return true to indicate success
@@ -92,13 +98,16 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
       } else {
         setState(() {
           _isSuccess = false;
-          _message = data['error'] ?? 
-              (response.statusCode == 401 ? 'Current password is incorrect' :
-               response.statusCode == 400 ? 'Invalid password format' :
-               'Failed to change password. Please try again.');
+          _message = data['error'] ??
+              (response.statusCode == 401
+                  ? 'Current password is incorrect'
+                  : response.statusCode == 400
+                      ? 'Invalid password format'
+                      : 'Failed to change password. Please try again.');
         });
       }
     } catch (e) {
+      print('change password error: $e');
       setState(() {
         _isSuccess = false;
         _message = 'An error occurred. Please try again.';
