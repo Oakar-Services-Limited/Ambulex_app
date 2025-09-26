@@ -42,7 +42,20 @@ class _MyTextInputState extends State<MyTextInput> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.value != oldWidget.value) {
-      _controller.text = widget.value;
+      final TextSelection currentSelection = _controller.selection;
+      final String currentText = _controller.text;
+
+      if (currentText != widget.value) {
+        _controller.text = widget.value;
+
+        // Only restore selection if user was actively editing
+        if (currentSelection.isValid &&
+            currentSelection.baseOffset < currentText.length) {
+          _controller.selection = TextSelection.fromPosition(TextPosition(
+              offset:
+                  currentSelection.baseOffset.clamp(0, widget.value.length)));
+        }
+      }
     }
   }
 
