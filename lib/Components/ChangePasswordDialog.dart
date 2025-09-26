@@ -25,6 +25,9 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
   bool _isLoading = false;
   String _message = '';
   bool _isSuccess = false;
+  bool _obscureOldPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
 
   Future<void> _changePassword() async {
     if (_oldPasswordController.text.isEmpty ||
@@ -176,11 +179,24 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
             const SizedBox(height: 20),
             TextField(
               controller: _oldPasswordController,
-              obscureText: true,
+              obscureText: _obscureOldPassword,
               decoration: InputDecoration(
                 hintText: 'Current Password',
                 prefixIcon:
                     Icon(Icons.lock_outline, color: Colors.blue.shade700),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureOldPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.blue.shade700,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureOldPassword = !_obscureOldPassword;
+                    });
+                  },
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.grey.shade300),
@@ -196,11 +212,24 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
             const SizedBox(height: 12),
             TextField(
               controller: _newPasswordController,
-              obscureText: true,
+              obscureText: _obscureNewPassword,
               decoration: InputDecoration(
                 hintText: 'New Password',
                 prefixIcon:
                     Icon(Icons.lock_outline, color: Colors.blue.shade700),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureNewPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.blue.shade700,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureNewPassword = !_obscureNewPassword;
+                    });
+                  },
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.grey.shade300),
@@ -216,11 +245,24 @@ class _ChangePasswordDialogState extends State<ChangePasswordDialog> {
             const SizedBox(height: 12),
             TextField(
               controller: _confirmPasswordController,
-              obscureText: true,
+              obscureText: _obscureConfirmPassword,
               decoration: InputDecoration(
                 hintText: 'Confirm New Password',
                 prefixIcon:
                     Icon(Icons.lock_outline, color: Colors.blue.shade700),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscureConfirmPassword
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.blue.shade700,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureConfirmPassword = !_obscureConfirmPassword;
+                    });
+                  },
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.grey.shade300),

@@ -565,13 +565,13 @@ Future<Message> login(String phone, String password) async {
       body: jsonEncode(<String, String>{
         'Phone': phone,
         'Password': password,
-        'appVersion': '5.0.0'
+        'appVersion': '6.0.0'
       }),
     );
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
-      if (password == "123456") {
+      if (password == "654321") {
         return Message(
           token: data['token'],
           success: "System Password detected, please change your password",
