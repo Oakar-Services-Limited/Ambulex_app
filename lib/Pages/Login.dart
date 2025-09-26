@@ -329,6 +329,8 @@ class _LoginState extends State<Login> {
                   else
                     Column(
                       children: [
+                        // Back button to return to phone step
+
                         MyTextInput(
                           title: 'Password',
                           value: password,
@@ -336,6 +338,31 @@ class _LoginState extends State<Login> {
                           onSubmit: (value) => setState(() => password = value),
                           prefixIcon: Icons.lock_outline,
                           isPassword: true,
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  isPhoneStep = true;
+                                  password = '';
+                                  error = '';
+                                });
+                              },
+                              icon: Icon(
+                                Icons.arrow_back,
+                                color: Colors.blue.shade700,
+                              ),
+                            ),
+                            Text(
+                              'Back',
+                              style: GoogleFonts.poppins(
+                                color: Colors.blue.shade700,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Align(
