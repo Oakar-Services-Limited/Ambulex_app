@@ -11,8 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class ChangePasswordDialog extends StatefulWidget {
   final String userId;
-  const ChangePasswordDialog({Key? key, required this.userId})
-      : super(key: key);
+  const ChangePasswordDialog({super.key, required this.userId});
 
   @override
   State<ChangePasswordDialog> createState() => _ChangePasswordDialogState();

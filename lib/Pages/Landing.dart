@@ -80,27 +80,22 @@ class _LandingState extends State<Landing> {
       }
 
       var decoded = parseJwt(token.toString());
-      if (decoded != null) {
-        setState(() {
-          userid = decoded["UserID"];
-          name = decoded["Name"];
-        });
+      setState(() {
+        userid = decoded["UserID"];
+        name = decoded["Name"];
+      });
 
-        // Check subscription status
-        bool hasActiveSubscription = await checkSubscriptionStatus(userid);
-        if (!hasActiveSubscription) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => Subscribe()));
-          return;
-        }
-
+      // Check subscription status
+      bool hasActiveSubscription = await checkSubscriptionStatus(userid);
+      if (!hasActiveSubscription) {
         Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Home()));
-      } else {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Login()));
+            context, MaterialPageRoute(builder: (_) => Subscribe()));
+        return;
       }
-    } catch (e) {
+
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => const Home()));
+        } catch (e) {
       print('Error in authenticateUser: $e');
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));

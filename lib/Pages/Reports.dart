@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ambulex_users/Components/MyDrawer.dart';
 import 'package:ambulex_users/Components/Utils.dart';
-import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -69,12 +68,6 @@ class _ReportsState extends State<Reports> {
     try {
       var token = await storage.read(key: "jwt");
       var decoded = parseJwt(token.toString());
-
-      if (decoded == null) {
-        Navigator.pushReplacement(
-            context, MaterialPageRoute(builder: (_) => const Login()));
-        return;
-      }
 
       var phone;
 
@@ -566,8 +559,9 @@ class _ReportsState extends State<Reports> {
                                                                     'application/json'
                                                               },
                                                             );
-                                                            if (!mounted)
+                                                            if (!mounted) {
                                                               return;
+                                                            }
                                                             if (response
                                                                     .statusCode ==
                                                                 200) {
@@ -602,8 +596,9 @@ class _ReportsState extends State<Reports> {
                                                               );
                                                             }
                                                           } catch (e) {
-                                                            if (!mounted)
+                                                            if (!mounted) {
                                                               return;
+                                                            }
                                                             ScaffoldMessenger
                                                                     .of(context)
                                                                 .showSnackBar(
@@ -778,14 +773,14 @@ class ReportDetailsPage extends StatelessWidget {
   final String username;
 
   const ReportDetailsPage({
-    Key? key,
+    super.key,
     required this.report,
     required this.markers,
     required this.routePoints,
     required this.showERTeam,
     required this.displayAddress,
     required this.username,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -958,7 +953,7 @@ class ReportDetailsPage extends StatelessWidget {
         const SizedBox(height: 8),
         ...timelineItems
             .map((item) => ReportDetailsPage._buildTimelineItem(item))
-            .toList(),
+            ,
       ],
     );
   }

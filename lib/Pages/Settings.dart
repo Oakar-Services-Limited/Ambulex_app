@@ -46,16 +46,11 @@ class _SettingsState extends State<Settings> {
   getToken() async {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
-    if (decoded == null) {
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => const Login()));
-    } else {
-      setState(() {
-        userDetails = decoded;
-      });
-      print("userDetails: ${userDetails}");
+    setState(() {
+      userDetails = decoded;
+    });
+    print("userDetails: $userDetails");
     }
-  }
 
   @override
   Widget build(BuildContext context) {

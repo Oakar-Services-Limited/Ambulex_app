@@ -29,7 +29,7 @@ class _LoginState extends State<Login> {
   String password = '';
   String error = '';
   bool successful = false;
-  var isLoading = null;
+  var isLoading;
   final storage = const FlutterSecureStorage();
   late FirebaseMessaging messaging;
   final TextEditingController _phoneController = TextEditingController();
@@ -51,7 +51,7 @@ class _LoginState extends State<Login> {
   Future<void> sendTokenToBackend(String token) async {
     var usertoken = await storage.read(key: "jwt");
     var decoded = parseJwt(usertoken.toString());
-    userid = decoded?['UserID'];
+    userid = decoded['UserID'];
 
     final response = await post(
       Uri.parse("${getUrl()}fcmtoken/create"),
@@ -193,7 +193,7 @@ class _LoginState extends State<Login> {
 
         if (res.token != null) {
           var decoded = parseJwt(res.token);
-          if (decoded != null && decoded["UserID"] != null) {
+          if (decoded["UserID"] != null) {
             final result = await _handleSystemPassword(decoded["UserID"]);
             setState(() {
               if (result) {

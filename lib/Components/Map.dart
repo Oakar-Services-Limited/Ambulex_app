@@ -31,13 +31,12 @@ class MyMap extends StatefulWidget {
   ///   routePoints: [LatLng(...), LatLng(...)],
   /// )
   const MyMap(
-      {Key? key,
+      {super.key,
       required this.lat,
       required this.lon,
       required this.username,
       this.markers,
-      this.routePoints})
-      : super(key: key);
+      this.routePoints});
 
   @override
   State<MyMap> createState() => _MyMapState();
@@ -296,7 +295,7 @@ class _MyMapState extends State<MyMap> {
         child: InkWell(
           onTap: onPressed,
           borderRadius: BorderRadius.circular(12),
-          child: Container(
+          child: SizedBox(
             width: 44,
             height: 44,
             child: Icon(

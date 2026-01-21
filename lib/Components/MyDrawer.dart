@@ -41,7 +41,7 @@ class _MyDrawerState extends State<MyDrawer> {
       final decoded = parseJwt(token);
       userId = decoded["UserID"];
     }
-    print('Debug: userId from JWT = ${userId}');
+    print('Debug: userId from JWT = $userId');
     if (userId != null) {
       try {
         final response =

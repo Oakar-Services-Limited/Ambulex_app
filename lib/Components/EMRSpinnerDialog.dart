@@ -42,7 +42,7 @@ class EMRSpinnerDialogState extends State<EMRSpinnerDialog> {
     for (String city in categorylist) {
       // here we are creating the drop down menu items, you can customize the item right here
       // but I'll just use a simple text for this
-      items.add(DropdownMenuItem(value: city, child: new Text(city)));
+      items.add(DropdownMenuItem(value: city, child: Text(city)));
     }
     return items;
   }

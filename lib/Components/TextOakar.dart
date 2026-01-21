@@ -5,10 +5,10 @@ class TextOakar extends StatefulWidget {
   final bool issuccessful;
 
   const TextOakar({
-    Key? key,
+    super.key,
     required this.label,
     this.issuccessful = false,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() => _TextOakarState();

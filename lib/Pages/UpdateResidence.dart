@@ -2,14 +2,11 @@
 
 import 'dart:async';
 import 'package:ambulex_users/Components/Map.dart';
-import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Home.dart';
 import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../Components/MyDrawer.dart';
 import 'package:flutter/material.dart';
-import '../Components/SubmitButton.dart';
 import '../Components/MyTextInput.dart';
 import '../Components/Utils.dart';
 import 'package:geolocator/geolocator.dart';
@@ -131,34 +128,30 @@ class _UpdateResidenceState extends State<UpdateResidence> {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
 
-    if (decoded != null) {
-      if (decoded["error"] == "Invalid token") {
-        Navigator.push(
-            context, MaterialPageRoute(builder: (_) => const Login()));
-        return false;
-      } else {
-        setState(() {
-          id = decoded["UserID"] ?? '';
-          name = decoded["Name"] ?? '';
-          email1 = decoded["Email"] ?? '';
-          city1 = decoded["City"] ?? '';
-          address1 = decoded["Address"] ?? '';
-          landmark1 = decoded["Landmark"] ?? '';
-          buildingname1 = decoded["BuildingName"] ?? '';
-          houseno1 = decoded["HouseNumber"] ?? '';
-          lat = double.tryParse(decoded["Latitude"]?.toString() ?? '0') ?? 0.0;
-          long =
-              double.tryParse(decoded["Longitude"]?.toString() ?? '0') ?? 0.0;
-          location = decoded["Latitude"] != null && decoded["Longitude"] != null
-              ? "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}"
-              : "Location not set";
-        });
-        return true;
-      }
+    if (decoded["error"] == "Invalid token") {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const Login()));
+      return false;
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const Login()));
+      setState(() {
+        id = decoded["UserID"] ?? '';
+        name = decoded["Name"] ?? '';
+        email1 = decoded["Email"] ?? '';
+        city1 = decoded["City"] ?? '';
+        address1 = decoded["Address"] ?? '';
+        landmark1 = decoded["Landmark"] ?? '';
+        buildingname1 = decoded["BuildingName"] ?? '';
+        houseno1 = decoded["HouseNumber"] ?? '';
+        lat = double.tryParse(decoded["Latitude"]?.toString() ?? '0') ?? 0.0;
+        long =
+            double.tryParse(decoded["Longitude"]?.toString() ?? '0') ?? 0.0;
+        location = decoded["Latitude"] != null && decoded["Longitude"] != null
+            ? "Saved location Lat: ${decoded['Latitude']} Lon: ${decoded['Longitude']}"
+            : "Location not set";
+      });
+      return true;
     }
-    return false;
+      return false;
   }
 
   @override

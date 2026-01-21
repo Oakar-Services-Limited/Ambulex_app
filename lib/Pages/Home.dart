@@ -43,15 +43,21 @@ class _HomeState extends State<Home> {
   late LocationPermission permission;
   late Position position;
   double long = 0.0, lat = 0.0;
-  late StreamSubscription<Position> positionStream;
+  StreamSubscription<Position>? positionStream;
   var isLoading = null;
   String address = 'Fetching location...';
 
   @override
   void initState() {
+    super.initState();
     getLocation();
     authenticateUser();
-    super.initState();
+  }
+
+  @override
+  void dispose() {
+    positionStream?.cancel();
+    super.dispose();
   }
 
   Future<Map<String, dynamic>?> getSubscriptionInfo(String userid) async {
@@ -73,6 +79,7 @@ class _HomeState extends State<Home> {
 
   Future<void> fetchSubscriptionInfo(String userid) async {
     final response = await getSubscriptionInfo(userid);
+    if (!mounted) return;
     if (response != null &&
         response['data'] != null &&
         response['data'].isNotEmpty) {
@@ -93,6 +100,7 @@ class _HomeState extends State<Home> {
       var token = await storage.read(key: "jwt");
       var decoded = parseJwt(token.toString());
 
+      if (!mounted) return;
       setState(() {
         phone = decoded["Phone"];
         id = decoded["UserID"]!;
@@ -103,14 +111,14 @@ class _HomeState extends State<Home> {
       await fetchSubscriptionInfo(id);
 
       // Check subscription status after fetching
+      if (!mounted) return;
       if (subscriptionInfo == null || subscriptionInfo?['status'] != 'active') {
-        if (mounted) {
-          Navigator.pushReplacement(
-              context, MaterialPageRoute(builder: (_) => Subscribe()));
-        }
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (_) => Subscribe()));
       }
     } catch (e) {
       print('Error in authenticateUser: $e');
+      if (!mounted) return;
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
     }
@@ -137,32 +145,44 @@ class _HomeState extends State<Home> {
       }
     } else {}
 
+    if (!mounted) return;
     setState(() {
       //refresh the UI
     });
   }
 
   Future<void> getLocation() async {
-    position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-    long = position.longitude;
-    lat = position.latitude;
-
-    // Get address from coordinates
     try {
-      List<Placemark> placemarks = await placemarkFromCoordinates(lat, long);
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+      long = position.longitude;
+      lat = position.latitude;
+
+      // Get address from coordinates
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(lat, long);
+        if (!mounted) return;
+        if (placemarks.isNotEmpty) {
+          Placemark place = placemarks[0];
+          setState(() {
+            address = '${place.street}, ${place.subLocality}, ${place.locality}';
+            location = 'Lat: $lat, Lon: $long';
+          });
+        }
+      } catch (e) {
+        print('Error getting address: $e');
+        if (!mounted) return;
         setState(() {
-          address = '${place.street}, ${place.subLocality}, ${place.locality}';
+          address = 'Unable to fetch address';
           location = 'Lat: $lat, Lon: $long';
         });
       }
     } catch (e) {
-      print('Error getting address: $e');
+      print('Error getting location: $e');
+      if (!mounted) return;
       setState(() {
-        address = 'Unable to fetch address';
-        location = 'Lat: $lat, Lon: $long';
+        address = 'Unable to fetch location';
+        location = 'Location unavailable';
       });
     }
   }
@@ -325,6 +345,7 @@ class _HomeState extends State<Home> {
                           _showSubscriptionDialog();
                         } else {
                           _showEmergencyConfirmation("GBV", () async {
+                            if (!mounted) return;
                             setState(() {
                               isLoading =
                                   LoadingAnimationWidget.staggeredDotsWave(
@@ -341,10 +362,12 @@ class _HomeState extends State<Home> {
                               lat,
                               category,
                             );
+                            if (!mounted) return;
                             setState(() {
                               isLoading = null;
                             });
 
+                            if (!mounted) return;
                             if (res.error == null) {
                               _showSuccessDialog("Gender Based Violence");
                             } else {
@@ -366,6 +389,7 @@ class _HomeState extends State<Home> {
                           _showSubscriptionDialog();
                         } else {
                           _showEmergencyConfirmation("ME", () async {
+                            if (!mounted) return;
                             setState(() {
                               isLoading =
                                   LoadingAnimationWidget.staggeredDotsWave(
@@ -382,10 +406,12 @@ class _HomeState extends State<Home> {
                               lat,
                               category,
                             );
+                            if (!mounted) return;
                             setState(() {
                               isLoading = null;
                             });
 
+                            if (!mounted) return;
                             if (res.error == null) {
                               _showSuccessDialog("Medical Emergency");
                             } else {
@@ -517,6 +543,7 @@ class _HomeState extends State<Home> {
   }
 
   void _showSuccessDialog(String type) {
+    if (!mounted) return;
     final isGBV = type.toLowerCase().contains('gender');
     final icon = isGBV ? Icons.handshake : Icons.medical_services;
     final color = isGBV ? Colors.orange : Colors.red;
@@ -566,6 +593,7 @@ class _HomeState extends State<Home> {
   }
 
   void _showSnackbar(String message) {
+    if (!mounted) return;
     final snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 3),
@@ -575,6 +603,7 @@ class _HomeState extends State<Home> {
   }
 
   void _showSubscriptionDialog() {
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -618,6 +647,7 @@ class _HomeState extends State<Home> {
   }
 
   void _showEmergencyConfirmation(String type, Function onConfirm) {
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (BuildContext context) {

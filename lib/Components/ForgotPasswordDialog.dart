@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_fonts/google_fonts.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
-  const ForgotPasswordDialog({Key? key}) : super(key: key);
+  const ForgotPasswordDialog({super.key});
 
   @override
   State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();

@@ -225,7 +225,7 @@ class _AboutState extends State<About> {
           ),
         ),
         const SizedBox(height: 8),
-        ...items.map((item) => _buildContactItemEnhanced(item)).toList(),
+        ...items.map((item) => _buildContactItemEnhanced(item)),
       ],
     );
   }
@@ -298,7 +298,7 @@ class _AboutState extends State<About> {
             ),
           ),
           const SizedBox(height: 16),
-          ...faqs.map((faq) => _buildFAQItem(faq)).toList(),
+          ...faqs.map((faq) => _buildFAQItem(faq)),
         ],
       ),
     );

@@ -59,13 +59,11 @@ class _GettingStartedState extends State<GettingStarted> {
       var token = await storage.read(key: "jwt");
       var decoded = parseJwt(token.toString());
 
-      if (decoded != null) {
-        setState(() {
-          id = decoded["UserID"]!;
-          name = decoded["Name"];
-        });
-      }
-    } catch (e) {}
+      setState(() {
+        id = decoded["UserID"]!;
+        name = decoded["Name"];
+      });
+        } catch (e) {}
   }
 
   getLocation() async {
@@ -288,7 +286,7 @@ Future<Message> update(
   }
 
   final response = await http.put(
-    Uri.parse('${getUrl()}users/${id}'),
+    Uri.parse('${getUrl()}users/$id'),
     headers: <String, String>{
       'Content-Type': 'application/json; charset=UTF-8',
     },
