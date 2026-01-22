@@ -33,12 +33,15 @@ class _LandingState extends State<Landing> {
 
   Future<void> _checkLocationPermission() async {
     PermissionStatus status = await Permission.location.status;
+    if (!mounted) return;
     if (status.isGranted) {
       await authenticateUser();
+      if (!mounted) return;
       setState(() {
         permission = true;
       });
     } else {
+      if (!mounted) return;
       setState(() {
         permission = false;
       });
@@ -47,9 +50,11 @@ class _LandingState extends State<Landing> {
 
   Future<void> requestLocationPermission() async {
     PermissionStatus status = await Permission.location.request();
+    if (!mounted) return;
     if (status == PermissionStatus.granted) {
       await authenticateUser();
     } else {
+      if (!mounted) return;
       openAppSettings();
     }
   }
@@ -73,6 +78,7 @@ class _LandingState extends State<Landing> {
   Future<void> authenticateUser() async {
     try {
       var token = await storage.read(key: "jwt");
+      if (!mounted) return;
       if (token == null) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => const Login()));
@@ -80,6 +86,7 @@ class _LandingState extends State<Landing> {
       }
 
       var decoded = parseJwt(token.toString());
+      if (!mounted) return;
       setState(() {
         userid = decoded["UserID"];
         name = decoded["Name"];
@@ -87,22 +94,26 @@ class _LandingState extends State<Landing> {
 
       // Check subscription status
       bool hasActiveSubscription = await checkSubscriptionStatus(userid);
+      if (!mounted) return;
       if (!hasActiveSubscription) {
         Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (_) => Subscribe()));
         return;
       }
 
+      if (!mounted) return;
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Home()));
-        } catch (e) {
+    } catch (e) {
       print('Error in authenticateUser: $e');
+      if (!mounted) return;
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => const Login()));
     }
   }
 
   Future<void> showPermissionDialog() {
+    if (!mounted) return Future.value();
     return showDialog(
       context: context,
       barrierDismissible: false,
