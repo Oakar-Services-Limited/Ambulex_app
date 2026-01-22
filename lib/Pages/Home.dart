@@ -343,6 +343,8 @@ class _HomeState extends State<Home> {
                       onButtonPressed: () async {
                         if (subscriptionInfo?['status'] != 'active') {
                           _showSubscriptionDialog();
+                        } else if (!_canMakeEmergencyReport()) {
+                          _showResponseLimitDialog();
                         } else {
                           _showEmergencyConfirmation("GBV", () async {
                             if (!mounted) return;
@@ -370,8 +372,16 @@ class _HomeState extends State<Home> {
                             if (!mounted) return;
                             if (res.error == null) {
                               _showSuccessDialog("Gender Based Violence");
+                              // Refresh subscription info to update response count
+                              await fetchSubscriptionInfo(id);
                             } else {
-                              _showSnackbar(res.error);
+                              // Check if it's a response limit error
+                              if (res.error.contains('limit') || res.error.contains('Response limit')) {
+                                _showResponseLimitDialog();
+                                await fetchSubscriptionInfo(id);
+                              } else {
+                                _showSnackbar(res.error);
+                              }
                             }
                           });
                         }
@@ -387,6 +397,8 @@ class _HomeState extends State<Home> {
                       onButtonPressed: () async {
                         if (subscriptionInfo?['status'] != 'active') {
                           _showSubscriptionDialog();
+                        } else if (!_canMakeEmergencyReport()) {
+                          _showResponseLimitDialog();
                         } else {
                           _showEmergencyConfirmation("ME", () async {
                             if (!mounted) return;
@@ -414,8 +426,16 @@ class _HomeState extends State<Home> {
                             if (!mounted) return;
                             if (res.error == null) {
                               _showSuccessDialog("Medical Emergency");
+                              // Refresh subscription info to update response count
+                              await fetchSubscriptionInfo(id);
                             } else {
-                              _showSnackbar(res.error);
+                              // Check if it's a response limit error
+                              if (res.error.contains('limit') || res.error.contains('Response limit')) {
+                                _showResponseLimitDialog();
+                                await fetchSubscriptionInfo(id);
+                              } else {
+                                _showSnackbar(res.error);
+                              }
                             }
                           });
                         }
@@ -426,6 +446,109 @@ class _HomeState extends State<Home> {
                 Center(child: isLoading),
               ]),
             )))));
+  }
+
+  bool _canMakeEmergencyReport() {
+    if (subscriptionInfo?['status'] != 'active') return false;
+    
+    final maxResponses = subscriptionInfo?['maxResponses'];
+    final responsesUsed = subscriptionInfo?['responsesUsed'] ?? 0;
+    
+    // Unlimited packages (null or -1 means unlimited)
+    if (maxResponses == null || maxResponses == -1) return true;
+    
+    // Limited packages - check if within limit
+    return responsesUsed < maxResponses;
+  }
+
+  int _getRemainingResponses() {
+    final maxResponses = subscriptionInfo?['maxResponses'];
+    final responsesUsed = subscriptionInfo?['responsesUsed'] ?? 0;
+    
+    if (maxResponses == null || maxResponses == -1) {
+      return -1; // Unlimited
+    }
+    
+    return maxResponses - responsesUsed;
+  }
+
+  void _showResponseLimitDialog() {
+    final maxResponses = subscriptionInfo?['maxResponses'];
+    final packageName = subscriptionInfo?['packageName'] ?? 'your package';
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.warning, color: Colors.orange, size: 28),
+              const SizedBox(width: 10),
+              Text(
+                'Response Limit Reached',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'You have used all $maxResponses emergency responses for your $packageName.',
+                style: GoogleFonts.poppins(fontSize: 16),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Options:',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '• Upgrade to a package with more responses',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+              Text(
+                '• Wait for your subscription to renew',
+                style: GoogleFonts.poppins(fontSize: 14),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(
+                'Cancel',
+                style: GoogleFonts.poppins(color: Colors.grey),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => Subscribe()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+              ),
+              child: Text(
+                'Upgrade Package',
+                style: GoogleFonts.poppins(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildSubscriptionCard() {
@@ -492,6 +615,16 @@ class _HomeState extends State<Home> {
               _formatDate(subscriptionInfo?['endDate']),
               Icons.event,
             ),
+            if (isActive && subscriptionInfo?['maxResponses'] != null) ...[
+              const SizedBox(height: 16),
+              _buildSubscriptionDetail(
+                'Responses Remaining',
+                _getRemainingResponses() >= 0
+                    ? '${_getRemainingResponses()} / ${subscriptionInfo?['maxResponses']}'
+                    : 'Unlimited',
+                Icons.emergency,
+              ),
+            ],
           ],
         ),
       ),

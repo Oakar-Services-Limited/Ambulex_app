@@ -354,6 +354,10 @@ class _SubscribeState extends State<Subscribe> {
       if (selectedPackage != null) {
         requestBody['packageId'] = selectedPackage!['id'];
         requestBody['packageName'] = selectedPackage!['name'];
+        // Include features array for backend to parse maxResponses
+        if (selectedPackage!['features'] != null) {
+          requestBody['features'] = selectedPackage!['features'];
+        }
       }
 
       final response = await http.post(
@@ -926,7 +930,7 @@ class _SubscribeState extends State<Subscribe> {
             crossAxisCount: 2,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
-            childAspectRatio: 0.9,
+            childAspectRatio: 0.75, // Adjusted for features display
           ),
           itemCount: packages!.length,
           itemBuilder: (context, index) {
@@ -1036,6 +1040,40 @@ class _SubscribeState extends State<Subscribe> {
                               overflow: TextOverflow.ellipsis,
                             ),
                             
+                            // Features List
+                            if (package['features'] != null && (package['features'] as List).isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              ...((package['features'] as List).take(2).map((feature) {
+                                final featureName = feature is Map ? feature['name'] : feature.toString();
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 3),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        size: 12,
+                                        color: colorScheme['primary']!.withOpacity(0.7),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Text(
+                                          featureName,
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 10,
+                                            color: Colors.grey.shade700,
+                                            height: 1.3,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList()),
+                            ],
+                            
                             const Spacer(),
                             
                             // Price Section
@@ -1117,6 +1155,17 @@ class _SubscribeState extends State<Subscribe> {
     );
   }
 
+  int _getRemainingResponses() {
+    final maxResponses = subscriptionInfo?['maxResponses'];
+    final responsesUsed = subscriptionInfo?['responsesUsed'] ?? 0;
+    
+    if (maxResponses == null || maxResponses == -1) {
+      return -1; // Unlimited
+    }
+    
+    return maxResponses - responsesUsed;
+  }
+
   Widget _buildSubscriptionCard() {
     final bool isActive = subscriptionInfo?['status'] == 'active';
 
@@ -1181,6 +1230,16 @@ class _SubscribeState extends State<Subscribe> {
               _formatDate(subscriptionInfo?['endDate']),
               Icons.event,
             ),
+            if (isActive && subscriptionInfo?['maxResponses'] != null) ...[
+              const SizedBox(height: 16),
+              _buildSubscriptionDetail(
+                'Responses Remaining',
+                _getRemainingResponses() >= 0
+                    ? '${_getRemainingResponses()} / ${subscriptionInfo?['maxResponses']}'
+                    : 'Unlimited',
+                Icons.emergency,
+              ),
+            ],
           ],
         ),
       ),
