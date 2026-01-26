@@ -565,7 +565,7 @@ Future<Message> login(String phone, String password) async {
       body: jsonEncode(<String, String>{
         'Phone': phone,
         'Password': password,
-        'appVersion': '6.0.0'
+        'appVersion': '7.0.0'
       }),
     );
 

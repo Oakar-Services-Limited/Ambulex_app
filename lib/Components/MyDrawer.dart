@@ -35,29 +35,32 @@ class _MyDrawerState extends State<MyDrawer> {
       isLoadingReferral = true;
     });
     final storage = FlutterSecureStorage();
-    String? token = await storage.read(key: "jwt");
-    String? userId;
-    if (token != null) {
-      final decoded = parseJwt(token);
-      userId = decoded["UserID"];
+    final String? token = await storage.read(key: "jwt");
+    if (token == null) {
+      setState(() => isLoadingReferral = false);
+      return;
+    }
+    final decoded = parseJwt(token);
+    final userId = decoded["UserID"]?.toString();
+    if (userId == null) {
+      setState(() => isLoadingReferral = false);
+      return;
     }
     print('Debug: userId from JWT = $userId');
-    if (userId != null) {
-      try {
-        final response =
-            await http.get(Uri.parse('${getUrl()}users/$userId/referral-code'));
-        print('Debug: API response status = ${response.statusCode}');
-        print('Debug: API response body = ${response.body}');
-        if (response.statusCode == 200) {
-          final data = json.decode(response.body);
-          setState(() {
-            referralCode = data['referralCode'];
-          });
-          print('Debug: referralCode fetched = ${referralCode ?? 'null'}');
-        }
-      } catch (e) {
-        print('Debug: Exception in _fetchReferralCode: $e');
+    try {
+      final response =
+          await http.get(Uri.parse('${getUrl()}users/$userId/referral-code'));
+      print('Debug: API response status = ${response.statusCode}');
+      print('Debug: API response body = ${response.body}');
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          referralCode = data['referralCode'];
+        });
+        print('Debug: referralCode fetched = ${referralCode ?? 'null'}');
       }
+    } catch (e) {
+      print('Debug: Exception in _fetchReferralCode: $e');
     }
     setState(() {
       isLoadingReferral = false;

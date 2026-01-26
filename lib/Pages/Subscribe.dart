@@ -1,4 +1,5 @@
 import 'package:ambulex_users/Pages/Home.dart';
+import 'package:ambulex_users/Pages/PackageDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
@@ -204,7 +205,7 @@ class _SubscribeState extends State<Subscribe> {
 
   Map<String, Color> _getPackageColorScheme(int index, String packageName) {
     final name = packageName.toLowerCase();
-    
+
     // Color schemes for different packages
     if (name.contains('lite')) {
       return {
@@ -241,10 +242,16 @@ class _SubscribeState extends State<Subscribe> {
       final colors = [
         {'primary': Colors.blue.shade600, 'secondary': Colors.blue.shade300},
         {'primary': Colors.teal.shade600, 'secondary': Colors.teal.shade300},
-        {'primary': Colors.indigo.shade600, 'secondary': Colors.indigo.shade300},
+        {
+          'primary': Colors.indigo.shade600,
+          'secondary': Colors.indigo.shade300
+        },
         {'primary': Colors.pink.shade600, 'secondary': Colors.pink.shade300},
         {'primary': Colors.cyan.shade600, 'secondary': Colors.cyan.shade300},
-        {'primary': Colors.deepPurple.shade600, 'secondary': Colors.deepPurple.shade300},
+        {
+          'primary': Colors.deepPurple.shade600,
+          'secondary': Colors.deepPurple.shade300
+        },
       ];
       return colors[index % colors.length];
     }
@@ -923,231 +930,265 @@ class _SubscribeState extends State<Subscribe> {
           ),
         ),
         const SizedBox(height: 20),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 0.75, // Adjusted for features display
-          ),
-          itemCount: packages!.length,
-          itemBuilder: (context, index) {
-            final package = packages![index];
-            final isSelected = selectedPackage != null &&
-                selectedPackage!['id'] == package['id'];
-            final packageName = package['name'] ?? 'Package';
-            final isPopular = packageName.toLowerCase().contains('prime') ||
-                packageName.toLowerCase().contains('total');
-            
-            // Get color scheme for each package
-            final colorScheme = _getPackageColorScheme(index, packageName);
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final w = MediaQuery.of(context).size.width;
+            final isNarrow = w < 360;
+            final isCompact = w >= 360 && w < 400;
+            final isTablet = w >= 600;
+            final crossAxisCount =
+                isNarrow ? 1 : (isTablet ? (w > 900 ? 4 : 3) : 2);
+            final spacing = isNarrow ? 8.0 : (isCompact ? 10.0 : 12.0);
+            final aspectRatio =
+                crossAxisCount == 1 ? 0.52 : (isNarrow ? 0.68 : 0.75);
+            final cardPadding = isNarrow ? 10.0 : (isCompact ? 12.0 : 14.0);
+            final iconSize = isNarrow ? 20.0 : (isCompact ? 22.0 : 24.0);
+            final nameFontSize = isNarrow ? 12.0 : (isCompact ? 12.5 : 13.0);
+            final featureFontSize = isNarrow ? 9.0 : (isCompact ? 9.5 : 10.0);
+            final priceFontSize = isNarrow ? 15.0 : (isCompact ? 16.0 : 18.0);
+            final borderRadius = isNarrow ? 12.0 : 16.0;
+            final badgeTop = isNarrow ? 4.0 : 6.0;
+            final badgePaddingH = isNarrow ? 4.0 : 6.0;
+            final badgePaddingV = isNarrow ? 2.0 : 3.0;
 
-            return GestureDetector(
-              onTap: () => _selectPackage(package),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeInOut,
-                child: Stack(
-                  children: [
-                    Card(
-                      elevation: isSelected ? 8 : 3,
-                      shadowColor: isSelected
-                          ? colorScheme['primary']!.withOpacity(0.4)
-                          : Colors.grey.withOpacity(0.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        side: BorderSide(
-                          color: isSelected
-                              ? colorScheme['primary']!
-                              : Colors.grey.shade300,
-                          width: isSelected ? 2.5 : 1,
-                        ),
+            return GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: crossAxisCount,
+                crossAxisSpacing: spacing,
+                mainAxisSpacing: spacing,
+                childAspectRatio: aspectRatio,
+              ),
+              itemCount: packages!.length,
+              itemBuilder: (context, index) {
+                final package = packages![index];
+                final isSelected = selectedPackage != null &&
+                    selectedPackage!['id'] == package['id'];
+                final packageName = package['name'] ?? 'Package';
+                final isPopular = packageName.toLowerCase().contains('prime') ||
+                    packageName.toLowerCase().contains('total');
+                final colorScheme = _getPackageColorScheme(index, packageName);
+
+                return GestureDetector(
+                  onTap: () async {
+                    final result = await Navigator.push<Map<String, dynamic>>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PackageDetail(package: package),
                       ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(16),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: isSelected
-                                ? [
-                                    colorScheme['primary']!.withOpacity(0.15),
-                                    colorScheme['secondary']!.withOpacity(0.1),
-                                    Colors.white,
-                                  ]
-                                : [
-                                    colorScheme['primary']!.withOpacity(0.08),
-                                    colorScheme['secondary']!.withOpacity(0.05),
-                                    Colors.white,
-                                  ],
+                    );
+                    if (result != null && mounted) {
+                      _selectPackage(result);
+                      _showPaymentDialog();
+                    }
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    child: Stack(
+                      children: [
+                        Card(
+                          elevation: isSelected ? 8 : 3,
+                          shadowColor: isSelected
+                              ? colorScheme['primary']!.withOpacity(0.4)
+                              : Colors.grey.withOpacity(0.2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(borderRadius),
+                            side: BorderSide(
+                              color: isSelected
+                                  ? colorScheme['primary']!
+                                  : Colors.grey.shade300,
+                              width: isSelected ? 2.5 : 1,
+                            ),
                           ),
-                        ),
-                        padding: const EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            // Icon and Name Row
-                            Row(
-                              children: [
-                                // Colored Icon Container
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: colorScheme['primary']!.withOpacity(0.2),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(
-                                    _getPackageIcon(packageName),
-                                    color: colorScheme['primary'],
-                                    size: 24,
-                                  ),
-                                ),
-                                const Spacer(),
-                                // Selected Check Icon
-                                if (isSelected)
-                                  Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: colorScheme['primary'],
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 16,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            
-                            const SizedBox(height: 8),
-                            
-                            // Package Name
-                            Text(
-                              packageName,
-                              style: GoogleFonts.poppins(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: isSelected
-                                    ? colorScheme['primary']!.withOpacity(0.9)
-                                    : Colors.black87,
-                                height: 1.2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(borderRadius),
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: isSelected
+                                    ? [
+                                        colorScheme['primary']!
+                                            .withOpacity(0.15),
+                                        colorScheme['secondary']!
+                                            .withOpacity(0.1),
+                                        Colors.white,
+                                      ]
+                                    : [
+                                        colorScheme['primary']!
+                                            .withOpacity(0.08),
+                                        colorScheme['secondary']!
+                                            .withOpacity(0.05),
+                                        Colors.white,
+                                      ],
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            
-                            // Features List
-                            if (package['features'] != null && (package['features'] as List).isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              ...((package['features'] as List).take(2).map((feature) {
-                                final featureName = feature is Map ? feature['name'] : feature.toString();
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 3),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.check_circle,
-                                        size: 12,
-                                        color: colorScheme['primary']!.withOpacity(0.7),
+                            padding: EdgeInsets.all(cardPadding),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(isNarrow ? 6 : 8),
+                                      decoration: BoxDecoration(
+                                        color: colorScheme['primary']!
+                                            .withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(
+                                            isNarrow ? 8 : 10),
                                       ),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Text(
-                                          featureName,
-                                          style: GoogleFonts.poppins(
-                                            fontSize: 10,
-                                            color: Colors.grey.shade700,
-                                            height: 1.3,
-                                          ),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
+                                      child: Icon(
+                                        _getPackageIcon(packageName),
+                                        color: colorScheme['primary'],
+                                        size: iconSize,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    if (isSelected)
+                                      Container(
+                                        padding:
+                                            EdgeInsets.all(isNarrow ? 3 : 4),
+                                        decoration: BoxDecoration(
+                                          color: colorScheme['primary'],
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: isNarrow ? 14 : 16,
                                         ),
                                       ),
-                                    ],
-                                  ),
-                                );
-                              }).toList()),
-                            ],
-                            
-                            const Spacer(),
-                            
-                            // Price Section
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  package['price'] ?? 'N/A',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: colorScheme['primary'],
-                                  ),
+                                  ],
                                 ),
-                                const SizedBox(height: 2),
+                                SizedBox(height: isNarrow ? 6 : 8),
                                 Text(
-                                  'per year',
+                                  packageName,
                                   style: GoogleFonts.poppins(
-                                    fontSize: 10,
-                                    color: Colors.grey.shade600,
+                                    fontSize: nameFontSize,
+                                    fontWeight: FontWeight.bold,
+                                    color: isSelected
+                                        ? colorScheme['primary']!
+                                            .withOpacity(0.9)
+                                        : Colors.black87,
+                                    height: 1.2,
                                   ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (package['features'] != null &&
+                                    (package['features'] as List)
+                                        .isNotEmpty) ...[
+                                  SizedBox(height: isNarrow ? 4 : 6),
+                                  ...((package['features'] as List)
+                                      .take(2)
+                                      .map((feature) {
+                                    final featureName = feature is Map
+                                        ? feature['name']
+                                        : feature.toString();
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: isNarrow ? 2 : 3),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Icon(
+                                            Icons.check_circle,
+                                            size: isNarrow ? 10 : 12,
+                                            color: colorScheme['primary']!
+                                                .withOpacity(0.7),
+                                          ),
+                                          SizedBox(width: isNarrow ? 3 : 4),
+                                          Expanded(
+                                            child: Text(
+                                              featureName,
+                                              style: GoogleFonts.poppins(
+                                                fontSize: featureFontSize,
+                                                color: Colors.grey.shade700,
+                                                height: 1.3,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList()),
+                                ],
+                                const Spacer(),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      package['price'] ?? 'N/A',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: priceFontSize,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorScheme['primary'],
+                                      ),
+                                    ),
+                                    SizedBox(height: isNarrow ? 1 : 2),
+                                    Text(
+                                      'per year',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: isNarrow ? 9 : 10,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
-                      ),
+                        if (isPopular && !isSelected)
+                          Positioned(
+                            top: badgeTop,
+                            right: badgeTop,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: badgePaddingH,
+                                vertical: badgePaddingV,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade400,
+                                borderRadius:
+                                    BorderRadius.circular(isNarrow ? 8 : 10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.orange.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.star,
+                                      color: Colors.white, size: 10),
+                                  const SizedBox(width: 2),
+                                  Text(
+                                    'Popular',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
-                    
-                    // Popular Badge
-                    if (isPopular && !isSelected)
-                      Positioned(
-                        top: 6,
-                        right: 6,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.orange.shade400,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.orange.withOpacity(0.3),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.star,
-                                color: Colors.white,
-                                size: 10,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                'Popular',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
+                  ),
+                );
+              },
             );
           },
         ),
@@ -1158,11 +1199,11 @@ class _SubscribeState extends State<Subscribe> {
   int _getRemainingResponses() {
     final maxResponses = subscriptionInfo?['maxResponses'];
     final responsesUsed = subscriptionInfo?['responsesUsed'] ?? 0;
-    
+
     if (maxResponses == null || maxResponses == -1) {
       return -1; // Unlimited
     }
-    
+
     return maxResponses - responsesUsed;
   }
 
