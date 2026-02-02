@@ -4,7 +4,9 @@ import 'package:http/http.dart';
 
 String getUrl() {
   // return "http://192.168.1.136:3003/";
-  return "https://api-ambulexsolutions.dat.co.ke/";
+    // return "http://161.97.169.110:3733/";
+
+  return "https://api.ambulexsolutions.org/";
 }
 
 Map<String, dynamic> parseJwt(String token) {
