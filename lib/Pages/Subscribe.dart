@@ -770,29 +770,6 @@ class _SubscribeState extends State<Subscribe> {
         backgroundColor: Colors.blue,
         elevation: 0,
       ),
-      floatingActionButton: subscriptionInfo?['status'] != 'active'
-          ? ElevatedButton(
-              onPressed: selectedPackage == null
-                  ? () {
-                      _showSnackbar('Please select a package first');
-                    }
-                  : _showPaymentDialog,
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  elevation: 5),
-              child: Text(
-                selectedPackage == null
-                    ? 'Select Package'
-                    : 'Subscribe - ${selectedPackage!['price']}',
-                style: GoogleFonts.poppins(color: Colors.white),
-              ),
-            )
-          : null,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -806,7 +783,7 @@ class _SubscribeState extends State<Subscribe> {
             children: [
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () async {
+                  onRefresh: () async { 
                     await fetchSubscriptionInfo();
                     await fetchPayments();
                     await fetchPackages();
