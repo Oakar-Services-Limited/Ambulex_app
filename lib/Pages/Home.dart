@@ -60,6 +60,36 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
+  Future<void> _startLiveClientLocation(String reportId) async {
+    // Cancel any existing stream first
+    await positionStream?.cancel();
+
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 20,
+    );
+
+    positionStream = Geolocator.getPositionStream(
+            locationSettings: locationSettings)
+        .listen((Position pos) async {
+      try {
+        await http.post(
+          Uri.parse('${getUrl()}reports/$reportId/client-location'),
+          headers: const {
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, dynamic>{
+            'Latitude': pos.latitude,
+            'Longitude': pos.longitude,
+          }),
+        );
+      } catch (e) {
+        // Swallow errors to avoid breaking the stream
+        debugPrint('Failed to send client live location: $e');
+      }
+    });
+  }
+
   Future<Map<String, dynamic>?> getSubscriptionInfo(String userid) async {
     try {
       print('Subscription User ID: $userid');
@@ -371,6 +401,10 @@ class _HomeState extends State<Home> {
 
                             if (!mounted) return;
                             if (res.error == null) {
+                              if (res.token != null) {
+                                _startLiveClientLocation(
+                                    res.token.toString());
+                              }
                               _showSuccessDialog("Gender Based Violence");
                               // Refresh subscription info to update response count
                               await fetchSubscriptionInfo(id);
@@ -425,6 +459,10 @@ class _HomeState extends State<Home> {
 
                             if (!mounted) return;
                             if (res.error == null) {
+                              if (res.token != null) {
+                                _startLiveClientLocation(
+                                    res.token.toString());
+                              }
                               _showSuccessDialog("Medical Emergency");
                               // Refresh subscription info to update response count
                               await fetchSubscriptionInfo(id);
@@ -639,11 +677,6 @@ class _HomeState extends State<Home> {
     } catch (e) {
       return 'N/A';
     }
-  }
-
-  String _formatDateTime(String dateStr) {
-    final date = DateTime.parse(dateStr);
-    return '${date.day}/${date.month}/${date.year} ${date.hour}:${date.minute}';
   }
 
   Widget _buildSubscriptionDetail(String label, String value, IconData icon) {
