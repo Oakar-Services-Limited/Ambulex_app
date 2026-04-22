@@ -720,12 +720,16 @@ class _HomeState extends State<Home> {
           children: [
             Icon(icon, color: color, size: 28),
             const SizedBox(width: 10),
-            Text(
-              type,
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.bold,
-                color: color,
-                fontSize: 20,
+            Expanded(
+              child: Text(
+                type,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                  fontSize: 20,
+                ),
               ),
             ),
           ],
