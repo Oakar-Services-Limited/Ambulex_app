@@ -195,7 +195,7 @@ class _ReportsState extends State<Reports> {
       appBar: AppBar(
         foregroundColor: Colors.white,
         title: Text(
-          'Tap to view a Report',
+          'Reports',
           style: GoogleFonts.poppins(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -261,15 +261,19 @@ class _ReportsState extends State<Reports> {
                                     'Address: ${report['Address'] ?? 'Not available'}';
 
                                 return Card(
-                                  elevation: 2,
+                                  elevation: 4,
                                   margin: const EdgeInsets.only(bottom: 16),
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(16),
+                                    side: BorderSide(
+                                      color: Colors.blue.shade50,
+                                      width: 1,
+                                    ),
                                   ),
                                   child: Stack(
                                     children: [
                                       InkWell(
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(16),
                                         onTap: () => _showReportDetails(report),
                                         child: Padding(
                                           padding: const EdgeInsets.all(16),
@@ -281,12 +285,24 @@ class _ReportsState extends State<Reports> {
                                                 crossAxisAlignment:
                                                     CrossAxisAlignment.start,
                                                 children: [
-                                                  Icon(
-                                                    _getTypeIcon(
-                                                        report['Type']),
-                                                    color: _getStatusColor(
-                                                        report['Status']),
-                                                    size: 24,
+                                                  Container(
+                                                    width: 38,
+                                                    height: 38,
+                                                    decoration: BoxDecoration(
+                                                      color: _getStatusColor(
+                                                              report['Status'])
+                                                          .withOpacity(0.14),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              10),
+                                                    ),
+                                                    child: Icon(
+                                                      _getTypeIcon(
+                                                          report['Type']),
+                                                      color: _getStatusColor(
+                                                          report['Status']),
+                                                      size: 20,
+                                                    ),
                                                   ),
                                                   const SizedBox(width: 8),
                                                   Expanded(
@@ -633,6 +649,51 @@ class _ReportsState extends State<Reports> {
                                                   fontSize: 12,
                                                   color: Colors.grey[500],
                                                 ),
+                                              ),
+                                              const SizedBox(height: 10),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  OutlinedButton.icon(
+                                                    onPressed: () =>
+                                                        _showReportDetails(
+                                                            report),
+                                                    icon: const Icon(
+                                                      Icons.visibility,
+                                                      size: 16,
+                                                    ),
+                                                    label: Text(
+                                                      'View',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                    style:
+                                                        OutlinedButton.styleFrom(
+                                                      foregroundColor:
+                                                          Colors.blue.shade700,
+                                                      side: BorderSide(
+                                                        color:
+                                                            Colors.blue.shade200,
+                                                      ),
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(10),
+                                                      ),
+                                                      padding: const EdgeInsets
+                                                          .symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 8,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ],
                                           ),

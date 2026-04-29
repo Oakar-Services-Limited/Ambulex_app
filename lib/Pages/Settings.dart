@@ -1,8 +1,6 @@
 // ignore_for_file: file_names, library_private_types_in_public_api, use_build_context_synchronously, prefer_typing_uninitialized_variables
 
-import 'package:ambulex_users/Components/MyTextInput.dart';
 import 'package:ambulex_users/Components/MyDrawer.dart';
-import 'package:ambulex_users/Components/TextOakar.dart';
 import 'package:ambulex_users/Pages/Home.dart';
 import 'package:ambulex_users/Pages/Login.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +8,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../Components/SubmitButton.dart';
 import '../Components/Utils.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -30,12 +25,6 @@ class _SettingsState extends State<Settings> {
   bool checkedin = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
   var userDetails;
-  String oldPass = "";
-  String nePass = "";
-  String cPass = "";
-  String error = '';
-  var isLoading;
-  bool successful = false;
 
   @override
   initState() {
@@ -46,6 +35,7 @@ class _SettingsState extends State<Settings> {
   getToken() async {
     var token = await storage.read(key: "jwt");
     var decoded = parseJwt(token.toString());
+    if (!mounted) return;
     setState(() {
       userDetails = decoded;
     });
@@ -83,9 +73,9 @@ class _SettingsState extends State<Settings> {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade100, Colors.white],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            colors: [Colors.blue.shade50, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
         ),
         child: Stack(children: [
@@ -95,11 +85,76 @@ class _SettingsState extends State<Settings> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        colors: [Colors.blue.shade500, Colors.blue.shade700],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.blue.withOpacity(0.18),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                userDetails != null ? userDetails["Name"] : "User",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                userDetails != null ? userDetails["Email"] : "",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   Card(
-                    elevation: 4,
-                    color: Colors.blue.shade50,
+                    elevation: 2,
+                    color: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -113,14 +168,14 @@ class _SettingsState extends State<Settings> {
                               Text(
                                 "User Details",
                                 style: GoogleFonts.poppins(
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.blue,
                                 ),
                               ),
                             ],
                           ),
-                          const Divider(height: 20),
+                          const Divider(height: 18),
                           _buildDetailRow(
                             Icons.badge,
                             "Name",
@@ -159,10 +214,10 @@ class _SettingsState extends State<Settings> {
                   ),
                   const SizedBox(height: 20),
                   Card(
-                    elevation: 4,
-                    color: Colors.blue.shade50,
+                    elevation: 2,
+                    color: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(0),
@@ -179,7 +234,7 @@ class _SettingsState extends State<Settings> {
                                   Text(
                                     "Change Password",
                                     style: GoogleFonts.poppins(
-                                      fontSize: 20,
+                                      fontSize: 18,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.orange,
                                     ),
@@ -187,79 +242,33 @@ class _SettingsState extends State<Settings> {
                                 ],
                               )),
                           const Divider(height: 20),
-                          MyTextInput(
-                            title: "Current Password",
-                            value: "",
-                            onSubmit: (v) => setState(() => oldPass = v),
-                            type: TextInputType.visiblePassword,
-                          ),
-                          MyTextInput(
-                            title: "New Password",
-                            value: "",
-                            onSubmit: (v) => setState(() => nePass = v),
-                            type: TextInputType.visiblePassword,
-                          ),
-                          MyTextInput(
-                            title: "Confirm Password",
-                            value: "",
-                            onSubmit: (v) => setState(() => cPass = v),
-                            type: TextInputType.visiblePassword,
-                          ),
-                          if (error.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: TextOakar(
-                                label: error,
-                                issuccessful: successful,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                            child: Text(
+                              "Update your account password securely in a dialog.",
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.grey[700],
                               ),
                             ),
-                          const SizedBox(height: 16),
+                          ),
                           Padding(
                               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                               child: SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () async {
-                                    setState(() {
-                                      isLoading = LoadingAnimationWidget
-                                          .staggeredDotsWave(
-                                        color: Colors.blue,
-                                        size: 100,
-                                      );
-                                    });
-                                    var res = await changePass(
-                                      oldPass,
-                                      nePass,
-                                      cPass,
-                                      userDetails["UserID"],
-                                    );
-                                    setState(() {
-                                      isLoading = null;
-                                      successful = res.error == null;
-                                      error = res.error ?? res.success;
-                                    });
-                                    if (res.error == null) {
-                                      await storage.write(
-                                          key: 'jwt', value: "");
-                                      Timer(const Duration(seconds: 1), () {
-                                        Navigator.pushReplacement(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) => const Login()),
-                                        );
-                                      });
-                                    }
-                                  },
+                                  onPressed: _showChangePasswordDialog,
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.blue,
+                                    backgroundColor: Colors.orange.shade600,
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 16),
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(12),
                                     ),
+                                    elevation: 0,
                                   ),
                                   child: Text(
-                                    "Update Password",
+                                    "Change Password",
                                     style: GoogleFonts.poppins(
                                       fontSize: 16,
                                       color: Colors.white,
@@ -276,24 +285,161 @@ class _SettingsState extends State<Settings> {
               ),
             ),
           ),
-          if (isLoading != null)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: Center(child: isLoading),
-            ),
         ]),
       ),
     );
   }
 
+  Future<void> _showChangePasswordDialog() async {
+    final oldController = TextEditingController();
+    final newController = TextEditingController();
+    final confirmController = TextEditingController();
+    String feedback = '';
+    bool success = false;
+    bool submitting = false;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: !submitting,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              title: Text(
+                "Change Password",
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.w700,
+                  color: Colors.blue,
+                ),
+              ),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: oldController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "Current Password",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: newController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "New Password",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: confirmController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        labelText: "Confirm Password",
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                    if (feedback.isNotEmpty) ...[
+                      const SizedBox(height: 10),
+                      Text(
+                        feedback,
+                        style: GoogleFonts.poppins(
+                          color: success ? Colors.green : Colors.red,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: submitting
+                      ? null
+                      : () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    "Cancel",
+                    style: GoogleFonts.poppins(color: Colors.grey[700]),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: submitting
+                      ? null
+                      : () async {
+                          setDialogState(() {
+                            submitting = true;
+                            feedback = '';
+                          });
+
+                          final res = await changePass(
+                            oldController.text.trim(),
+                            newController.text.trim(),
+                            confirmController.text.trim(),
+                            userDetails != null ? userDetails["UserID"] : "",
+                          );
+
+                          if (!mounted) return;
+
+                          setDialogState(() {
+                            submitting = false;
+                            success = res.error == null;
+                            feedback = res.error ?? (res.success ?? '');
+                          });
+
+                          if (res.error == null) {
+                            await storage.write(key: 'jwt', value: "");
+                            if (!mounted) return;
+                            Navigator.of(dialogContext).pop();
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const Login(),
+                              ),
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  child: Text(
+                    submitting ? "Updating..." : "Update",
+                    style: GoogleFonts.poppins(color: Colors.white),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.blue.shade50.withOpacity(0.55),
+        borderRadius: BorderRadius.circular(12),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[600]),
-          const SizedBox(width: 8),
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(icon, size: 18, color: Colors.blue.shade700),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,11 +451,13 @@ class _SettingsState extends State<Settings> {
                     color: Colors.grey[600],
                   ),
                 ),
+                const SizedBox(height: 2),
                 Text(
                   value.isEmpty ? "Not provided" : value,
                   style: GoogleFonts.poppins(
-                    fontSize: 16,
+                    fontSize: 15,
                     color: Colors.black87,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],

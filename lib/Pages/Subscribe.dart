@@ -198,11 +198,16 @@ class _SubscribeState extends State<Subscribe> {
     }
   }
 
-  double _parsePrice(String priceString) {
+  double _parsePrice(dynamic rawPrice) {
     try {
-      // Remove "Ksh" and any whitespace, then parse
-      final cleaned =
-          priceString.replaceAll('Ksh', '').replaceAll(' ', '').trim();
+      if (rawPrice == null) return 200.0;
+      if (rawPrice is num) return rawPrice.toDouble();
+
+      final priceString = rawPrice.toString();
+      // Keep only digits and decimal point to handle values like:
+      // "Ksh 5,000", "KES 1200.50", "1,500"
+      final cleaned = priceString.replaceAll(RegExp(r'[^0-9.]'), '').trim();
+      if (cleaned.isEmpty) return 200.0;
       return double.parse(cleaned);
     } catch (e) {
       print('Error parsing price: $e');
@@ -754,7 +759,7 @@ class _SubscribeState extends State<Subscribe> {
       // Log the request body
       print('Request Body: ${json.encode({
             'phoneNumber': phoneNumber,
-            'amount': subscriptionAmount,
+            'amount': amount,
             'userId': userid, // Ensure userid is correctly set
           })}');
 
@@ -763,7 +768,7 @@ class _SubscribeState extends State<Subscribe> {
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'phoneNumber': phoneNumber,
-          'amount': subscriptionAmount,
+          'amount': amount,
           'userId': userid, // Include userId in the request body
         }),
       );
@@ -1237,6 +1242,8 @@ class _SubscribeState extends State<Subscribe> {
   Widget _buildSubscriptionCard() {
     final bool isSubscriptionLoading = subscriptionInfo == null;
     final bool isActive = _subscriptionStatusValue() == 'active';
+    final bool hasPackagePreview =
+        _showPackageSelector && selectedPackage != null;
     final int remainingResponses = _getRemainingResponses();
     final dynamic responsesUsedRaw = subscriptionInfo?['responsesUsed'];
     final dynamic maxResponsesRaw = subscriptionInfo?['maxResponses'];
@@ -1250,17 +1257,26 @@ class _SubscribeState extends State<Subscribe> {
     final double responsesProgress = hasLimitedResponses
         ? (responsesUsed / maxResponses).clamp(0.0, 1.0)
         : 0.0;
-    final gradientColors = isSubscriptionLoading
-        ? [Colors.blue.shade300, Colors.blue.shade600]
-        : (isActive
-            ? [Colors.blue.shade400, Colors.blue.shade700]
-            : [Colors.grey.shade400, Colors.grey.shade700]);
-    final statusText = isSubscriptionLoading
-        ? 'LOADING...'
-        : (subscriptionInfo?['status']?.toUpperCase() ?? 'NO SUBSCRIPTION');
-    final String amountPaidText = 'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}';
-    final String packageName =
-        subscriptionInfo?['packageName']?.toString() ?? 'No package selected';
+    final gradientColors = hasPackagePreview
+        ? [Colors.blue.shade400, Colors.blue.shade700]
+        : isSubscriptionLoading
+            ? [Colors.blue.shade300, Colors.blue.shade600]
+            : (isActive
+                ? [Colors.blue.shade400, Colors.blue.shade700]
+                : [Colors.grey.shade400, Colors.grey.shade700]);
+    final statusText = hasPackagePreview
+        ? 'PACKAGE SELECTED'
+        : isSubscriptionLoading
+            ? 'LOADING...'
+            : (subscriptionInfo?['status']?.toUpperCase() ?? 'NO SUBSCRIPTION');
+    final String amountPaidText = hasPackagePreview
+        ? (selectedPackage?['price']?.toString() ??
+            'Ksh${subscriptionAmount.toStringAsFixed(2)}')
+        : 'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}';
+    final String packageName = hasPackagePreview
+        ? (selectedPackage?['name']?.toString() ?? 'Selected package')
+        : (subscriptionInfo?['packageName']?.toString() ??
+            'No package selected');
 
     return Card(
       elevation: 4,
@@ -1368,7 +1384,7 @@ class _SubscribeState extends State<Subscribe> {
                     child: _buildMiniStatCard(
                       icon: Icons.payment,
                       label: 'Amount Paid',
-                      value: 'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                      value: amountPaidText,
                     ),
                   ),
                   SizedBox(
