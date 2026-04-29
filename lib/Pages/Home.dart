@@ -311,46 +311,56 @@ class _HomeState extends State<Home> {
                                 showDialog(
                                   context: context,
                                   builder: (BuildContext context) {
-                                    return Dialog(
-                                      insetPadding: const EdgeInsets.all(16),
-                                      child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9,
-                                        height:
-                                            MediaQuery.of(context).size.height *
-                                                0.6,
-                                        padding: const EdgeInsets.all(8),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                    final size = MediaQuery.of(context).size;
+                                    return SafeArea(
+                                      child: Dialog(
+                                        insetPadding: const EdgeInsets.all(16),
+                                        child: ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth: size.width * 0.92,
+                                            maxHeight: size.height * 0.82,
+                                          ),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Text(
-                                                  'Location Map',
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.blue,
-                                                  ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Expanded(
+                                                      child: Text(
+                                                        'Location Map',
+                                                        maxLines: 1,
+                                                        overflow:
+                                                            TextOverflow.ellipsis,
+                                                        style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors.blue,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      icon:
+                                                          const Icon(Icons.close),
+                                                      onPressed: () =>
+                                                          Navigator.pop(context),
+                                                    ),
+                                                  ],
                                                 ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.close),
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
+                                                Expanded(
+                                                  child: MyMap(
+                                                      lat: lat,
+                                                      lon: long,
+                                                      username: phone),
                                                 ),
                                               ],
                                             ),
-                                            Expanded(
-                                              child: MyMap(
-                                                  lat: lat,
-                                                  lon: long,
-                                                  username: phone),
-                                            ),
-                                          ],
+                                          ),
                                         ),
                                       ),
                                     );

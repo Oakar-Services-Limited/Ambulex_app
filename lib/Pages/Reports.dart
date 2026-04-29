@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ambulex_users/Components/Map.dart';
+import 'package:ambulex_users/Pages/TrackEMT.dart';
 import 'package:latlong2/latlong.dart';
 
 class Reports extends StatefulWidget {
@@ -259,6 +260,12 @@ class _ReportsState extends State<Reports> {
                                 String displayAddress = report[
                                         'GeocodedAddress'] ??
                                     'Address: ${report['Address'] ?? 'Not available'}';
+                                final String status =
+                                    (report['Status'] ?? '').toString().toLowerCase();
+                                final bool canTrack = status == 'in progress' &&
+                                    report['ID'] != null &&
+                                    report['Latitude'] != null &&
+                                    report['Longitude'] != null;
 
                                 return Card(
                                   elevation: 4,
@@ -651,10 +658,74 @@ class _ReportsState extends State<Reports> {
                                                 ),
                                               ),
                                               const SizedBox(height: 10),
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
+                                              Wrap(
+                                                alignment: WrapAlignment.end,
+                                                runSpacing: 8,
+                                                spacing: 8,
                                                 children: [
+                                                  if (canTrack) ...[
+                                                    OutlinedButton.icon(
+                                                      onPressed: () {
+                                                        final reportId =
+                                                            report['ID'].toString();
+                                                        final clientLat =
+                                                            double.tryParse(
+                                                                    report['Latitude']
+                                                                        .toString()) ??
+                                                                0.0;
+                                                        final clientLon =
+                                                            double.tryParse(
+                                                                    report['Longitude']
+                                                                        .toString()) ??
+                                                                0.0;
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                TrackEMTPage(
+                                                              reportId: reportId,
+                                                              clientLat: clientLat,
+                                                              clientLon: clientLon,
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      icon: const Icon(
+                                                        Icons.location_searching,
+                                                        size: 16,
+                                                      ),
+                                                      label: Text(
+                                                        'Track EMT',
+                                                        style:
+                                                            GoogleFonts.poppins(
+                                                          fontWeight:
+                                                              FontWeight.w600,
+                                                          fontSize: 12,
+                                                        ),
+                                                      ),
+                                                      style:
+                                                          OutlinedButton.styleFrom(
+                                                        foregroundColor:
+                                                            Colors.orange.shade700,
+                                                        side: BorderSide(
+                                                          color:
+                                                              Colors.orange.shade200,
+                                                        ),
+                                                        shape:
+                                                            RoundedRectangleBorder(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                        ),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                          horizontal: 12,
+                                                          vertical: 8,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                   OutlinedButton.icon(
                                                     onPressed: () =>
                                                         _showReportDetails(
@@ -791,7 +862,6 @@ class _ReportsState extends State<Reports> {
     }
 
     List<LatLng>? routePoints;
-    bool isLoadingRoute = false;
 
     if (showERTeam &&
         lat != null &&
