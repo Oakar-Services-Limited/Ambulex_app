@@ -31,18 +31,21 @@ class _MyDrawerState extends State<MyDrawer> {
   }
 
   Future<void> _fetchReferralCode() async {
+    if (!mounted) return;
     setState(() {
       isLoadingReferral = true;
     });
     final storage = FlutterSecureStorage();
     final String? token = await storage.read(key: "jwt");
     if (token == null) {
+      if (!mounted) return;
       setState(() => isLoadingReferral = false);
       return;
     }
     final decoded = parseJwt(token);
     final userId = decoded["UserID"]?.toString();
     if (userId == null) {
+      if (!mounted) return;
       setState(() => isLoadingReferral = false);
       return;
     }
@@ -54,6 +57,7 @@ class _MyDrawerState extends State<MyDrawer> {
       print('Debug: API response body = ${response.body}');
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        if (!mounted) return;
         setState(() {
           referralCode = data['referralCode'];
         });
@@ -62,6 +66,7 @@ class _MyDrawerState extends State<MyDrawer> {
     } catch (e) {
       print('Debug: Exception in _fetchReferralCode: $e');
     }
+    if (!mounted) return;
     setState(() {
       isLoadingReferral = false;
     });

@@ -60,6 +60,7 @@ class _SubscribeState extends State<Subscribe> {
   Future<void> getUserInfo() async {
     try {
       var token = await storage.read(key: "jwt");
+      if (!mounted) return;
       if (token == null) {
         _showSnackbar('User not logged in. Please log in again.');
         return;
@@ -73,6 +74,7 @@ class _SubscribeState extends State<Subscribe> {
         return;
       }
 
+      if (!mounted) return;
       setState(() {
         userid = decoded["UserID"];
         var phone = decoded["Phone"]; // Get the user's phone number
@@ -259,6 +261,7 @@ class _SubscribeState extends State<Subscribe> {
 
   Future<void> fetchSubscriptionInfo() async {
     final response = await getSubscriptionInfo();
+    if (!mounted) return;
     if (response != null &&
         response['data'] != null &&
         response['data'].isNotEmpty) {
@@ -276,6 +279,7 @@ class _SubscribeState extends State<Subscribe> {
 
   Future<void> fetchPayments() async {
     final response = await getPayments();
+    if (!mounted) return;
     if (response != null) {
       print('Payments fetched: $response'); // Log the fetched payments
       setState(() {
@@ -328,6 +332,7 @@ class _SubscribeState extends State<Subscribe> {
 
   Future<void> createSubscription() async {
     try {
+      if (!mounted) return;
       setState(() {
         isLoading = true;
       });
@@ -373,6 +378,7 @@ class _SubscribeState extends State<Subscribe> {
         body: json.encode(requestBody),
       );
 
+      if (!mounted) return;
       setState(() {
         isLoading = false;
       });
@@ -383,6 +389,7 @@ class _SubscribeState extends State<Subscribe> {
         _showPaymentDialog();
         await fetchSubscriptionInfo();
         await fetchPayments();
+        if (!mounted) return;
         setState(() {
           paymentMade =
               true; // Set paymentMade to true after successful payment
@@ -398,6 +405,7 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   void _showSnackbar(String message, {bool isSuccess = false}) {
+    if (!mounted) return;
     final snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 3),
@@ -407,6 +415,7 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   void _showPaymentDialog() {
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -510,6 +519,7 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   void _showPhoneNumberEditDialog() {
+    if (!mounted) return;
     final TextEditingController phoneController =
         TextEditingController(text: phoneNumber);
 
@@ -623,6 +633,7 @@ class _SubscribeState extends State<Subscribe> {
     _showSnackbar('Processing Payment...');
     final paymentResponse =
         await initiatePayment(phoneNumber, subscriptionAmount.toString());
+    if (!mounted) return;
 
     if (paymentResponse != null) {
       _showPaymentConfirmationDialog();
@@ -632,6 +643,7 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   void _showPaymentConfirmationDialog() {
+    if (!mounted) return;
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -748,16 +760,20 @@ class _SubscribeState extends State<Subscribe> {
 
   @override
   Widget build(BuildContext context) {
+    final w = MediaQuery.of(context).size.width;
+    final isTablet = w >= 700;
+    final horizontalPadding = isTablet ? 24.0 : 16.0;
+    final primary = Theme.of(context).colorScheme.primary;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           "Subscription",
           style: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
         ),
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.home),
@@ -767,33 +783,92 @@ class _SubscribeState extends State<Subscribe> {
             },
           ),
         ],
-        backgroundColor: Colors.blue,
-        elevation: 0,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade50, Colors.white],
-          ),
-        ),
+        color: const Color(0xFFF7FAFF),
         child: SafeArea(
           child: Column(
             children: [
               Expanded(
                 child: RefreshIndicator(
-                  onRefresh: () async { 
+                  onRefresh: () async {
                     await fetchSubscriptionInfo();
                     await fetchPayments();
                     await fetchPackages();
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.fromLTRB(
+                      horizontalPadding,
+                      16,
+                      horizontalPadding,
+                      24,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: primary.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                              color: primary.withOpacity(0.16),
+                            ),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(14),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.05),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 6),
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.workspace_premium,
+                                  color: primary,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Choose a plan that fits you',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.blue.shade900,
+                                        letterSpacing: -0.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Tap a package to view details and pay securely via M‑Pesa.',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 12,
+                                        color: Colors.grey.shade700,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
                         _buildSubscriptionCard(),
                         const SizedBox(height: 24),
                         if (subscriptionInfo?['status'] != 'active')
@@ -815,6 +890,7 @@ class _SubscribeState extends State<Subscribe> {
   }
 
   Widget _buildPackagesSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     if (isLoadingPackages) {
       return Center(
         child: Padding(
@@ -823,8 +899,8 @@ class _SubscribeState extends State<Subscribe> {
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade700),
-              ),
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(colorScheme.primary)),
               const SizedBox(height: 16),
               Text(
                 'Loading packages...',
@@ -841,10 +917,12 @@ class _SubscribeState extends State<Subscribe> {
 
     if (packages == null || packages!.isEmpty) {
       return Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
               Icon(
@@ -857,7 +935,8 @@ class _SubscribeState extends State<Subscribe> {
                 'No packages available',
                 style: GoogleFonts.poppins(
                   fontSize: 16,
-                  color: Colors.grey.shade600,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 8),
@@ -867,9 +946,8 @@ class _SubscribeState extends State<Subscribe> {
                 },
                 icon: Icon(Icons.refresh),
                 label: Text('Retry'),
-                style: TextButton.styleFrom(
-                  foregroundColor: Colors.blue,
-                ),
+                style:
+                    TextButton.styleFrom(foregroundColor: colorScheme.primary),
               ),
             ],
           ),
@@ -882,18 +960,26 @@ class _SubscribeState extends State<Subscribe> {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.workspace_premium,
-              color: Colors.blue.shade700,
-              size: 24,
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.workspace_premium,
+                color: colorScheme.primary,
+                size: 18,
+              ),
             ),
             const SizedBox(width: 8),
             Text(
               'Select a Package',
               style: GoogleFonts.poppins(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue.shade700,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.blue.shade900,
+                letterSpacing: -0.2,
               ),
             ),
           ],
@@ -906,7 +992,7 @@ class _SubscribeState extends State<Subscribe> {
             color: Colors.grey.shade600,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         LayoutBuilder(
           builder: (context, constraints) {
             final w = MediaQuery.of(context).size.width;
@@ -947,60 +1033,48 @@ class _SubscribeState extends State<Subscribe> {
                     packageName.toLowerCase().contains('total');
                 final colorScheme = _getPackageColorScheme(index, packageName);
 
-                return GestureDetector(
-                  onTap: () async {
-                    final result = await Navigator.push<Map<String, dynamic>>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PackageDetail(package: package),
-                      ),
-                    );
-                    if (result != null && mounted) {
-                      _selectPackage(result);
-                      _showPaymentDialog();
-                    }
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    child: Stack(
-                      children: [
-                        Card(
-                          elevation: isSelected ? 8 : 3,
-                          shadowColor: isSelected
-                              ? colorScheme['primary']!.withOpacity(0.4)
-                              : Colors.grey.withOpacity(0.2),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(borderRadius),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? colorScheme['primary']!
-                                  : Colors.grey.shade300,
-                              width: isSelected ? 2.5 : 1,
-                            ),
+                return AnimatedContainer(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  child: Material(
+                    color: Colors.transparent,
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(borderRadius),
+                      onTap: () async {
+                        final result = await Navigator.push<Map<String, dynamic>>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PackageDetail(package: package),
                           ),
-                          child: Container(
+                        );
+                        if (result != null && mounted) {
+                          _selectPackage(result);
+                          _showPaymentDialog();
+                        }
+                      },
+                      child: Stack(
+                        children: [
+                          Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(borderRadius),
-                              gradient: LinearGradient(
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                                colors: isSelected
-                                    ? [
-                                        colorScheme['primary']!
-                                            .withOpacity(0.15),
-                                        colorScheme['secondary']!
-                                            .withOpacity(0.1),
-                                        Colors.white,
-                                      ]
-                                    : [
-                                        colorScheme['primary']!
-                                            .withOpacity(0.08),
-                                        colorScheme['secondary']!
-                                            .withOpacity(0.05),
-                                        Colors.white,
-                                      ],
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.circular(borderRadius),
+                              border: Border.all(
+                                color: isSelected
+                                    ? colorScheme['primary']!
+                                        .withOpacity(0.55)
+                                    : Colors.grey.shade200,
+                                width: isSelected ? 1.6 : 1,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(
+                                      isSelected ? 0.08 : 0.05),
+                                  blurRadius: isSelected ? 18 : 14,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
                             ),
                             padding: EdgeInsets.all(cardPadding),
                             child: Column(
@@ -1013,9 +1087,9 @@ class _SubscribeState extends State<Subscribe> {
                                       padding: EdgeInsets.all(isNarrow ? 6 : 8),
                                       decoration: BoxDecoration(
                                         color: colorScheme['primary']!
-                                            .withOpacity(0.2),
+                                            .withOpacity(0.12),
                                         borderRadius: BorderRadius.circular(
-                                            isNarrow ? 8 : 10),
+                                            isNarrow ? 10 : 12),
                                       ),
                                       child: Icon(
                                         _getPackageIcon(packageName),
@@ -1121,47 +1195,47 @@ class _SubscribeState extends State<Subscribe> {
                               ],
                             ),
                           ),
-                        ),
-                        if (isPopular && !isSelected)
-                          Positioned(
-                            top: badgeTop,
-                            right: badgeTop,
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: badgePaddingH,
-                                vertical: badgePaddingV,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade400,
-                                borderRadius:
-                                    BorderRadius.circular(isNarrow ? 8 : 10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.orange.withOpacity(0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.star,
-                                      color: Colors.white, size: 10),
-                                  const SizedBox(width: 2),
-                                  Text(
-                                    'Popular',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 9,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
+                          if (isPopular && !isSelected)
+                            Positioned(
+                              top: badgeTop,
+                              right: badgeTop,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: badgePaddingH + 2,
+                                  vertical: badgePaddingV + 1,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade400,
+                                  borderRadius:
+                                      BorderRadius.circular(isNarrow ? 10 : 12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.orange.withOpacity(0.22),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.star,
+                                        color: Colors.white, size: 12),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Popular',
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -1186,126 +1260,275 @@ class _SubscribeState extends State<Subscribe> {
 
   Widget _buildSubscriptionCard() {
     final bool isActive = subscriptionInfo?['status'] == 'active';
+    final primary = Theme.of(context).colorScheme.primary;
 
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isActive
-                ? [Colors.blue.shade400, Colors.blue.shade700]
-                : [Colors.grey.shade400, Colors.grey.shade700],
-          ),
+    final statusText =
+        subscriptionInfo?['status']?.toString().toUpperCase() ?? 'NO SUBSCRIPTION';
+    final statusBg = isActive ? Colors.blue.shade50 : Colors.orange.shade50;
+    final statusFg =
+        isActive ? Colors.blue.shade800 : Colors.orange.shade800;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            primary.withOpacity(0.06),
+            Colors.white,
+          ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isActive ? Icons.verified : Icons.warning_rounded,
-                  color: Colors.white,
-                  size: 32,
+        borderRadius: BorderRadius.circular(20),
+        border: Border(
+          left: BorderSide(
+            color: isActive
+                ? Colors.blue.shade400.withOpacity(0.55)
+                : Colors.orange.shade400.withOpacity(0.55),
+            width: 4,
+          ),
+          top: BorderSide(color: Colors.grey.shade200),
+          right: BorderSide(color: Colors.grey.shade200),
+          bottom: BorderSide(color: Colors.grey.shade200),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isActive ? Colors.blue.shade50 : Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-                Column(
+                child: Icon(
+                  isActive ? Icons.verified : Icons.warning_rounded,
+                  color:
+                      isActive ? Colors.blue.shade700 : Colors.orange.shade700,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Subscription Status',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Subscription',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.blue.shade900,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: statusBg,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: statusFg.withOpacity(0.15),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                size: 8,
+                                color: isActive
+                                    ? Colors.green.shade600
+                                    : Colors.orange.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                statusText,
+                                style: GoogleFonts.poppins(
+                                  color: statusFg,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 6),
                     Text(
-                      subscriptionInfo?['status']?.toUpperCase() ??
-                          'NO SUBSCRIPTION',
+                      subscriptionInfo?['packageName']?.toString().isNotEmpty ==
+                              true
+                          ? (subscriptionInfo?['packageName']?.toString() ?? '')
+                          : 'Choose a plan to unlock full access.',
                       style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        height: 1.3,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
-            const Divider(color: Colors.white24, height: 32),
-            _buildSubscriptionDetail(
-              'Amount Paid',
-              'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
-              Icons.payment,
-            ),
-            const SizedBox(height: 16),
-            _buildSubscriptionDetail(
-              'Valid Until',
-              _formatDate(subscriptionInfo?['endDate']),
-              Icons.event,
-            ),
-            if (isActive && subscriptionInfo?['maxResponses'] != null) ...[
-              const SizedBox(height: 16),
-              _buildSubscriptionDetail(
-                'Responses Remaining',
-                _getRemainingResponses() >= 0
-                    ? '${_getRemainingResponses()} / ${subscriptionInfo?['maxResponses']}'
-                    : 'Unlimited',
-                Icons.emergency,
               ),
             ],
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade200, height: 1),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final twoCols = constraints.maxWidth >= 520;
+              const gap = 12.0;
+              final tileWidth = twoCols
+                  ? (constraints.maxWidth - gap) / 2
+                  : constraints.maxWidth;
+
+              final tiles = <Widget>[
+                SizedBox(
+                  width: tileWidth,
+                  child: _buildSubscriptionDetail(
+                    'Amount Paid',
+                    'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                    Icons.payment,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _buildSubscriptionDetail(
+                    'Valid Until',
+                    _formatDate(subscriptionInfo?['endDate']),
+                    Icons.event,
+                  ),
+                ),
+                if (isActive && subscriptionInfo?['maxResponses'] != null)
+                  SizedBox(
+                    width: tileWidth,
+                    child: _buildSubscriptionDetail(
+                      'Responses Remaining',
+                      _getRemainingResponses() >= 0
+                          ? '${_getRemainingResponses()} / ${subscriptionInfo?['maxResponses']}'
+                          : 'Unlimited',
+                      Icons.emergency,
+                    ),
+                  ),
+              ];
+
+              return Wrap(
+                spacing: gap,
+                runSpacing: 12,
+                children: tiles,
+              );
+            },
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildSubscriptionDetail(String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.white70, size: 20),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(12),
             ),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Icon(
+              icon,
+              color: Theme.of(context).colorScheme.primary,
+              size: 16,
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade600,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    color: Colors.black87,
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildPaymentsSection() {
+    final colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Payment History',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue.shade700,
-          ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withOpacity(0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.receipt_long,
+                color: colorScheme.primary,
+                size: 18,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Payment History',
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Colors.blue.shade900,
+                letterSpacing: -0.2,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         if (payments == null || payments!.isEmpty)
           Center(
             child: Column(
@@ -1323,11 +1546,10 @@ class _SubscribeState extends State<Subscribe> {
                 ElevatedButton(
                   onPressed: _showPaymentDialog,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12),
+                        horizontal: 24, vertical: 14),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                   ),
                   child: Text(
@@ -1345,38 +1567,68 @@ class _SubscribeState extends State<Subscribe> {
             itemCount: payments!.length,
             itemBuilder: (context, index) {
               final payment = payments![index];
-              return Card(
+              return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.blue.shade50,
-                    child: Icon(Icons.receipt, color: Colors.blue.shade700),
-                  ),
-                  title: Text(
-                    'Ksh${payment['amountPaid']}',
-                    style: GoogleFonts.poppins(
-                      fontWeight: FontWeight.w600,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
                     ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _formatDateTime(payment['createdAt']),
-                        style: GoogleFonts.poppins(fontSize: 12),
-                      ),
-                      Text(
-                        'Ref: ${payment['mpesaReceiptNumber']}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
+                  ],
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      left: 0,
+                      top: 0,
+                      bottom: 0,
+                      child: Container(
+                        width: 4,
+                        decoration: BoxDecoration(
+                          color: colorScheme.primary.withOpacity(0.35),
+                          borderRadius: const BorderRadius.horizontal(
+                            left: Radius.circular(18),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                    ListTile(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: colorScheme.primary.withOpacity(0.12),
+                        child: Icon(Icons.receipt, color: colorScheme.primary),
+                      ),
+                      title: Text(
+                        'Ksh${payment['amountPaid']}',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _formatDateTime(payment['createdAt']),
+                            style: GoogleFonts.poppins(fontSize: 12),
+                          ),
+                          Text(
+                            'Ref: ${payment['mpesaReceiptNumber']}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

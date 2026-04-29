@@ -46,6 +46,8 @@ class _HomeState extends State<Home> {
   StreamSubscription<Position>? positionStream;
   var isLoading = null;
   String address = 'Fetching location...';
+  bool _isGbvPressed = false;
+  bool _isMePressed = false;
 
   @override
   void initState() {
@@ -69,11 +71,11 @@ class _HomeState extends State<Home> {
       distanceFilter: 20,
     );
 
-    positionStream = Geolocator.getPositionStream(
-            locationSettings: locationSettings)
-        .listen((Position pos) async {
+    positionStream =
+        Geolocator.getPositionStream(locationSettings: locationSettings)
+            .listen((Position pos) async {
       try {
-        await http.post(
+        final response = await http.post(
           Uri.parse('${getUrl()}reports/$reportId/client-location'),
           headers: const {
             'Content-Type': 'application/json; charset=UTF-8',
@@ -81,8 +83,16 @@ class _HomeState extends State<Home> {
           body: jsonEncode(<String, dynamic>{
             'Latitude': pos.latitude,
             'Longitude': pos.longitude,
+            'Timestamp': DateTime.now().toUtc().toIso8601String(),
+            'Accuracy': pos.accuracy,
+            'Speed': pos.speed,
           }),
         );
+
+        if (response.statusCode != 200 && response.statusCode != 203) {
+          debugPrint(
+              'Client live location update failed: ${response.statusCode}');
+        }
       } catch (e) {
         // Swallow errors to avoid breaking the stream
         debugPrint('Failed to send client live location: $e');
@@ -195,7 +205,8 @@ class _HomeState extends State<Home> {
         if (placemarks.isNotEmpty) {
           Placemark place = placemarks[0];
           setState(() {
-            address = '${place.street}, ${place.subLocality}, ${place.locality}';
+            address =
+                '${place.street}, ${place.subLocality}, ${place.locality}';
             location = 'Lat: $lat, Lon: $long';
           });
         }
@@ -219,16 +230,23 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isTablet = screenWidth >= 700;
+    final double horizontalPadding = isTablet ? 24 : 16;
+    final double sectionGap = isTablet ? 24 : 16;
+
     return MaterialApp(
         title: "Home",
         home: Scaffold(
             appBar: AppBar(
               foregroundColor: Colors.white,
               title: Text("Ambulex",
-                  style: GoogleFonts.lato(
-                    fontSize: 24,
+                  style: GoogleFonts.poppins(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
                   )),
               backgroundColor: Colors.blue,
+              elevation: 0,
               actions: [
                 IconButton(
                   icon: const Icon(Icons.logout),
@@ -242,7 +260,7 @@ class _HomeState extends State<Home> {
             ),
             drawer: const Drawer(child: MyDrawer()),
             floatingActionButton: FloatingActionButton(
-                elevation: 10.0,
+                elevation: 4.0,
                 backgroundColor: Colors.blue,
                 foregroundColor: Colors.white,
                 onPressed: () {
@@ -252,234 +270,485 @@ class _HomeState extends State<Home> {
             body: SafeArea(
                 child: SingleChildScrollView(
                     child: Container(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [Colors.blue.shade100, Colors.white],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+              padding: EdgeInsets.fromLTRB(
+                horizontalPadding,
+                horizontalPadding,
+                horizontalPadding,
+                32,
               ),
+              color: Colors.grey.shade50,
               child: Stack(children: [
-                Column(
-                  children: [
-                    _buildSubscriptionCard(),
-                    const SizedBox(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 7),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 760),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Emergency Dashboard',
+                          style: GoogleFonts.poppins(
+                            fontSize: isTablet ? 30 : 26,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.blue.shade900,
+                            letterSpacing: -0.3,
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Current Location',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
+                        const SizedBox(height: 8),
+                        Text(
+                          'Fast support, clear status, and your live location at a glance.',
+                          style: GoogleFonts.poppins(
+                            fontSize: isTablet ? 14 : 13,
+                            color: Colors.grey.shade600,
+                            height: 1.4,
+                          ),
+                        ),
+                        SizedBox(height: sectionGap),
+                        _buildSubscriptionCard(),
+                        SizedBox(height: sectionGap),
+                        Container(
+                          padding: EdgeInsets.all(isTablet ? 24 : 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.06),
+                                blurRadius: 18,
+                                offset: const Offset(0, 6),
                               ),
-                            ),
-                            Divider(height: 8, color: Colors.blue),
-                            const SizedBox(height: 4),
-                            Text(
-                              address,
-                              style: GoogleFonts.poppins(fontSize: 12),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              location,
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                color: Colors.grey[600],
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Icon(
+                                      Icons.my_location,
+                                      color: Colors.blue.shade700,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'Current Location',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 18,
+                                      color: Colors.blue.shade900,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 0),
-                            TextButton.icon(
-                              onPressed: () {
-                                showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Dialog(
-                                      insetPadding: const EdgeInsets.all(16),
-                                      child: Container(
-                                        width:
-                                            MediaQuery.of(context).size.width *
-                                                0.9,
-                                        height:
-                                            MediaQuery.of(context).size.height *
+                              const SizedBox(height: 16),
+                              Text(
+                                address,
+                                style: GoogleFonts.poppins(
+                                  fontSize: isTablet ? 15 : 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black87,
+                                  height: 1.4,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                location,
+                                style: GoogleFonts.poppins(
+                                  fontSize: isTablet ? 13 : 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              Material(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(16),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          insetPadding: const EdgeInsets.all(16),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                          ),
+                                          child: Container(
+                                            width:
+                                                MediaQuery.of(context).size.width *
+                                                    0.9,
+                                            height: MediaQuery.of(context)
+                                                    .size
+                                                    .height *
                                                 0.6,
-                                        padding: const EdgeInsets.all(8),
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                            padding: const EdgeInsets.all(8),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Text(
-                                                  'Location Map',
-                                                  style: TextStyle(
-                                                    fontSize: 18,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.blue,
-                                                  ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      'Location Map',
+                                                      style:
+                                                          GoogleFonts.poppins(
+                                                        fontSize: 18,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.blue,
+                                                      ),
+                                                    ),
+                                                    IconButton(
+                                                      icon: const Icon(Icons.close),
+                                                      onPressed: () =>
+                                                          Navigator.pop(context),
+                                                    ),
+                                                  ],
                                                 ),
-                                                IconButton(
-                                                  icon: const Icon(Icons.close),
-                                                  onPressed: () =>
-                                                      Navigator.pop(context),
+                                                Expanded(
+                                                  child: MyMap(
+                                                      lat: lat,
+                                                      lon: long,
+                                                      username: phone),
                                                 ),
                                               ],
                                             ),
-                                            Expanded(
-                                              child: MyMap(
-                                                  lat: lat,
-                                                  lon: long,
-                                                  username: phone),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                          ),
+                                        );
+                                      },
                                     );
                                   },
-                                );
-                              },
-                              icon: const Icon(Icons.map),
-                              label: const Text('View on Map'),
-                            ),
-                          ],
+                                  child: Ink(
+                                    height: isTablet ? 180 : 140,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: Colors.blue.shade100,
+                                      ),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(15),
+                                          child: IgnorePointer(
+                                            child: MyMap(
+                                              lat: lat,
+                                              lon: long,
+                                              username: phone,
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 10,
+                                          left: 10,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 10, vertical: 5),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
+                                              borderRadius:
+                                                  BorderRadius.circular(999),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.circle,
+                                                  color: Colors.green.shade600,
+                                                  size: 8,
+                                                ),
+                                                const SizedBox(width: 6),
+                                                Text(
+                                                  'Live Location',
+                                                  style: GoogleFonts.poppins(
+                                                    fontSize: 11,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Colors.blue.shade800,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          right: 10,
+                                          bottom: 10,
+                                          child: Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.9),
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.open_in_full,
+                                              size: 16,
+                                              color: Colors.blue.shade700,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
+                              OutlinedButton.icon(
+                                style: OutlinedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  side: BorderSide(color: Colors.blue.shade200),
+                                  foregroundColor: Colors.blue.shade700,
+                                ),
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Dialog(
+                                        insetPadding: const EdgeInsets.all(16),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: Container(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.9,
+                                          height: MediaQuery.of(context)
+                                                  .size
+                                                  .height *
+                                              0.6,
+                                          padding: const EdgeInsets.all(8),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Location Map',
+                                                    style: GoogleFonts.poppins(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.blue,
+                                                    ),
+                                                  ),
+                                                  IconButton(
+                                                    icon:
+                                                        const Icon(Icons.close),
+                                                    onPressed: () =>
+                                                        Navigator.pop(context),
+                                                  ),
+                                                ],
+                                              ),
+                                              Expanded(
+                                                child: MyMap(
+                                                    lat: lat,
+                                                    lon: long,
+                                                    username: phone),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: const Icon(Icons.map),
+                                label: Text(
+                                  'View on Map',
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    ReportButton(
-                      label: "Gender Based Violence",
-                      icon: Icons.handshake_sharp,
-                      color1: Colors.orange,
-                      onButtonPressed: () async {
-                        if (subscriptionInfo?['status'] != 'active') {
-                          _showSubscriptionDialog();
-                        } else if (!_canMakeEmergencyReport()) {
-                          _showResponseLimitDialog();
-                        } else {
-                          _showEmergencyConfirmation("GBV", () async {
-                            if (!mounted) return;
-                            setState(() {
-                              isLoading =
-                                  LoadingAnimationWidget.staggeredDotsWave(
-                                color: Colors.blue,
-                                size: 100,
-                              );
-                            });
-                            var res = await report(
-                              id,
-                              context,
-                              phone,
-                              "GBV",
-                              long,
-                              lat,
-                              category,
-                            );
-                            if (!mounted) return;
-                            setState(() {
-                              isLoading = null;
-                            });
+                        SizedBox(height: sectionGap),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final bool twoColumns = constraints.maxWidth >= 620;
+                            final double gap = twoColumns ? 16 : 0;
+                            final double cardWidth = twoColumns
+                                ? (constraints.maxWidth - gap) / 2
+                                : constraints.maxWidth;
+                            return Wrap(
+                              spacing: gap,
+                              runSpacing: 16,
+                              children: [
+                                SizedBox(
+                                  width: cardWidth,
+                                  child: _buildEmergencyActionCard(
+                                    title: 'Gender Based Violence',
+                                    subtitle:
+                                        'Report and request immediate intervention.',
+                                    cta: 'Request Help',
+                                    icon: Icons.handshake_sharp,
+                                    color: Colors.orange,
+                                    isPressed: _isGbvPressed,
+                                    onTapDown: (_) =>
+                                        setState(() => _isGbvPressed = true),
+                                    onTapUp: (_) =>
+                                        setState(() => _isGbvPressed = false),
+                                    onTapCancel: () =>
+                                        setState(() => _isGbvPressed = false),
+                                    onTap: () async {
+                                      if (subscriptionInfo?['status'] !=
+                                          'active') {
+                                        _showSubscriptionDialog();
+                                      } else if (!_canMakeEmergencyReport()) {
+                                        _showResponseLimitDialog();
+                                      } else {
+                                        _showEmergencyConfirmation("GBV",
+                                            () async {
+                                          if (!mounted) return;
+                                          setState(() {
+                                            isLoading = LoadingAnimationWidget
+                                                .staggeredDotsWave(
+                                              color: Colors.blue,
+                                              size: 100,
+                                            );
+                                          });
+                                          var res = await report(
+                                            id,
+                                            context,
+                                            phone,
+                                            "GBV",
+                                            long,
+                                            lat,
+                                            category,
+                                          );
+                                          if (!mounted) return;
+                                          setState(() {
+                                            isLoading = null;
+                                          });
 
-                            if (!mounted) return;
-                            if (res.error == null) {
-                              if (res.token != null) {
-                                _startLiveClientLocation(
-                                    res.token.toString());
-                              }
-                              _showSuccessDialog("Gender Based Violence");
-                              // Refresh subscription info to update response count
-                              await fetchSubscriptionInfo(id);
-                            } else {
-                              // Check if it's a response limit error
-                              if (res.error.contains('limit') || res.error.contains('Response limit')) {
-                                _showResponseLimitDialog();
-                                await fetchSubscriptionInfo(id);
-                              } else {
-                                _showSnackbar(res.error);
-                              }
-                            }
-                          });
-                        }
-                      },
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    ReportButton(
-                      label: "Medical Emergency",
-                      icon: Icons.medical_services,
-                      color1: Colors.red,
-                      onButtonPressed: () async {
-                        if (subscriptionInfo?['status'] != 'active') {
-                          _showSubscriptionDialog();
-                        } else if (!_canMakeEmergencyReport()) {
-                          _showResponseLimitDialog();
-                        } else {
-                          _showEmergencyConfirmation("ME", () async {
-                            if (!mounted) return;
-                            setState(() {
-                              isLoading =
-                                  LoadingAnimationWidget.staggeredDotsWave(
-                                color: Colors.blue,
-                                size: 100,
-                              );
-                            });
-                            var res = await report(
-                              id,
-                              context,
-                              phone,
-                              "ME",
-                              long,
-                              lat,
-                              category,
-                            );
-                            if (!mounted) return;
-                            setState(() {
-                              isLoading = null;
-                            });
+                                          if (!mounted) return;
+                                          if (res.error == null) {
+                                            if (res.token != null) {
+                                              _startLiveClientLocation(
+                                                  res.token.toString());
+                                            }
+                                            _showSuccessDialog(
+                                                "Gender Based Violence");
+                                            // Refresh subscription info to update response count
+                                            await fetchSubscriptionInfo(id);
+                                          } else {
+                                            // Check if it's a response limit error
+                                            if (res.error.contains('limit') ||
+                                                res.error.contains(
+                                                    'Response limit')) {
+                                              _showResponseLimitDialog();
+                                              await fetchSubscriptionInfo(id);
+                                            } else {
+                                              _showSnackbar(res.error);
+                                            }
+                                          }
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: cardWidth,
+                                  child: _buildEmergencyActionCard(
+                                    title: 'Medical Emergency',
+                                    subtitle:
+                                        'Get urgent medical assistance to your location.',
+                                    cta: 'Request Help',
+                                    icon: Icons.medical_services,
+                                    color: Colors.red,
+                                    isPressed: _isMePressed,
+                                    onTapDown: (_) =>
+                                        setState(() => _isMePressed = true),
+                                    onTapUp: (_) =>
+                                        setState(() => _isMePressed = false),
+                                    onTapCancel: () =>
+                                        setState(() => _isMePressed = false),
+                                    onTap: () async {
+                                      if (subscriptionInfo?['status'] !=
+                                          'active') {
+                                        _showSubscriptionDialog();
+                                      } else if (!_canMakeEmergencyReport()) {
+                                        _showResponseLimitDialog();
+                                      } else {
+                                        _showEmergencyConfirmation("ME",
+                                            () async {
+                                          if (!mounted) return;
+                                          setState(() {
+                                            isLoading = LoadingAnimationWidget
+                                                .staggeredDotsWave(
+                                              color: Colors.blue,
+                                              size: 100,
+                                            );
+                                          });
+                                          var res = await report(
+                                            id,
+                                            context,
+                                            phone,
+                                            "ME",
+                                            long,
+                                            lat,
+                                            category,
+                                          );
+                                          if (!mounted) return;
+                                          setState(() {
+                                            isLoading = null;
+                                          });
 
-                            if (!mounted) return;
-                            if (res.error == null) {
-                              if (res.token != null) {
-                                _startLiveClientLocation(
-                                    res.token.toString());
-                              }
-                              _showSuccessDialog("Medical Emergency");
-                              // Refresh subscription info to update response count
-                              await fetchSubscriptionInfo(id);
-                            } else {
-                              // Check if it's a response limit error
-                              if (res.error.contains('limit') || res.error.contains('Response limit')) {
-                                _showResponseLimitDialog();
-                                await fetchSubscriptionInfo(id);
-                              } else {
-                                _showSnackbar(res.error);
-                              }
-                            }
-                          });
-                        }
-                      },
+                                          if (!mounted) return;
+                                          if (res.error == null) {
+                                            if (res.token != null) {
+                                              _startLiveClientLocation(
+                                                  res.token.toString());
+                                            }
+                                            _showSuccessDialog(
+                                                "Medical Emergency");
+                                            // Refresh subscription info to update response count
+                                            await fetchSubscriptionInfo(id);
+                                          } else {
+                                            // Check if it's a response limit error
+                                            if (res.error.contains('limit') ||
+                                                res.error.contains(
+                                                    'Response limit')) {
+                                              _showResponseLimitDialog();
+                                              await fetchSubscriptionInfo(id);
+                                            } else {
+                                              _showSnackbar(res.error);
+                                            }
+                                          }
+                                        });
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
                 Center(child: isLoading),
               ]),
@@ -488,13 +757,13 @@ class _HomeState extends State<Home> {
 
   bool _canMakeEmergencyReport() {
     if (subscriptionInfo?['status'] != 'active') return false;
-    
+
     final maxResponses = subscriptionInfo?['maxResponses'];
     final responsesUsed = subscriptionInfo?['responsesUsed'] ?? 0;
-    
+
     // Unlimited packages (null or -1 means unlimited)
     if (maxResponses == null || maxResponses == -1) return true;
-    
+
     // Limited packages - check if within limit
     return responsesUsed < maxResponses;
   }
@@ -502,18 +771,18 @@ class _HomeState extends State<Home> {
   int _getRemainingResponses() {
     final maxResponses = subscriptionInfo?['maxResponses'];
     final responsesUsed = subscriptionInfo?['responsesUsed'] ?? 0;
-    
+
     if (maxResponses == null || maxResponses == -1) {
       return -1; // Unlimited
     }
-    
+
     return maxResponses - responsesUsed;
   }
 
   void _showResponseLimitDialog() {
     final maxResponses = subscriptionInfo?['maxResponses'];
     final packageName = subscriptionInfo?['packageName'] ?? 'your package';
-    
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -592,79 +861,169 @@ class _HomeState extends State<Home> {
   Widget _buildSubscriptionCard() {
     final bool isActive = subscriptionInfo?['status'] == 'active';
 
-    return Card(
-      elevation: 8,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: isActive
-                ? [Colors.blue.shade400, Colors.blue.shade700]
-                : [Colors.grey.shade400, Colors.grey.shade700],
+    final statusText =
+        subscriptionInfo?['status']?.toString().toUpperCase() ?? 'NO SUBSCRIPTION';
+    final statusBg =
+        isActive ? Colors.blue.shade50 : Colors.orange.shade50;
+    final statusFg =
+        isActive ? Colors.blue.shade800 : Colors.orange.shade800;
+    final headerIconBg =
+        isActive ? Colors.blue.shade50 : Colors.orange.shade50;
+    final headerIconFg =
+        isActive ? Colors.blue.shade700 : Colors.orange.shade700;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
           ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isActive ? Icons.verified : Icons.warning_rounded,
-                  color: Colors.white,
-                  size: 32,
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: headerIconBg,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                const SizedBox(width: 12),
-                Column(
+                child: Icon(
+                  isActive ? Icons.verified : Icons.warning_rounded,
+                  color: headerIconFg,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Subscription Status',
-                      style: GoogleFonts.poppins(
-                        color: Colors.white70,
-                        fontSize: 14,
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Subscription',
+                            style: GoogleFonts.poppins(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.blue.shade900,
+                              letterSpacing: -0.2,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: statusBg,
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(
+                              color: statusFg.withOpacity(0.15),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.circle,
+                                size: 8,
+                                color: isActive
+                                    ? Colors.green.shade600
+                                    : Colors.orange.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                statusText,
+                                style: GoogleFonts.poppins(
+                                  color: statusFg,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.3,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 6),
                     Text(
-                      subscriptionInfo?['status']?.toUpperCase() ??
-                          'NO SUBSCRIPTION',
+                      subscriptionInfo?['packageName']?.toString().isNotEmpty == true
+                          ? (subscriptionInfo?['packageName']?.toString() ?? '')
+                          : 'Manage your plan and track usage details.',
                       style: GoogleFonts.poppins(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        height: 1.3,
                       ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
-              ],
-            ),
-            const Divider(color: Colors.white24, height: 32),
-            _buildSubscriptionDetail(
-              'Amount Paid',
-              'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
-              Icons.payment,
-            ),
-            const SizedBox(height: 16),
-            _buildSubscriptionDetail(
-              'Valid Until',
-              _formatDate(subscriptionInfo?['endDate']),
-              Icons.event,
-            ),
-            if (isActive && subscriptionInfo?['maxResponses'] != null) ...[
-              const SizedBox(height: 16),
-              _buildSubscriptionDetail(
-                'Responses Remaining',
-                _getRemainingResponses() >= 0
-                    ? '${_getRemainingResponses()} / ${subscriptionInfo?['maxResponses']}'
-                    : 'Unlimited',
-                Icons.emergency,
               ),
             ],
-          ],
-        ),
+          ),
+          const SizedBox(height: 16),
+          Divider(color: Colors.grey.shade200, height: 1),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final bool twoCols = constraints.maxWidth >= 520;
+              final double gap = 12;
+              final double tileWidth = twoCols
+                  ? (constraints.maxWidth - gap) / 2
+                  : constraints.maxWidth;
+
+              final tiles = <Widget>[
+                SizedBox(
+                  width: tileWidth,
+                  child: _buildSubscriptionDetail(
+                    'Amount Paid',
+                    'Ksh${subscriptionInfo?['amountPaid'] ?? '0.00'}',
+                    Icons.payment,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _buildSubscriptionDetail(
+                    'Valid Until',
+                    _formatDate(subscriptionInfo?['endDate']),
+                    Icons.event,
+                  ),
+                ),
+                if (isActive && subscriptionInfo?['maxResponses'] != null)
+                  SizedBox(
+                    width: tileWidth,
+                    child: _buildSubscriptionDetail(
+                      'Responses Remaining',
+                      _getRemainingResponses() >= 0
+                          ? '${_getRemainingResponses()} / ${subscriptionInfo?['maxResponses']}'
+                          : 'Unlimited',
+                      Icons.emergency,
+                    ),
+                  ),
+              ];
+
+              return Wrap(
+                spacing: gap,
+                runSpacing: 12,
+                children: tiles,
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -680,31 +1039,158 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildSubscriptionDetail(String label, String value, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: Colors.white70, size: 20),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.poppins(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
             ),
-            Text(
-              value,
-              style: GoogleFonts.poppins(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+            child: Icon(icon, color: Colors.blue.shade700, size: 16),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade600,
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  value,
+                  style: GoogleFonts.poppins(
+                    color: Colors.black87,
+                    fontSize: 16.5,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -0.1,
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmergencyActionCard({
+    required String title,
+    required String subtitle,
+    required String cta,
+    required IconData icon,
+    required Color color,
+    required bool isPressed,
+    required GestureTapDownCallback onTapDown,
+    required GestureTapUpCallback onTapUp,
+    required GestureTapCancelCallback onTapCancel,
+    required VoidCallback onTap,
+  }) {
+    return AnimatedScale(
+      scale: isPressed ? 0.98 : 1,
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOutCubic,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onTap,
+          onTapDown: onTapDown,
+          onTapUp: onTapUp,
+          onTapCancel: onTapCancel,
+          child: Ink(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: color.withOpacity(0.2)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 16,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(0.12),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(icon, color: color, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.campaign_rounded, color: color, size: 16),
+                      const SizedBox(width: 6),
+                      Text(
+                        cta,
+                        style: GoogleFonts.poppins(
+                          color: color,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ],
+      ),
     );
   }
 
