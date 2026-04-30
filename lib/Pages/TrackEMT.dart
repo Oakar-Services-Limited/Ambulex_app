@@ -31,6 +31,7 @@ class _TrackEMTPageState extends State<TrackEMTPage> {
   bool _loadingInitial = true;
   String? _status;
   Timer? _staleTimer;
+  Timer? _fallbackPollTimer;
   bool _isStale = false;
 
   @override
@@ -99,7 +100,8 @@ class _TrackEMTPageState extends State<TrackEMTPage> {
           data = jsonDecode(data);
         }
 
-        if (data['reportId'] != widget.reportId) return;
+        final incomingReportId = data['reportId']?.toString();
+        if (incomingReportId != widget.reportId.toString()) return;
 
         final lat = (data['latitude'] as num?)?.toDouble();
         final lon = (data['longitude'] as num?)?.toDouble();
@@ -133,11 +135,18 @@ class _TrackEMTPageState extends State<TrackEMTPage> {
     _socket!.onDisconnect((_) {
       debugPrint('Socket disconnected');
     });
+
+    // Fallback polling for cases where socket delivery is delayed/interrupted.
+    _fallbackPollTimer?.cancel();
+    _fallbackPollTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _fetchInitialLocation();
+    });
   }
 
   @override
   void dispose() {
     _staleTimer?.cancel();
+    _fallbackPollTimer?.cancel();
     _socket?.dispose();
     super.dispose();
   }
